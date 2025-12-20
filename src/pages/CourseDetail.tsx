@@ -856,6 +856,78 @@ const CourseDetail = () => {
           ]
         }
       ]
+    },
+    "experience-selling": {
+      name: "Experience Selling Bootcamp",
+      description: "We are not selling courses, we are selling experience. Connecting the gap between students and industry via an experience-driven approach to make your career easier.",
+      duration: "8 weeks (2 months)",
+      level: "Beginner to Advanced",
+      modules: [
+        {
+          week: 1,
+          title: "Foundation & Strategy",
+          topics: [
+            "Session 1 — Introduction + Why Most Students Don't Get Placed",
+            "Session 2 — Project Division + Portal + Execution Strategy"
+          ]
+        },
+        {
+          week: 2,
+          title: "Reality Check & Planning",
+          topics: [
+            "Session 3 — What I'd Do If I Was In Your Place",
+            "Session 4 — Resume vs Reality"
+          ]
+        },
+        {
+          week: 3,
+          title: "Building Your Presence",
+          topics: [
+            "Session 5 — How to Ideate & Execute Projects",
+            "Session 6 — How to Build LinkedIn & Network"
+          ]
+        },
+        {
+          week: 4,
+          title: "Industry Insights",
+          topics: [
+            "Session 7 — What HR Really Thinks & Wants",
+            "Session 8 — My Internship Journey & Mistakes"
+          ]
+        },
+        {
+          week: 5,
+          title: "Interview Mastery",
+          topics: [
+            "Session 9 — Mock Interview",
+            "Session 10 — How To Answer Any Interview Question"
+          ]
+        },
+        {
+          week: 6,
+          title: "Advanced Skills & Mindset",
+          topics: [
+            "Session 11 — How To Be a Top 1% Coder",
+            "Session 12 — Entrepreneurship & Leadership Thinking"
+          ]
+        },
+        {
+          week: 7,
+          title: "Final Preparation",
+          topics: [
+            "Session 13 — Time Management & Multitasking",
+            "Session 14 — Final Placement Preparation"
+          ]
+        },
+        {
+          week: 8,
+          title: "Completion & Next Steps",
+          topics: [
+            "Session 15 — External Guest Talk",
+            "Session 16 — Certification & Project Handoff"
+          ]
+        }
+      ]
     }
   };
 
@@ -981,20 +1053,30 @@ const CourseDetail = () => {
 
           {/* Call to Action */}
           <Card className="mt-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 shadow-xl">
-            <CardContent className="pt-8">
+            <CardContent className="pt-8 pb-8">
               <div className="text-center">
                 <h3 className="text-2xl font-bold mb-4">Ready to Start Learning?</h3>
                 <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                   Join thousands of students who are transforming their careers with our comprehensive programs.
                   Get expert guidance, hands-on projects, and industry-relevant skills.
                 </p>
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-lg"
-                  onClick={() => window.location.href = "mailto:upstride.in@gmail.com?subject=Enrollment Inquiry for " + course.name}
-                >
-                  Enroll Now
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-lg"
+                    onClick={() => window.open("https://chat.whatsapp.com/K1eY2yOQ2Gt0NF5FzSpnMh", "_blank")}
+                  >
+                    Enroll Now
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="flex-1 border-primary hover:bg-primary/10 text-lg"
+                    onClick={() => window.location.href = "mailto:upstride.in@gmail.com?subject=Enrollment Inquiry for " + course.name}
+                  >
+                    Email Us
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
