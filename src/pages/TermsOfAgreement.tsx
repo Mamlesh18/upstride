@@ -9,7 +9,7 @@ const TermsOfAgreement = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-50 border-b">
+      <header className="fixed top-0 w-full backdrop-blur-sm z-50 border-b border-border/20">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
             <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
@@ -37,7 +37,7 @@ const TermsOfAgreement = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Terms of Agreement</h1>
           <p className="text-muted-foreground text-lg mb-8">
-            Last Updated: November 2024
+            Last Updated: November 2025
           </p>
 
           <div className="space-y-8">

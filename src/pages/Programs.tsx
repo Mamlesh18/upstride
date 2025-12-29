@@ -1,10 +1,93 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Rocket, Target, Users, TrendingUp, Award, Calendar } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Rocket, Target, Users, TrendingUp, Award, Calendar, Phone } from "lucide-react";
+import SocialProof from "@/components/SocialProof";
+import { toast } from "@/hooks/use-toast";
 
 const Programs = () => {
   const navigate = useNavigate();
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate phone number (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid 10-digit phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get current date and time
+      const now = new Date();
+      const dateTime = now.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'full',
+        timeStyle: 'long'
+      });
+
+      // Send email via Web3Forms API (free service)
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "f4edb229-9419-4f5c-a18f-8f67c1ec3082", // Replace with your actual key from web3forms.com
+          subject: "🔥 New Call Request - UPSTRIDE Program Inquiry",
+          from_name: "UPSTRIDE Website",
+          to: "mamlesh.va06@gmail.com", // Your email
+          phone: phoneNumber,
+          name: "Program Inquiry", // For better organization
+          message: `
+📞 NEW CALL REQUEST FROM UPSTRIDE WEBSITE
+
+Phone Number: ${phoneNumber}
+Date & Time: ${dateTime}
+Source Page: Programs Page (Experience Selling Bootcamp)
+Program Interest: Experience Selling Bootcamp
+
+---
+ACTION REQUIRED: Call this number within 24 hours as promised on the website.
+
+Browser Info: ${navigator.userAgent}
+          `.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Request Submitted!",
+          description: "Our founder will call you personally within 24 hours.",
+        });
+        setPhoneNumber("");
+      } else {
+        throw new Error("Submission failed");
+      }
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "Please try again or contact us directly at upstride.in@gmail.com",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const features = [
     {
@@ -31,6 +114,9 @@ const Programs = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Social Proof Notifications */}
+      <SocialProof />
+
       {/* Decorative Color Element - Top Right */}
       <div className="fixed top-4 right-4 z-50 pointer-events-none">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 opacity-80 blur-xl animate-pulse"></div>
@@ -38,7 +124,7 @@ const Programs = () => {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-40 border-b border-border/50">
+      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
             <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
@@ -132,21 +218,49 @@ const Programs = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* Phone Number Form */}
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-xl p-6 border-2 border-primary/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Phone className="w-6 h-6 text-primary" />
+                    <h3 className="text-xl font-bold text-foreground">Talk to Our Founder Personally</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Skip the sales pitch! Share your number and our founder will call you personally to discuss the program, answer your questions, and create a customized learning path for you.
+                  </p>
+
+                  <form onSubmit={handlePhoneSubmit} className="space-y-3">
+                    <div className="flex gap-3">
+                      <Input
+                        type="tel"
+                        placeholder="Enter your 10-digit phone number"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        className="flex-1 text-lg h-12"
+                        disabled={isSubmitting}
+                      />
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="bg-green-600 hover:bg-green-700 text-white px-8"
+                        disabled={isSubmitting || phoneNumber.length !== 10}
+                      >
+                        {isSubmitting ? "Submitting..." : "Request Call"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      ✓ No spam calls &nbsp; ✓ Personalized guidance &nbsp; ✓ 24-hour response time
+                    </p>
+                  </form>
+                </div>
+
                 <Button
                   size="lg"
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium py-6 group/btn"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium py-6 group/btn"
                   onClick={() => navigate("/course/experience-selling")}
                 >
                   View Full Curriculum
                   <ArrowLeft className="w-5 h-5 ml-2 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
-                <Button
-                  size="lg"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-lg font-medium py-6"
-                  onClick={() => window.open("https://chat.whatsapp.com/K1eY2yOQ2Gt0NF5FzSpnMh", "_blank")}
-                >
-                  Enroll Now
                 </Button>
               </div>
             </CardContent>

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(dir /s \"C:\\Users\\mamle\\visualstudiocode\\Upstride\\upstride\\src\")",
-      "WebFetch(domain:clueso.io)"
+      "WebFetch(domain:clueso.io)",
+      "Bash(dir:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

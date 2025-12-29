@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { GraduationCap, Users, Award, TrendingUp, Heart, Clock, Mail, Star, ChevronLeft, ChevronRight, Briefcase, UserCheck, Building2, Shield } from "lucide-react";
+import SocialProof from "@/components/SocialProof";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -69,6 +70,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Social Proof Notifications */}
+      <SocialProof />
+
       {/* Decorative Color Element - Top Right */}
       <div className="fixed top-4 right-4 z-50 pointer-events-none">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 opacity-80 blur-xl animate-pulse"></div>
@@ -76,7 +80,7 @@ const Index = () => {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-40 border-b border-border/50 overflow-visible">
+      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20 overflow-visible">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center overflow-visible">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
             <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
@@ -88,6 +92,9 @@ const Index = () => {
             </Button>
             <Button variant="ghost" onClick={() => navigate("/programs")}>
               Programs
+            </Button>
+            <Button variant="ghost" onClick={() => navigate("/blogs")}>
+              Blogs
             </Button>
             <Button variant="ghost" onClick={() => navigate("/login")}>
               Portal
@@ -161,51 +168,80 @@ const Index = () => {
       <section className="py-20 px-4 bg-secondary/30 border-y border-border">
         <div className="container mx-auto max-w-7xl">
           {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16 max-w-5xl mx-auto">
             {/* Students Trained */}
             <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in">
               <UserCheck className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">100+</div>
+              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">250+</div>
               <p className="text-sm md:text-base text-muted-foreground font-medium">Students Trained</p>
             </div>
 
             {/* Placements */}
             <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-1">
               <Briefcase className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">20+</div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Internships & Full-Time</p>
-            </div>
-
-            {/* Industry Mentors */}
-            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-2">
-              <Building2 className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-2xl md:text-3xl font-black text-foreground mb-2">Google, Wipro, Zoho</div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Industry Mentors</p>
+              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">30+</div>
+              <p className="text-sm md:text-base text-muted-foreground font-medium">Internships & Full-Time Offers After joining Training</p>
             </div>
 
             {/* MSME Registered */}
-            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-3">
+            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-2">
               <Shield className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
               <div className="text-xl md:text-2xl font-black text-foreground mb-2">MSME Registered</div>
               <p className="text-sm md:text-base text-muted-foreground font-medium">Government Certified</p>
             </div>
           </div>
 
-          {/* Clutch Recognition */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 bg-background rounded-2xl p-10 border-2 border-primary/20 animate-scale-in shadow-lg">
-            <div className="flex items-center gap-4">
-              <Award className="w-12 h-12 text-primary flex-shrink-0" />
-              <div>
-                <h3 className="text-2xl md:text-3xl font-black text-foreground mb-2">Recognized by Clutch</h3>
-                <p className="text-base md:text-lg text-muted-foreground">Leading B2B ratings and reviews platform</p>
+          {/* Recognition Partners */}
+          <div className="space-y-4">
+            <h3 className="text-2xl md:text-3xl font-black text-center mb-8">Recognition & Partnerships</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Clutch Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">Clutch Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/Clutch.png"
+                    alt="Clutch Recognition Badge"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">Leading B2B platform</p>
               </div>
-            </div>
-            <div className="flex-shrink-0 bg-white p-4 rounded-xl shadow-md">
-              <img
-                src="/Clutch.png"
-                alt="Clutch Recognition Badge"
-                className="h-24 md:h-32 w-auto object-contain hover:scale-105 transition-transform"
-              />
+
+              {/* VIT Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">VIT Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/vit.jpg"
+                    alt="Vellore Institute of Technology Recognition"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">Vellore Institute of Technology</p>
+              </div>
+
+              {/* Saveetha Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">Saveetha Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/saveetha.gif"
+                    alt="Saveetha University Recognition"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">Saveetha University</p>
+              </div>
             </div>
           </div>
         </div>
@@ -299,7 +335,7 @@ const Index = () => {
             {/* About Section */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" />
+                <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" loading="lazy" decoding="async" />
                 <h3 className="text-xl font-bold text-foreground">UPSTRIDE</h3>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
@@ -364,7 +400,7 @@ const Index = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2026 UPSTRIDE Learning. All rights reserved.
+                © 2025 UPSTRIDE Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India
