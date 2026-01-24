@@ -334,7 +334,7 @@ const ContactUs = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2024 UPSTRIDE Learning. All rights reserved.
+                © 2026 UPSTRIDE Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India

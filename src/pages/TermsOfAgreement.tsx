@@ -37,7 +37,7 @@ const TermsOfAgreement = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Terms of Agreement</h1>
           <p className="text-muted-foreground text-lg mb-8">
-            Last Updated: November 2025
+            Last Updated: November 2026
           </p>
 
           <div className="space-y-8">
@@ -275,7 +275,7 @@ const TermsOfAgreement = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2024 UPSTRIDE Learning. All rights reserved.
+                © 2026 UPSTRIDE Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India

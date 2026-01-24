@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Mail, Linkedin, ListChecks, FileCode, MessageSquare, Building2, Code2, LogOut, GraduationCap, Star, Database, Network, Cpu, MessageCircle, Lightbulb, Brain, Target } from "lucide-react";
+import { FileText, Mail, Linkedin, ListChecks, FileCode, MessageSquare, Building2, Code2, LogOut, GraduationCap, Star, Database, Network, Cpu, MessageCircle, Lightbulb, Brain, Target, BookOpen } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type ViewType = "recommended" | "training" | "placement";
@@ -28,6 +28,18 @@ const Portal = () => {
 
   // Categorized training resources
   const trainingResourcesCategories = [
+    {
+      category: "Learning Materials",
+      color: "from-purple-500/10 to-pink-500/10",
+      borderColor: "border-purple-500/20",
+      icon: BookOpen,
+      description: "Comprehensive learning resources for AI, Frontend, and Backend development",
+      resources: [
+        { id: 0, name: "AI Training Resource", icon: Brain, description: "Complete guide for learning Artificial Intelligence fundamentals and advanced concepts", url: "https://docs.google.com/document/d/1fZ6b1J3e2mkN954eCgf8G4g6RO_XVCO0FJEJPecNtDc/edit?usp=sharing" },
+        { id: -1, name: "ReactJS Frontend", icon: Code2, description: "Comprehensive frontend development training with React, modern UI/UX practices", url: "https://docs.google.com/document/d/1Ez1sA7_r42u1MskH-CuuhbrnucboCS8TNrrXXpQSWYo/edit?usp=sharing" },
+        { id: -2, name: "Python Backend", icon: FileText, description: "Backend development with Python, APIs, databases, and server-side programming", url: "https://docs.google.com/document/d/1GCNXcPpThwiQ70Ad1Y6awnBQe5Bct5VvcIwJNi2sGpc/edit?usp=sharing" },
+      ]
+    },
     {
       category: "Resume & Career Documents",
       color: "from-green-500/10 to-emerald-500/10",

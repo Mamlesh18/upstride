@@ -374,9 +374,9 @@ And please, stop judging people based on their first company. The guy joining TC
 **Want to prepare for both service and product-based companies?** UPSTRIDE's Experience Selling Bootcamp covers strategies for both paths with real interview experiences and placement guidance.
 
 Sources consulted for this article:
-- [Product vs Service-Based Company Guide 2025](https://digitaldefynd.com/IQ/product-vs-service-based-company/)
+- [Product vs Service-Based Company Guide 2026](https://digitaldefynd.com/IQ/product-vs-service-based-company/)
 - [Medium: Difference Between Product & Service Companies](https://medium.com/@krishnakasireddy213/difference-between-a-product-service-based-company-9db44d2795a1)
-- [Product vs Service-Based Companies 2025](https://faceprep.medium.com/product-based-vs-service-based-companies-which-one-should-you-choose-in-2025-6e0bef8c258f)
+- [Product vs Service-Based Companies 2026](https://faceprep.medium.com/product-based-vs-service-based-companies-which-one-should-you-choose-in-2026-6e0bef8c258f)
       `.trim(),
     },
     {
@@ -739,9 +739,187 @@ Remember: Every expert was once a beginner who didn't quit.
 
 Sources consulted for this article:
 - [How I Prepared for Coding Interviews in 3 Months - Medium](https://medium.com/swlh/how-i-prepared-for-coding-interviews-in-3-months-8d54ba3bf50)
-- [Roadmap for Learning DSA 2025](https://www.placementpreparation.io/blog/roadmap-for-learning-dsa/)
+- [Roadmap for Learning DSA 2026](https://www.placementpreparation.io/blog/roadmap-for-learning-dsa/)
 - [Tech Interview Handbook - Study Plan](https://www.techinterviewhandbook.org/coding-interview-study-plan/)
-- [Google DS & Algo Roadmap 2025 - Medium](https://medium.com/@prashant558908/google-ds-algo-interview-preparation-roadmap-2025-974d15cb10cd)
+- [Google DS & Algo Roadmap 2026 - Medium](https://medium.com/@prashant558908/google-ds-algo-interview-preparation-roadmap-2026-974d15cb10cd)
+      `.trim(),
+    },
+    {
+      id: 4,
+      title: "Why Students Feel Lost: The Missing Piece That Changes Everything",
+      excerpt: "Most students aren't confused because they can't learn. They're confused because no one tells them where to start. Here's what nobody talks about.",
+      author: "UPSTRIDE Team",
+      date: "January 20, 2025",
+      readTime: "6 min read",
+      image: "/placeholder-blog-4.jpg",
+      content: `# Why Students Feel Lost: The Missing Piece That Changes Everything
+
+Most students aren't confused because they can't learn.
+They're confused because no one tells them where to start.
+
+The internet is full of courses, tutorials, and advice.
+Yet so many students feel lost, anxious, and unsure about their future.
+
+Not because knowledge is missing.
+But because guidance is.
+
+## The Information Overload Problem
+
+I've seen students spend thousands, even lakhs, chasing courses — hoping one of them will finally give clarity.
+
+Most of the time, they don't need more content.
+They need someone to sit with them and say,
+**"Here's the right path for you. Trust this."**
+
+Think about it:
+- YouTube has millions of tutorials
+- Udemy has thousands of courses
+- LinkedIn has endless "top 10 tips" posts
+- Twitter/X is full of learning threads
+
+And yet, students are more confused than ever.
+
+**Why?**
+
+Because having access to everything means knowing nothing about what matters for YOU.
+
+## The Real Problem: Information vs Direction
+
+There's a huge difference between:
+- **Information:** "Here are 50 ways to learn Python"
+- **Direction:** "Based on your goals, start with THIS, then do THAT"
+
+Information is everywhere. Direction is rare.
+
+A student told me recently: "I've started 12 courses in the last year. I've finished none. I don't know what's right for me."
+
+That's not a discipline problem. That's a direction problem.
+
+## Why One Mentor Changes Everything
+
+One mentor.
+One honest conversation.
+One correction at the right time.
+
+That's enough to change a life.
+
+### What a Good Mentor Does:
+
+**1. Cuts Through the Noise**
+Instead of "learn everything," a mentor says: "For your goals, focus on these 3 things. Ignore the rest for now."
+
+**2. Gives Personalized Paths**
+Generic advice doesn't work. A mentor understands YOUR situation — your background, your strengths, your constraints — and creates a path that fits YOU.
+
+**3. Provides Accountability**
+It's easy to skip a YouTube tutorial. It's hard to skip a session with someone who's invested in your success.
+
+**4. Shares Real Experience**
+Courses teach theory. Mentors share what actually works in the real world — the shortcuts, the mistakes to avoid, the things that matter.
+
+**5. Offers Emotional Support**
+Sometimes you just need someone to say: "This is normal. Everyone struggles here. You're on the right track."
+
+## Learning is Free. Direction is Priceless.
+
+Learning is free today.
+But mentorship gives hope, confidence, and direction.
+
+And sometimes, that direction is all a student is really looking for.
+
+You can watch 100 videos on "how to crack placements."
+Or you can have one conversation with someone who's been there, who understands your specific situation, and who can tell you exactly what to do next.
+
+## The Students Who Succeed
+
+I've noticed a pattern in students who succeed:
+
+They don't try to learn everything.
+They find someone they trust.
+They follow that guidance completely.
+They ask questions when confused.
+They stay consistent.
+
+**That's it.**
+
+The students who struggle:
+- Jump from course to course
+- Follow 10 different "gurus" with conflicting advice
+- Never complete anything
+- Feel paralyzed by too many options
+
+## What You Actually Need
+
+If you're feeling lost right now, here's what you need:
+
+**1. ONE trusted source of guidance**
+Not 10. Not 5. One person or program you trust completely.
+
+**2. A clear, step-by-step path**
+Not "learn everything eventually." A specific sequence: First this, then this, then this.
+
+**3. Regular check-ins**
+Someone to course-correct when you go off track.
+
+**4. Permission to ignore everything else**
+The freedom to say "no" to shiny new courses and stick with your plan.
+
+## The Mentorship Mindset
+
+Here's a shift in thinking that helped many students:
+
+**Before:** "I need to learn more"
+**After:** "I need to learn the right things in the right order"
+
+**Before:** "I'm behind compared to others"
+**After:** "I'm on my own timeline, and I have a clear path"
+
+**Before:** "I should try everything"
+**After:** "I should master what matters"
+
+## A Simple Exercise
+
+If you're reading this and feeling lost, try this:
+
+1. **Write down your goal** (e.g., "Get placed in a product company in 6 months")
+2. **Find ONE person** who has achieved that goal
+3. **Ask them:** "If you were me, what would you do first?"
+4. **Do exactly that.** Nothing else.
+
+That simple act of getting direction from someone who's been there — that's mentorship.
+
+## Why We Built UPSTRIDE
+
+This is exactly why UPSTRIDE exists.
+
+We're not selling courses. We're selling experience and direction.
+
+Every student in our program gets:
+- A clear, week-by-week roadmap
+- Personal mentorship from people who've been there
+- Honest feedback on what's working and what's not
+- The confidence that comes from knowing you're on the right path
+
+Because we believe what you need isn't more content.
+You need someone to show you the way.
+
+## Final Thoughts
+
+If you take nothing else from this post, remember this:
+
+**You're not lost because you can't learn.
+You're lost because no one showed you where to start.**
+
+Find that person. Find that guidance. Everything else becomes easier.
+
+Learning is free.
+But mentorship gives hope, confidence, and direction.
+
+And sometimes, that direction is all you're really looking for.
+
+---
+
+**Ready to get the direction you need?** Join UPSTRIDE's Experience Selling Bootcamp — where we don't just teach skills, we guide you personally through your career journey.
       `.trim(),
     },
   ];
@@ -930,7 +1108,7 @@ Sources consulted for this article:
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2025 UPSTRIDE Learning. All rights reserved.
+                © 2026 UPSTRIDE Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 MSME Certified | VIT & Saveetha Recognized
@@ -1058,7 +1236,7 @@ Sources consulted for this article:
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © 2025 UPSTRIDE Learning. All rights reserved.
+              © 2026 UPSTRIDE Learning. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm">
               MSME Certified | VIT & Saveetha Recognized

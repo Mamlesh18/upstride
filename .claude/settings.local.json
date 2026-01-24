@@ -4,7 +4,14 @@
       "Bash(dir /s \"C:\\Users\\mamle\\visualstudiocode\\Upstride\\upstride\\src\")",
       "WebFetch(domain:clueso.io)",
       "Bash(dir:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(del accordion.tsx alert-dialog.tsx alert.tsx aspect-ratio.tsx avatar.tsx badge.tsx breadcrumb.tsx)",
+      "Bash(del calendar.tsx carousel.tsx chart.tsx checkbox.tsx collapsible.tsx command.tsx context-menu.tsx)",
+      "Bash(del dialog.tsx drawer.tsx dropdown-menu.tsx form.tsx hover-card.tsx input-otp.tsx)",
+      "Bash(del menubar.tsx navigation-menu.tsx pagination.tsx popover.tsx progress.tsx radio-group.tsx)",
+      "Bash(del resizable.tsx scroll-area.tsx select.tsx separator.tsx sheet.tsx sidebar.tsx)",
+      "Bash(del skeleton.tsx slider.tsx switch.tsx table.tsx tabs.tsx toggle-group.tsx toggle.tsx)",
+      "Bash(del use-mobile.tsx)"
     ],
     "deny": [],
     "ask": []

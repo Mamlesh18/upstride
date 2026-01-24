@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Rocket, Target, Users, TrendingUp, Award, Calendar, Phone } from "lucide-react";
+import { ArrowLeft, Rocket, Target, Users, TrendingUp, Award, Calendar, Phone, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
 import SocialProof from "@/components/SocialProof";
 import { toast } from "@/hooks/use-toast";
 
@@ -11,6 +11,75 @@ const Programs = () => {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
+
+  // Curriculum data for Experience Selling Bootcamp
+  const curriculum = [
+    {
+      week: 1,
+      title: "Foundation & Strategy",
+      topics: [
+        "Session 1 — Introduction + Why Most Students Don't Get Placed",
+        "Session 2 — Project Division + Portal + Execution Strategy"
+      ]
+    },
+    {
+      week: 2,
+      title: "Reality Check & Planning",
+      topics: [
+        "Session 3 — What I'd Do If I Was In Your Place",
+        "Session 4 — Resume vs Reality"
+      ]
+    },
+    {
+      week: 3,
+      title: "Building Your Presence",
+      topics: [
+        "Session 5 — How to Ideate & Execute Projects",
+        "Session 6 — How to Build LinkedIn & Network"
+      ]
+    },
+    {
+      week: 4,
+      title: "Industry Insights",
+      topics: [
+        "Session 7 — What HR Really Thinks & Wants",
+        "Session 8 — My Internship Journey & Mistakes"
+      ]
+    },
+    {
+      week: 5,
+      title: "Interview Mastery",
+      topics: [
+        "Session 9 — Mock Interview",
+        "Session 10 — How To Answer Any Interview Question"
+      ]
+    },
+    {
+      week: 6,
+      title: "Advanced Skills & Mindset",
+      topics: [
+        "Session 11 — How To Be a Top 1% Coder",
+        "Session 12 — Entrepreneurship & Leadership Thinking"
+      ]
+    },
+    {
+      week: 7,
+      title: "Final Preparation",
+      topics: [
+        "Session 13 — Time Management & Multitasking",
+        "Session 14 — Final Placement Preparation"
+      ]
+    },
+    {
+      week: 8,
+      title: "Completion & Next Steps",
+      topics: [
+        "Session 15 — External Guest Talk",
+        "Session 16 — Certification & Project Handoff"
+      ]
+    }
+  ];
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -254,14 +323,47 @@ Browser Info: ${navigator.userAgent}
                   </form>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium py-6 group/btn"
-                  onClick={() => navigate("/course/experience-selling")}
-                >
-                  View Full Curriculum
-                  <ArrowLeft className="w-5 h-5 ml-2 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
+              </div>
+
+              {/* Curriculum Section - Embedded */}
+              <div className="mt-8 border-t border-border pt-8">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Calendar className="w-6 h-6 text-primary" />
+                  8-Week Learning Curriculum
+                </h3>
+                <div className="space-y-3">
+                  {curriculum.map((module) => (
+                    <div key={module.week} className="border border-border rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedWeek(expandedWeek === module.week ? null : module.week)}
+                        className="w-full text-left p-4 hover:bg-secondary/50 transition-colors flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="bg-primary/10 text-primary font-bold px-3 py-1 rounded-lg text-sm">
+                            Week {module.week}
+                          </span>
+                          <span className="font-semibold text-foreground">{module.title}</span>
+                        </div>
+                        {expandedWeek === module.week ? (
+                          <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </button>
+
+                      {expandedWeek === module.week && (
+                        <div className="bg-secondary/30 p-4 space-y-2 border-t border-border">
+                          {module.topics.map((topic, idx) => (
+                            <div key={idx} className="flex items-start gap-3">
+                              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                              <p className="text-muted-foreground">{topic}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -312,7 +414,7 @@ Browser Info: ${navigator.userAgent}
                 upstride.in@gmail.com
               </a>
               <p className="text-sm text-muted-foreground">
-                © 2024 UPSTRIDE Learning. All rights reserved.
+                © 2026 UPSTRIDE Learning. All rights reserved.
               </p>
             </div>
           </div>

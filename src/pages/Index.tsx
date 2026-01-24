@@ -142,7 +142,7 @@ const Index = () => {
             We are not selling course, we are selling experience
           </p>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto font-normal">
-            Connecting the gap between students and indsutry via a experiece driven approach to make your carrer easier
+            Connecting the gap between students and industry via an experience driven approach to make your career easier
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -194,7 +194,7 @@ const Index = () => {
           {/* Recognition Partners */}
           <div className="space-y-4">
             <h3 className="text-2xl md:text-3xl font-black text-center mb-8">Recognition & Partnerships</h3>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
               {/* Clutch Recognition */}
               <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
                 <Award className="w-10 h-10 text-primary" />
@@ -241,6 +241,22 @@ const Index = () => {
                   />
                 </div>
                 <p className="text-sm text-muted-foreground text-center">Saveetha University</p>
+              </div>
+
+              {/* Kongunadu Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">Kongunadu Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/kongunadu.png"
+                    alt="Kongunadu Arts and Science College Recognition"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">Kongunadu Arts and Science College</p>
               </div>
             </div>
           </div>
@@ -400,7 +416,7 @@ const Index = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2025 UPSTRIDE Learning. All rights reserved.
+                © 2026 UPSTRIDE Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India
