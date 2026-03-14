@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, User, ArrowRight, BookOpen } from "lucide-react";
+import { ArrowLeft, Calendar, User, ArrowRight, BookOpen, Menu, X } from "lucide-react";
 
 const Blogs = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const blogPosts = [
     {
@@ -922,6 +924,1335 @@ And sometimes, that direction is all you're really looking for.
 **Ready to get the direction you need?** Join UPSTRIDE's Experience Selling Bootcamp — where we don't just teach skills, we guide you personally through your career journey.
       `.trim(),
     },
+    {
+      id: 5,
+      title: "Campus to Corporate in the Age of AI: Why Human Skills Matter More Than Ever",
+      date: "January 21, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "AI is taking over tasks — but it can't replace the person who knows how to think, communicate, and lead.",
+      content: `
+# Campus to Corporate in the Age of AI: Why Human Skills Matter More Than Ever
+
+Everywhere you look, someone is warning you: *"AI will take your job."*
+
+And honestly? They might be right — but not in the way you think.
+
+AI isn't going to walk into your office and steal your chair. What it's going to do is make the *average* irreplaceable and reward the *exceptional*. The question is: which one are you building yourself to be?
+
+## The Skills AI Can't Touch
+
+Here's the uncomfortable truth — AI is already doing large parts of what your internship had you doing. Summarizing documents. Generating reports. Writing basic code. Sorting data.
+
+But there are things AI fundamentally cannot do:
+
+- **Read a room.** Understanding what a client actually needs behind what they say.
+- **Build trust.** The feeling that someone believes in you as a person.
+- **Navigate ambiguity.** When no one knows what to do, a human figures it out.
+- **Lead with empathy.** Motivating people when the stakes are real.
+
+These are the skills that companies are *desperate* for — and that colleges almost never teach.
+
+## The Campus Trap
+
+Campus trains you to be right. Solve the problem. Get the grade.
+
+Corporate trains you to be *useful*. Solve the relationship. Earn the trust.
+
+That gap — between being right and being useful — is where most freshers fall apart.
+
+## What You Should Be Building Right Now
+
+**1. Learn to communicate without jargon.**
+Write emails a 60-year-old client could understand. Speak in solutions, not processes.
+
+**2. Practice failing forward.**
+Take on projects where you might fail. Recovery is a skill.
+
+**3. Develop your point of view.**
+AI gives you answers. Humans need perspectives. Learn to have one.
+
+**4. Become a connector.**
+Know who knows what. Be the person who links the right people.
+
+## The Real Opportunity
+
+The shift to AI isn't a threat if you're prepared. It's a massive filter — removing anyone who only knew how to follow instructions.
+
+You have the chance to be someone who rises *because of* AI, not in spite of it.
+
+Human skills + AI tools = the new superpower.
+
+---
+
+**UPSTRIDE exists to build exactly that.** We prepare you for the corporate world that AI is reshaping — so you become someone companies fight to keep.
+      `.trim(),
+    },
+    {
+      id: 6,
+      title: "The Resume That Actually Gets You Shortlisted (And What Everyone Else Is Doing Wrong)",
+      date: "January 28, 2025",
+      readTime: "5 min read",
+      category: "Resume",
+      excerpt: "Most resumes look the same. Here's how to build one that makes a recruiter stop scrolling.",
+      content: `
+# The Resume That Actually Gets You Shortlisted (And What Everyone Else Is Doing Wrong)
+
+A recruiter spends an average of **7 seconds** on your resume before deciding yes or no.
+
+Seven seconds.
+
+That means your entire academic career, your projects, your internships — all of it — gets judged in less time than it takes to tie your shoe.
+
+So the question isn't "How do I put everything on my resume?" The question is: **"What makes someone stop and read mine?"**
+
+## The 5 Mistakes Killing Your Chances
+
+**1. Generic objective statements.**
+"Seeking a challenging role in a dynamic organization where I can contribute my skills…"
+
+Recruiters have read this sentence 400 times today. Delete it. Replace it with a 2-line professional summary that tells them *exactly* what you bring.
+
+**2. Responsibilities instead of results.**
+"Responsible for managing social media accounts."
+vs.
+"Grew Instagram following from 2K to 11K in 3 months through weekly reels strategy."
+
+One shows a task. One shows impact. Only one gets a callback.
+
+**3. No numbers anywhere.**
+If you can quantify it, quantify it. Percentages, rupees, users, time saved — numbers create credibility instantly.
+
+**4. The same resume for every job.**
+Your resume should be *customized* for each role. Mirror the language in the job description. If they say "client management," say "client management" — not "stakeholder coordination."
+
+**5. Bad formatting.**
+Use clean fonts. Single column. Consistent spacing. No photos unless specifically required. Make it readable in 7 seconds, not 7 minutes.
+
+## The Elements That Actually Work
+
+- **Headline:** Your strongest selling point in 10 words or fewer
+- **Summary:** 2–3 lines max. Who you are, what you've done, what you're looking for.
+- **Experience:** Bullet points. Past tense. Results-first.
+- **Projects:** What you built, what problem it solved, what the outcome was.
+- **Skills:** Only list what you can actually talk about in an interview.
+
+## The Real Secret
+
+The best resume isn't the prettiest one.
+
+It's the most *relevant* one.
+
+A recruiter should read your resume and think: "This person understands what we need."
+
+That only happens when you've done the work to understand the role — and then made it obvious that you're the answer to their problem.
+
+---
+
+**At UPSTRIDE, we review and rebuild resumes from scratch.** Because your career deserves more than a template.
+      `.trim(),
+    },
+    {
+      id: 7,
+      title: "Why Your LinkedIn Profile is Costing You Opportunities (And How to Fix It)",
+      date: "February 3, 2025",
+      readTime: "4 min read",
+      category: "LinkedIn",
+      excerpt: "Recruiters are searching LinkedIn right now. The question is — will they find you, or scroll past you?",
+      content: `
+# Why Your LinkedIn Profile is Costing You Opportunities (And How to Fix It)
+
+Right now, a recruiter somewhere is typing keywords into LinkedIn.
+
+They're looking for someone like you. Someone with your background, your skills, your potential.
+
+But they're not finding you. And you'll never know it happened.
+
+That's the quiet cost of a bad LinkedIn profile — not rejection, but invisibility.
+
+## The Profile Audit: Where Are You Losing?
+
+### Your Photo
+No photo = no trust. A blurry selfie = wrong impression.
+Use a clear, well-lit photo. Professional but approachable. You don't need a studio — good lighting and a plain background work perfectly.
+
+### Your Headline
+"Student at XYZ University" is not a headline. It's a fact.
+
+A headline sells. Try:
+*"Marketing Enthusiast | Content Strategy | Helping Brands Tell Better Stories"*
+
+That's searchable. That's specific. That makes someone curious.
+
+### Your About Section
+This is your story. Don't waste it on a list of things recruiters can already see on your resume.
+
+Tell them *why* you do what you do. What drives you. What problem you want to solve. Be human. Be specific.
+
+### Your Experience Section
+Every role, internship, project — add it. With results.
+Not just "worked on campaign" but "campaign reached 50,000+ users and drove 12% increase in sign-ups."
+
+### Recommendations
+Three genuine recommendations from professors, managers, or teammates will do more for your profile than anything else.
+
+Ask for them. Most people say yes if you make it easy — give them a template.
+
+## The Active Strategy
+
+A good profile is the foundation. But the people getting opportunities are *active*.
+
+- Post once a week about something you learned
+- Comment thoughtfully on posts in your industry
+- Send 5 connection requests a week with personalized notes
+- Engage with content from companies you want to work for
+
+LinkedIn rewards consistency. Show up regularly, and the algorithm will do the rest.
+
+## The Mindset Shift
+
+LinkedIn is not a job board. It's a **professional community.**
+
+The people winning on LinkedIn aren't just updating their profiles when they need a job.
+
+They're showing up, sharing, connecting — building a reputation before they need it.
+
+---
+
+**UPSTRIDE's placement program includes LinkedIn profile optimization** — because your online presence is now part of your job application.
+      `.trim(),
+    },
+    {
+      id: 8,
+      title: "Cold Emails That Actually Get Replies: The Framework No One Teaches You",
+      date: "February 7, 2025",
+      readTime: "5 min read",
+      category: "Networking",
+      excerpt: "One cold email can change your career. Here's how to write the kind that actually gets read.",
+      content: `
+# Cold Emails That Actually Get Replies: The Framework No One Teaches You
+
+Most cold emails get deleted in 3 seconds.
+
+Not because the sender isn't qualified. But because the email is about *them*, not about *the person reading it*.
+
+Here's the thing: the best cold email ever written doesn't feel cold. It feels like it was written specifically for one person — because it was.
+
+## The Anatomy of a Cold Email That Works
+
+### Subject Line (The Gate)
+This is the only thing that determines whether your email is opened.
+
+Don't say: "Inquiry Regarding Opportunities at [Company]"
+Do say: "Quick question about your content strategy" or "Loved your talk at [Event] — a follow-up thought"
+
+Specific. Personal. Curiosity-triggering.
+
+### Opening Line (The Hook)
+Lead with something about *them*, not you.
+
+"Your recent post about hiring for EQ over IQ really stayed with me…"
+"I saw that [Company] just launched in Bangalore — congrats on that milestone."
+
+Prove you did your homework in the first sentence.
+
+### The Value Exchange (The Body)
+Don't ask for a job. Offer something first — a thought, an idea, a genuine observation.
+
+"I noticed your careers page doesn't have a role for X, but based on your growth trajectory, I think that's a gap worth filling — and it's exactly where I've been building skills."
+
+That's interesting. That's not begging. That's confident.
+
+### The Ask (Clear and Specific)
+Don't say: "Please let me know if there's anything."
+Do say: "Would you be open to a 15-minute call this week or next?"
+
+One ask. Specific. Easy to answer yes or no.
+
+### Sign-off
+Keep it professional but warm. Include your LinkedIn URL. Nothing more.
+
+## The Follow-Up Rule
+
+Send one follow-up 5–7 days later. Keep it brief:
+
+*"Just wanted to bump this up — happy to share more if it's useful. No pressure either way."*
+
+Most replies come from follow-ups. Don't skip this step.
+
+## The Numbers Game (Done Right)
+
+Cold emails work at scale — but *personalized* scale.
+
+Write 10 emails. Each one customized. Each one researched.
+That beats 100 copy-paste templates every single time.
+
+---
+
+**UPSTRIDE teaches you exactly this.** Because in the corporate world, reaching the right person is half the battle — and the email is your first impression.
+      `.trim(),
+    },
+    {
+      id: 9,
+      title: "From 0 to Offer: What the Students Who Got Placed Did Differently",
+      date: "February 12, 2025",
+      readTime: "4 min read",
+      category: "Placement",
+      excerpt: "It wasn't luck. It wasn't connections. Here's what actually separated students who got offers from those who didn't.",
+      content: `
+# From 0 to Offer: What the Students Who Got Placed Did Differently
+
+Every year, some students graduate with multiple job offers.
+
+And every year, other students with similar grades, similar colleges, similar skills — graduate with nothing.
+
+What's the difference?
+
+After working with hundreds of students, we've identified the patterns. And none of them are what you'd expect.
+
+## They Started Before They Were Ready
+
+The students who got placed didn't wait until they felt "ready" to apply, to network, to reach out.
+
+They started messy. They sent imperfect emails. They attended events where they knew no one. They applied to jobs they weren't sure they were qualified for.
+
+The students who stayed unemployed kept preparing. Kept waiting. Kept telling themselves: "One more skill and then I'll start."
+
+Readiness is a myth. Action is the teacher.
+
+## They Knew Their Story
+
+When an interviewer says "Tell me about yourself," most candidates panic and list their resume out loud.
+
+Placed students had a *story*. A clear, compelling narrative that answered:
+- Who am I?
+- What have I done that's relevant?
+- Why this role, this company, right now?
+
+That story had been practiced. Not memorized — practiced. There's a difference.
+
+## They Treated Rejection as Data
+
+Every "no" told them something.
+
+*Didn't get shortlisted?* Resume problem.
+*Got interviews but no offers?* Communication issue.
+*Got to final rounds and failed?* Closing the deal — a specific skill you can learn.
+
+They didn't spiral. They diagnosed and adjusted.
+
+## They Built Relationships, Not Transactions
+
+They didn't message people only when they needed something.
+
+They commented on LinkedIn posts. They attended workshops. They followed up after events. They stayed in touch.
+
+When opportunities came, people thought of them — because they'd already been seen.
+
+## They Asked for Help
+
+This one sounds simple. It's not.
+
+Most students are too proud, too scared, or too embarrassed to say: "I don't know what I'm doing. Can you help me?"
+
+The placed students found mentors, coaches, and communities. They didn't try to figure everything out alone.
+
+---
+
+**You don't have to figure this out alone.** UPSTRIDE was built to be the mentor, the community, and the guide that gets you from 0 to offer.
+      `.trim(),
+    },
+    {
+      id: 10,
+      title: "How to Ace Interviews Without Faking Confidence",
+      date: "February 17, 2025",
+      readTime: "5 min read",
+      category: "Interviews",
+      excerpt: "Real confidence isn't performed. It's built. Here's how to walk into any interview and actually mean what you say.",
+      content: `
+# How to Ace Interviews Without Faking Confidence
+
+"Just be confident."
+
+Has anyone ever said that to you before an interview?
+
+As if confidence is a switch you can flip. As if nervous energy just disappears because someone told you to relax.
+
+Here's the truth: the most effective interview confidence isn't performed. It's earned — through preparation that goes deeper than memorizing answers.
+
+## Why Fake Confidence Backfires
+
+Interviewers are trained to spot it. The rehearsed smile. The over-polished answer that sounds like a press release. The pause that's a second too long because you're recalling the script, not thinking.
+
+Real confidence has a texture to it. It's present, curious, unhurried. It doesn't need to impress — it just shows up.
+
+## The Preparation That Actually Builds Confidence
+
+### 1. Know Your Stories Cold
+Not memorized — *internalized*. Use the STAR format (Situation, Task, Action, Result) to prepare 6–8 stories from your experience. Different stories should demonstrate different skills.
+
+When you know your stories well enough to tell them differently each time, you're confident — because you're drawing from memory, not a script.
+
+### 2. Research Until You Have a Point of View
+Don't just know what the company does. Have an *opinion* about it.
+
+"I noticed you've been expanding into Tier 2 cities — I think that's smart given the consumption shift we're seeing. I'd love to understand how the product is being adapted for that market."
+
+That's confidence. That's earned.
+
+### 3. Prepare Questions That Show You're Thinking
+"Do you have any questions for us?" is not a formality. It's an opportunity.
+
+Ask about the team dynamics. Ask what success looks like in 90 days. Ask what the company is getting wrong and trying to fix.
+
+These questions signal that you're a thinker, not just a candidate.
+
+### 4. Practice Out Loud. Not in Your Head.
+The biggest mistake students make is rehearsing silently. Your brain thinks it knows the answer until your mouth has to say it.
+
+Practice with a friend, a mirror, a recording. The discomfort of hearing yourself is exactly the point — it trains you to think and speak at the same time.
+
+## On the Day
+
+Get there early. Breathe slowly. Remember: they're not your judge. They're your potential colleague. You're assessing them too.
+
+Walk in curious, not desperate. The shift in energy is everything.
+
+---
+
+**UPSTRIDE does live mock interviews** — not practice questions, but real simulated pressure so that the actual interview feels easy by comparison.
+      `.trim(),
+    },
+    {
+      id: 11,
+      title: "The Internship Trap: Why Experience Alone Isn't Enough",
+      date: "February 21, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "You've done internships. You still don't have a job. Here's why — and what to do instead.",
+      content: `
+# The Internship Trap: Why Experience Alone Isn't Enough
+
+You did the internship. Maybe two.
+
+You worked the hours. You did the projects. You got the certificate.
+
+And now you're sitting in placement season wondering why the offers aren't coming.
+
+Here's the uncomfortable answer: **experience without narrative is invisible.**
+
+## The Myth of "Just Get Experience"
+
+Everyone told you to get experience. Internships. Freelance work. Projects. And they weren't wrong — experience matters.
+
+But experience is only as valuable as your ability to *articulate it*.
+
+A recruiter doesn't experience your internship. They only hear your description of it. If that description sounds like "I helped the team with various tasks," your experience is worth almost nothing on paper.
+
+## What You Should Have Done During Every Internship
+
+**Written down your wins weekly.**
+What did you contribute? What problem did you solve? What changed because you were there?
+
+**Quantified everything possible.**
+Not just "handled social media" but "increased engagement by 34% over 8 weeks."
+
+**Asked for feedback on your work.**
+Not just "was this good?" but "what would make this excellent?" Those answers are interview gold.
+
+**Built relationships, not just deliverables.**
+The manager who saw you work is worth more than the certificate they sign.
+
+## How to Rescue Past Internships
+
+It's not too late. Go back and audit what you actually did.
+
+- What tools did you use?
+- What was the project's outcome?
+- Did the company use what you built?
+- What did you learn that changed how you work?
+
+Turn those answers into bullet points on your resume. Then practice saying them out loud until they sound natural.
+
+## The Real Lesson
+
+Experience is raw material. Your job is to shape it into a story that makes a recruiter say: "This person gets it."
+
+That takes reflection. It takes honesty. And it takes practice.
+
+---
+
+**UPSTRIDE helps you extract the value from every experience you already have** — and turn it into language that opens doors.
+      `.trim(),
+    },
+    {
+      id: 12,
+      title: "Salary Negotiation for Freshers: You Have More Power Than You Think",
+      date: "February 25, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "Most freshers accept the first number they hear. Here's why that's a mistake — and how to negotiate without fear.",
+      content: `
+# Salary Negotiation for Freshers: You Have More Power Than You Think
+
+The offer came. You're thrilled. You want to say yes immediately.
+
+Stop.
+
+Take a breath. Read the number. Then — negotiate.
+
+Most freshers don't. They assume they have no leverage. They're scared of losing the offer. They think negotiation is aggressive or rude.
+
+It isn't. Negotiation is professional. And the companies who respect you expect it.
+
+## Why You Should Always Negotiate
+
+**1. The first offer is rarely the best offer.**
+HR budgets almost always have room. The initial number is a starting point, not a ceiling.
+
+**2. It signals confidence.**
+Companies want employees who advocate for themselves. Negotiating professionally is one of the first impressions you make as an employee.
+
+**3. The math matters more than you think.**
+A ₹5,000/month difference at your first job compounds over your career in ways you can't see right now. First salaries anchor future salaries.
+
+## How to Negotiate Without Feeling Awkward
+
+**Step 1: Research the market.**
+Know what peers at similar companies earn. Use LinkedIn Salary, Glassdoor, or simply ask seniors in your network. Walk in with data.
+
+**Step 2: Express gratitude first.**
+"Thank you so much for the offer — I'm genuinely excited about the role and the team."
+
+**Step 3: Make your ask.**
+"Based on my research and what I bring to the role, I was hoping we could discuss a base of [number]. Is there flexibility there?"
+
+One sentence. Specific. Calm.
+
+**Step 4: Let silence do its job.**
+Don't fill the silence after your ask. Let them respond. Silence isn't awkward — it's powerful.
+
+**Step 5: Accept gracefully.**
+Whether they meet your number or not, end professionally. "Thank you for working through this with me — I'm excited to join."
+
+## If They Say No
+
+Ask for clarity: "I understand. Is there anything else we could look at — like a signing bonus, performance review at 6 months, or additional leave?"
+
+You're not being difficult. You're being professional.
+
+---
+
+**UPSTRIDE covers salary negotiation as part of our placement prep** — because what you earn in your first job shapes your financial trajectory for years.
+      `.trim(),
+    },
+    {
+      id: 13,
+      title: "How to Build a Network When You Know Absolutely No One",
+      date: "March 1, 2025",
+      readTime: "5 min read",
+      category: "Networking",
+      excerpt: "Nobody starts with connections. Here's how to build a network from zero — authentically and effectively.",
+      content: `
+# How to Build a Network When You Know Absolutely No One
+
+"It's all about who you know."
+
+You've heard this. It probably makes you feel frustrated or helpless — because right now, you don't know anyone.
+
+Here's what that advice gets wrong: you don't need to *know* people. You need to *start knowing* people.
+
+There's a difference. And the gap between those two things is smaller than you think.
+
+## The Truth About Networking
+
+Networking isn't a transaction. It's not walking into a room and collecting business cards. It's not messaging a stranger with "Please review my resume."
+
+Networking is **building genuine relationships before you need them**.
+
+And it starts with one conversation.
+
+## Where to Start When You Have Zero Contacts
+
+### Your College Alumni Network
+This is the most underused resource in every student's life.
+
+Find alumni from your college working in roles you want. Message them:
+
+*"Hi [Name], I'm a final-year student at [College] — same place you graduated from! I came across your profile while researching careers in [field]. Your journey from [X] to [Y] is really inspiring. Would you have 15 minutes to share some advice? Completely understanding if you're too busy."*
+
+Response rate: surprisingly high. People love giving back to their college community.
+
+### Industry Events and Webinars
+Show up. Not to pitch yourself — to genuinely learn. Ask one smart question during Q&A. Then follow up with the speaker on LinkedIn: "I was at your session today and your point about X really stayed with me…"
+
+### LinkedIn (Used Properly)
+Not as a broadcast tool — as a conversation starter.
+Comment thoughtfully on posts in your field. Share things you've learned. Engage before you ask.
+
+### Your Professors and Internship Supervisors
+The warmest network you already have. They've seen you work. They can introduce you to people. Most students never ask.
+
+## The Rule of Give Before You Take
+
+Before you ask for anything from your network, give something.
+
+Share an article that would interest them. Congratulate them on a promotion. Respond to their content. Show up for *them* before you need them to show up for *you*.
+
+People help people they feel a relationship with.
+
+## The Long Game
+
+Networks built fast fall apart fast. Networks built slowly — through consistent, genuine engagement — become the foundation of your career.
+
+Start one conversation this week. That's the whole task.
+
+---
+
+**UPSTRIDE connects you with a community of peers, mentors, and industry professionals** — because who you surround yourself with shapes who you become.
+      `.trim(),
+    },
+    {
+      id: 14,
+      title: "The Art of the Follow-Up: Why Most Opportunities Die in Your Inbox",
+      date: "March 5, 2025",
+      readTime: "3 min read",
+      category: "Networking",
+      excerpt: "Most deals, interviews, and relationships are won or lost in the follow-up. Here's how to do it right.",
+      content: `
+# The Art of the Follow-Up: Why Most Opportunities Die in Your Inbox
+
+You had the conversation. You sent the email. You attended the interview.
+
+And then you waited.
+
+And nothing happened.
+
+Here's the truth that nobody tells you: **most opportunities don't close because someone said no. They close because someone stopped following up.**
+
+## Why People Don't Follow Up
+
+- Fear of seeming desperate
+- Not wanting to "bother" someone
+- Assuming silence means rejection
+- Not knowing what to say
+
+Every single one of these is a misunderstanding.
+
+## What Silence Actually Means
+
+Silence almost never means no.
+
+It means someone is busy. It means your email got buried. It means they meant to reply and forgot. It means life happened.
+
+A follow-up isn't bothering someone. It's **giving them a second chance to respond to something they already wanted to respond to.**
+
+## The Follow-Up Framework
+
+**Timing:** Wait 5–7 business days after your first message. For post-interview, 24–48 hours for a thank-you, then 5–7 days if you haven't heard.
+
+**Length:** Short. Three to four sentences max.
+
+**Tone:** Warm, confident, zero desperation.
+
+**Example:**
+*"Hi [Name], just wanted to follow up on my previous note. I'm still very interested in [role/conversation/opportunity] and happy to share anything else that might be helpful. No pressure at all — I know things get busy."*
+
+That's it. Professional. Human. Easy to respond to.
+
+**How many times?** Follow up twice. After the second follow-up with no response, let it go gracefully. You haven't lost — you've simply moved on.
+
+## The Thank-You Note
+
+This is the most underused follow-up of all.
+
+After every interview, every informational call, every connection — send a brief thank-you within 24 hours.
+
+Not a generic "Thanks for your time." But something specific:
+
+*"Thank you for the conversation today. Your perspective on building client trust without formal authority really shifted something for me — I'll be thinking about that for a while."*
+
+That's memorable. That's the kind of follow-up that makes people remember you.
+
+---
+
+**UPSTRIDE teaches you the full arc of professional communication** — because the conversation doesn't end when you walk out the door.
+      `.trim(),
+    },
+    {
+      id: 15,
+      title: "Personal Branding for Students: How to Be Known Before You're Hired",
+      date: "March 8, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "In a world of identical resumes, your personal brand is what makes you impossible to ignore.",
+      content: `
+# Personal Branding for Students: How to Be Known Before You're Hired
+
+Two candidates. Same college. Same GPA. Same internship.
+
+One gets the offer. One doesn't.
+
+The difference? **One of them was already known.**
+
+Not famous. Not viral. Just *visible* in the right places, to the right people, for the right reasons.
+
+That's personal branding.
+
+## What Personal Branding Actually Is
+
+It's not about posting every day or building a huge following.
+
+It's about ensuring that when someone who matters Googles your name or finds your LinkedIn, they see a clear, compelling picture of who you are and what you bring.
+
+It's about owning your narrative before someone else defines it by default.
+
+## The Three Questions Your Brand Must Answer
+
+**1. What do you know?**
+Your niche. Your area of growing expertise. You don't need to be an expert — you need to be someone who's genuinely curious and learning in a specific direction.
+
+**2. What do you believe?**
+Your perspective. The lens you see your field through. This is what makes you interesting.
+
+**3. Who do you serve?**
+The companies, industries, or problems you want to work on. Specificity attracts opportunity.
+
+## Where to Build Your Brand (Even as a Student)
+
+**LinkedIn:** Share what you're learning. Comment on industry posts. Publish short articles about your projects or observations.
+
+**Portfolio/Website:** A single-page site with your work, your story, and your contact info. Costs ₹500/year to host. Returns are immeasurable.
+
+**Conversations:** Your reputation is built one-on-one as much as it is online. Be someone people describe well to others.
+
+## The Consistency Principle
+
+You don't need to post every day. You need to show up *consistently*.
+
+One post a week. One meaningful comment a day. One email every two weeks to a contact you want to maintain.
+
+Visibility compounds. The person who shows up every week is remembered. The person who posts once a month is forgettable.
+
+## Starting Before You're Ready
+
+You don't need to have arrived to start building a brand. You can build it *while you're on your way*.
+
+Document your learning. Share your questions. Show your process.
+
+People trust the person who shares the journey, not just the destination.
+
+---
+
+**UPSTRIDE helps you define and build your personal brand** as part of our placement program — because in today's market, being *known* is the new competitive advantage.
+      `.trim(),
+    },
+    {
+      id: 16,
+      title: "Cracking Group Discussions: What Evaluators Actually Look For",
+      date: "March 11, 2025",
+      readTime: "4 min read",
+      category: "Interviews",
+      excerpt: "Group Discussions aren't debates. Here's what evaluators are really watching — and how to stand out without shouting.",
+      content: `
+# Cracking Group Discussions: What Evaluators Actually Look For
+
+Most students prepare for Group Discussions by planning to talk the most.
+
+That's not the strategy. That's the mistake.
+
+Evaluators aren't looking for the loudest person in the room. They're looking for someone who makes the room *better*.
+
+## What a GD Actually Tests
+
+A Group Discussion is a controlled simulation of a professional environment. It tests:
+
+- **Communication clarity** — Can you say something meaningful in 30 seconds?
+- **Listening ability** — Do you build on others' points or just wait for your turn?
+- **Leadership without authority** — Can you guide the conversation without dominating it?
+- **Composure under pressure** — Do you fall apart when challenged?
+- **Structured thinking** — Is your argument logical and easy to follow?
+
+## The Moves That Make You Stand Out
+
+**The Initiator.**
+Starting a GD signals confidence. But only if you have something substantive to say. Don't just jump in — lead with a framework or a key question that structures the discussion.
+
+**The Synthesizer.**
+When the conversation gets scattered, say: *"I think what [Name] and [Name] are both pointing to is…"* and tie the threads together. Evaluators love this. It shows you're listening and thinking.
+
+**The Devil's Advocate.**
+Present the opposing view respectfully. *"That's a strong point — I want to add a counterargument worth considering…"* This shows nuance and intellectual courage.
+
+**The Summarizer.**
+If given the chance to conclude, don't just restate points. Synthesize and add insight: *"This discussion highlighted that the challenge isn't binary — it requires both X and Y, and the key tension to manage is…"*
+
+## What Kills Your Chances
+
+- Interrupting others constantly
+- Agreeing with everything (shows no thinking)
+- Going off-topic to seem knowledgeable
+- Speaking without a point
+- Being silent for long stretches
+
+## The Preparation Strategy
+
+Before any GD:
+1. Read current affairs for 15 minutes daily
+2. Practice speaking for 60 seconds on a topic without rambling
+3. Practice listening — summarize what others say before responding in conversations
+
+The GD is won in preparation, not in the room.
+
+---
+
+**UPSTRIDE runs live Group Discussion simulations** — real rounds, real feedback, real improvement.
+      `.trim(),
+    },
+    {
+      id: 17,
+      title: "The Hidden Job Market: 70% of Jobs Are Never Posted Online",
+      date: "March 14, 2025",
+      readTime: "4 min read",
+      category: "Placement",
+      excerpt: "Most students only see 30% of available jobs. Here's how to access the opportunities that never make it to job boards.",
+      content: `
+# The Hidden Job Market: 70% of Jobs Are Never Posted Online
+
+Here's something nobody tells you in college:
+
+The job you're perfect for might never appear on Naukri, LinkedIn Jobs, or any career portal.
+
+Studies consistently show that 60–80% of jobs are filled through referrals, networks, and direct outreach — *before* they're ever posted publicly.
+
+You've been fishing in a small pond. The real lake is somewhere else.
+
+## Why the Hidden Job Market Exists
+
+Companies prefer to hire through referrals because:
+
+- Referred candidates have a higher success rate
+- It's faster and cheaper than advertising
+- Employee referrals come pre-vetted
+
+This means the moment a role opens, someone in the company is already thinking of people they know — not posting a job description.
+
+If no one knows you exist, you're not in that conversation.
+
+## How to Access the Hidden Job Market
+
+### 1. Talk to People Who Work Where You Want to Work
+Not to ask for jobs. To learn about the company, the culture, the challenges.
+
+When a role opens, you're no longer a stranger — you're someone they've already had a conversation with.
+
+### 2. Tell People You're Looking
+This sounds obvious. Most students don't do it.
+
+Tell your professors, your alumni, your former internship supervisors. Post on LinkedIn. Say specifically what you're looking for.
+
+People cannot refer you if they don't know you're available.
+
+### 3. Apply Directly Through the Company Website
+Not every role gets posted on third-party portals. Check the careers page of companies you want to work for — weekly.
+
+### 4. Target Companies Before They Have Openings
+Reach out to companies you admire even when they haven't posted roles. Express interest in the company, not a specific job.
+
+*"I've been following [Company] for a while and I'm genuinely excited about where you're headed. I'd love to be considered for any relevant opportunities that might open up."*
+
+Many companies keep these emails on file.
+
+### 5. Attend Industry Events
+Every webinar, conference, or meetup is an entry point into the hidden job market. People hire people they've met.
+
+## The Shift in Strategy
+
+Stop spending 100% of your job search time applying online.
+
+Flip the ratio: **70% networking and direct outreach, 30% job portal applications.**
+
+---
+
+**UPSTRIDE's network gets you access to companies before positions are posted** — because the best opportunities go to the people who are already in the room.
+      `.trim(),
+    },
+    {
+      id: 18,
+      title: "Emotional Intelligence at Work: The Skill That Decides Who Gets Promoted",
+      date: "March 17, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "Technical skills get you hired. Emotional intelligence gets you promoted. Here's what it actually looks like.",
+      content: `
+# Emotional Intelligence at Work: The Skill That Decides Who Gets Promoted
+
+Two employees join the same company on the same day.
+
+One year later, one is managing a team. The other is still doing the same tasks they were hired for.
+
+Their technical skills? Roughly equal.
+
+The difference? **How they handle people, pressure, and themselves.**
+
+That's emotional intelligence — and it's the single biggest predictor of career acceleration after the first year.
+
+## What Emotional Intelligence Actually Is
+
+Forget the textbook definition. In the workplace, emotional intelligence shows up as:
+
+- **Staying calm when things go wrong** instead of panicking or blaming
+- **Noticing when someone on your team is struggling** before they say anything
+- **Receiving feedback without becoming defensive** — even when it stings
+- **Reading what a client or stakeholder really needs** beyond what they say
+- **Knowing when to push and when to listen** in a conversation
+
+It's not about being soft. It's about being *effective*.
+
+## Why This Becomes More Important Over Time
+
+At the entry level, your job is mostly technical. Do the task. Hit the deadline.
+
+As you move up, your job becomes almost entirely about people — influencing without authority, building trust, navigating conflict, motivating others.
+
+The people who can do that are rare. They get promoted fast.
+
+## How to Build It
+
+**Practice naming your emotions accurately.**
+Not "I'm fine" but "I'm frustrated because this project keeps shifting direction." Precision with emotions leads to better decisions.
+
+**Pause before responding when you're reactive.**
+When someone says something that triggers you, give it 10 seconds. What you don't say is often more powerful than what you do.
+
+**Ask more questions than you give answers.**
+Curiosity is the cornerstone of emotional intelligence. Be more interested in understanding than in being understood.
+
+**Seek feedback actively.**
+Ask someone you trust: "What's one thing I do that makes your work harder?" Most people won't say it unprompted. But it's the most valuable data you can get.
+
+**Notice the dynamics in every room.**
+Who defers to whom? Who's holding back? What's not being said? The person who sees these things clearly has a massive advantage.
+
+## The Career Compounding Effect
+
+The higher you go, the more emotional intelligence matters.
+
+And unlike technical skills, it takes time to develop. Which means the person who starts building it early — in college, in their first job — arrives years ahead.
+
+---
+
+**UPSTRIDE builds this into our training** — because the skills that make you successful long-term are different from the ones that get you hired.
+      `.trim(),
+    },
+    {
+      id: 19,
+      title: "First Job Survival Guide: How to Actually Thrive in Your First 90 Days",
+      date: "March 19, 2025",
+      readTime: "5 min read",
+      category: "Career",
+      excerpt: "The first 90 days of your career shape how you're perceived for years. Here's how to get them right.",
+      content: `
+# First Job Survival Guide: How to Actually Thrive in Your First 90 Days
+
+Getting the job is only half the story.
+
+What you do in the first 90 days determines whether you become someone your company *builds around* — or someone they quietly regret hiring.
+
+Most freshers think the job is to impress people with what they know.
+
+The real job is to *prove you're someone worth betting on*.
+
+## The 3 Phases of Your First 90 Days
+
+### Days 1–30: Listen More Than You Talk
+
+You are new. You do not know how things really work here.
+
+The org chart is not the power map. The official process is not how decisions actually get made. The culture exists in what people do, not what they say.
+
+In your first month: observe, ask questions, take notes. Make yourself useful without trying to be impressive. Learn who the real influencers are. Understand what "winning" looks like in this team.
+
+**Resist the urge to show off what you know.**
+
+### Days 31–60: Start Delivering Small Wins
+
+By now you understand the terrain. Start picking your spots.
+
+Find one thing you can do better than it's currently being done. Fix a small problem. Automate a manual task. Put together a summary no one asked for but everyone needs.
+
+These small wins signal that you're someone who *does things* — not just someone who talks about doing things.
+
+**Don't wait to be asked for everything. Show initiative on small things.**
+
+### Days 61–90: Build Your Relationships Intentionally
+
+Who do you need to know? Who needs to know you?
+
+Schedule informal coffees or calls with people in departments adjacent to yours. Ask how the teams connect. Express genuine curiosity about their work.
+
+The person who knows how the whole machine works — and who everyone knows — gets access to the best projects.
+
+**Invest in relationships before you need them.**
+
+## The Things That Will Make or Break You
+
+**Meet your deadlines. Always.** If you can't, say so early — not at the last moment.
+
+**Communicate proactively.** Don't wait to be chased. Send status updates. Close the loop.
+
+**Be early to everything** for the first three months. Presence signals commitment.
+
+**Handle feedback gracefully.** You will be corrected. The way you receive it tells people everything about whether they want to invest in you.
+
+**Ask for feedback at 30, 60, and 90 days.** Most employees wait for an annual review. You want to course-correct every month.
+
+---
+
+**UPSTRIDE prepares you not just to get the job — but to thrive once you're in it.** Because starting strong is a skill, and we teach it.
+      `.trim(),
+    },
+    {
+      id: 20,
+      title: "Why Most Students Fail Aptitude Tests (And How to Stop Being One of Them)",
+      date: "March 21, 2025",
+      readTime: "4 min read",
+      category: "Placement",
+      excerpt: "Aptitude tests aren't IQ tests. They're learnable skills. Here's how to improve your score fast.",
+      content: `
+# Why Most Students Fail Aptitude Tests (And How to Stop Being One of Them)
+
+You studied hard. You know your subject. And then the aptitude test happened.
+
+Time ran out. Calculations didn't work. Questions that looked simple somehow took forever.
+
+You're not alone — and more importantly, this is not about intelligence.
+
+Aptitude tests are a specific kind of exam that rewards a specific kind of preparation. And most students prepare for them the wrong way.
+
+## Why You're Probably Approaching This Wrong
+
+**You study the solutions instead of the patterns.**
+Looking up how to solve a specific problem teaches you that problem. What you need is to internalize the *pattern* behind a class of problems.
+
+**You practice without pressure.**
+Aptitude tests are 50% time management. If you practice without timing yourself, you're training for the wrong exam.
+
+**You skip mental math.**
+Speed in aptitude comes from reducing calculator dependency. If you can't quickly multiply two-digit numbers, find percentages without paper, or estimate answers, you'll run out of time.
+
+**You don't analyze your mistakes.**
+Most students see a wrong answer, check the solution, and move on. The right approach: understand *why* you got it wrong. What assumption did you make? Where did your logic break?
+
+## The Fast-Track Improvement Plan
+
+**Week 1: Foundation**
+- Brush up on fractions, percentages, ratios, time & distance basics
+- Do 20 mental math exercises daily (without a calculator)
+
+**Week 2: Pattern Recognition**
+- Solve 10 problems per topic, then review similar problems together
+- Identify which 3 topics you're weakest at. Focus 80% of effort there.
+
+**Week 3: Timed Practice**
+- Do full-length tests under real conditions (no breaks, strict timing)
+- Review every wrong answer with root-cause analysis
+
+**Week 4: Consolidation**
+- Simulate actual test environments: early morning, timed, no phone
+- Practice elimination strategy — ruling out 2 wrong answers is faster than finding 1 right one
+
+## The Mindset Shift
+
+Aptitude tests don't measure your worth. They measure your ability to perform under a specific kind of pressure.
+
+That's a skill. And like every skill, it improves with deliberate practice.
+
+One month of focused preparation can take you from 50th percentile to 85th.
+
+---
+
+**UPSTRIDE covers aptitude preparation as part of our complete placement readiness program** — because clearing the first round is the price of entry.
+      `.trim(),
+    },
+    {
+      id: 21,
+      title: "The Power of Showing Up: Why Consistency Beats Talent in Your Career",
+      date: "March 23, 2025",
+      readTime: "3 min read",
+      category: "Career",
+      excerpt: "Talented people quit. Consistent people win. Here's the mindset that actually builds careers.",
+      content: `
+# The Power of Showing Up: Why Consistency Beats Talent in Your Career
+
+Let's be honest about something.
+
+You know people who are less talented than you. Worse at the technical stuff. Less "smart" by any metric you use.
+
+And they're doing better.
+
+It feels unfair. Until you understand the one thing they're doing that you're not.
+
+**They keep showing up.**
+
+## The Talent Trap
+
+Talented people often fall into the same trap:
+
+They start strong. They get praised. They expect things to come easily. And when something requires sustained effort without immediate feedback, they slow down — or stop.
+
+Talent is a fast start. It's not a finish line.
+
+The person who shows up every day — imperfect, unglamorous, unacknowledged — is playing a different game. A longer game. A game they usually win.
+
+## What Consistency Actually Looks Like
+
+It doesn't look impressive. That's the point.
+
+It's applying for one job every day when nothing seems to be working.
+It's practicing one interview answer before bed even when you're tired.
+It's posting one thing on LinkedIn every week when nobody's reading.
+It's reaching out to one person every week even when you're scared of rejection.
+
+None of these feel significant in the moment. Cumulatively, they become *everything*.
+
+## The Compound Effect in Your Career
+
+A 1% improvement every day for a year results in being 37 times better by year's end.
+
+A 1% drop every day? You're down to nearly zero.
+
+This is what consistency does. It's not flashy. But it's the closest thing to a guaranteed outcome that exists in career-building.
+
+## How to Build Consistency When Motivation Runs Out
+
+Motivation is unreliable. Systems are not.
+
+Pick one specific action for each goal. Make it small enough to do on your worst day. Then do it — even on your worst day.
+
+The days you do it without wanting to are the days it actually counts.
+
+---
+
+**UPSTRIDE gives you the structure, accountability, and support to stay consistent** — because showing up every day is easier when you're not doing it alone.
+      `.trim(),
+    },
+    {
+      id: 22,
+      title: "How to Handle Rejection During Placements Without Losing Your Confidence",
+      date: "March 25, 2025",
+      readTime: "4 min read",
+      category: "Mindset",
+      excerpt: "Rejection during placements is inevitable. How you respond to it determines everything that comes next.",
+      content: `
+# How to Handle Rejection During Placements Without Losing Your Confidence
+
+The email came.
+
+"After careful consideration, we have decided to move forward with other candidates."
+
+Maybe it's the third one this month. Maybe you were *sure* about this one.
+
+And now you're sitting there wondering what's wrong with you.
+
+Nothing is wrong with you. But the way you respond to this moment will either accelerate your career — or stall it.
+
+## The Truth About Rejection
+
+Every person you respect in your field was rejected. Extensively.
+
+The founder who raised a ₹100 crore round was rejected by 40 investors first. The marketing head who built a beloved brand was turned down by the company three times before they finally said yes.
+
+Rejection is not a verdict on your worth. It's *data*.
+
+And data, used correctly, makes you better.
+
+## Processing It Right
+
+**Let yourself feel it for 24 hours.**
+Don't suppress it. Don't spiral. Give yourself one day to be disappointed. Then close that chapter.
+
+**Then analyze, not ruminate.**
+Ruminating is replaying what happened. Analyzing is asking: *What can I change?*
+
+- Was it the resume stage? → Fix the resume.
+- Was it the aptitude test? → Prepare differently.
+- Was it the interview? → What specific moment felt shaky?
+- Was it the final round? → What would you say differently?
+
+**Ask for feedback when you can.**
+Many recruiters will give brief feedback if asked respectfully. "I'd be grateful to understand one area where I could improve" is a question worth sending.
+
+## The Reframe That Changes Everything
+
+Rejection from the wrong opportunity is *protection*.
+
+The job that didn't hire you might have been a culture mismatch, a toxic manager, a team that would have frustrated you. You don't know.
+
+What you're building toward is not any job. It's the *right* job. And sometimes rejection is simply the universe redirecting you toward something better.
+
+That's not spiritual bypass — it's pattern recognition. Most people, looking back, are grateful for the rejections that seemed devastating at the time.
+
+## The Practical Next Step
+
+After every rejection: write down one thing you'll do differently.
+
+One thing. Not five. One.
+
+Then do it before the next application. And keep going.
+
+---
+
+**UPSTRIDE walks with you through the full placement journey** — including the hard days. Because those days are part of the journey too.
+      `.trim(),
+    },
+    {
+      id: 23,
+      title: "How to Build a Personal Brand as a Student (Before You Even Have a Job)",
+      date: "March 27, 2025",
+      readTime: "4 min read",
+      category: "Career",
+      excerpt: "You don't need a title or a company to have a personal brand. You just need to start.",
+      content: `
+# How to Build a Personal Brand as a Student (Before You Even Have a Job)
+
+Most students think personal branding is something you do after you've achieved something.
+
+After you get the job. After you get promoted. After you have something worth saying.
+
+But that's exactly backwards.
+
+**Your brand is what people say about you when you're not in the room.** And it's being built right now — whether you're shaping it or not.
+
+## Why This Matters More Than You Think
+
+When a recruiter considers two equally qualified candidates, they Google both of them.
+
+Candidate A: A sparse LinkedIn profile, no posts, nothing notable.
+Candidate B: A LinkedIn with thoughtful posts, a side project documented publicly, a clear perspective on their field.
+
+Candidate B gets the call. Not because they're more qualified — but because they feel *more real*, more credible, more prepared.
+
+## The Student Advantage
+
+Here's what nobody tells you: being a student is actually a *brand asset*.
+
+You have time to experiment. Permission to be learning publicly. An origin story that's still being written.
+
+The audience doesn't expect perfection from a student. They expect authenticity.
+
+That's the lowest bar you'll ever have to clear. Use it.
+
+## What to Actually Do
+
+**Step 1: Pick one platform.**
+Don't try to be everywhere. Pick LinkedIn if you want a corporate career. Pick Twitter/X if you want to build in public. Pick YouTube if you want to teach.
+
+**Step 2: Pick one niche.**
+Not "marketing" — but "B2B SaaS marketing for early-stage startups." Not "finance" — but "personal finance for Indian students."
+
+Specificity builds audiences. Generality doesn't.
+
+**Step 3: Share your learning, not just your wins.**
+"I just realized I've been doing X wrong for years" gets more engagement than "I won an award."
+
+Process content beats achievement content. Always.
+
+**Step 4: Be consistent for 90 days.**
+Not daily. Sustainable. Two posts a week. Every week. For 90 days.
+
+At the end of 90 days, you'll have a body of work that shows up in Google, that gives recruiters something to hold onto, that makes you someone rather than anyone.
+
+## The Long Game
+
+Your personal brand compounds like interest.
+
+The post you write today will be read by someone six months from now when they're looking to hire exactly who you are.
+
+Start now. The best time was yesterday. The second best time is today.
+
+---
+
+**UPSTRIDE helps you define your story and build your professional presence** — because in this market, visibility is leverage.
+      `.trim(),
+    },
+    {
+      id: 24,
+      title: "The Mindset Shift That Separates Placed Students from Those Still Waiting",
+      date: "March 28, 2025",
+      readTime: "5 min read",
+      category: "Mindset",
+      excerpt: "It's not skills. It's not luck. The students who get placed think differently. Here's how.",
+      content: `
+# The Mindset Shift That Separates Placed Students from Those Still Waiting
+
+Two students. Same degree. Same city. Same market.
+
+One has an offer. The other is still applying.
+
+From the outside, it looks like luck. Or connections. Or the right college.
+
+But spend time with both of them, and you see it immediately: **they think differently.**
+
+## The Waiting Mindset vs. The Acting Mindset
+
+**The waiting mindset says:**
+- "The market is bad right now."
+- "I'll apply once my skills are stronger."
+- "I'm waiting to hear back from that one company."
+- "Nobody's responded, so I must not be good enough."
+
+**The acting mindset says:**
+- "The market is what it is. What can I do differently?"
+- "I'll build skills while I apply."
+- "I'm running 10 parallel conversations."
+- "Nobody's responded yet. What do I need to change?"
+
+Same situation. Entirely different response. Entirely different outcome.
+
+## The Scarcity vs. Abundance Frame
+
+The waiting student treats every opportunity like it might be the last one.
+
+They over-prepare for a single application. They're devastated by a single rejection. They're afraid to follow up in case it "looks desperate."
+
+The placed student treats the job market like a funnel.
+
+They know: most conversations won't convert. So they keep the top of the funnel full. They apply wide, follow up always, and detach from individual outcomes while staying committed to the overall goal.
+
+## The "I'm Not Ready" Lie
+
+The most common reason students don't act is that they don't feel ready.
+
+Here's the problem: you never feel ready.
+
+The feeling of readiness comes *after* action — not before. You feel ready by doing the thing, not by preparing indefinitely for the thing.
+
+The placed student applied to 30 companies before they felt ready. By the time the right interview came, they *were* ready — because they'd practiced on the first 29.
+
+## The Accountability Difference
+
+Here's the one that hurts:
+
+The placed student usually had someone holding them accountable. A mentor. A community. A program. Someone who asked them every week: *"What did you do this week? What do you do next week?"*
+
+The struggling student went through the process alone.
+
+This is not a character flaw. It's just human. We all do more when someone is watching — not because we're being judged, but because accountability makes intentions into habits.
+
+## The Shift Is a Decision
+
+You don't need to feel differently to act differently.
+
+Act as if you're the candidate who gets hired. Make the calls. Send the emails. Show up. Follow up.
+
+The mindset follows the action. Not the other way around.
+
+---
+
+**UPSTRIDE was built for this exact mindset shift.** We give you the structure, the accountability, and the belief that you're someone worth betting on — because you are.
+      `.trim(),
+    },
   ];
 
   // Find the current blog post if id is provided
@@ -938,7 +2269,8 @@ And sometimes, that direction is all you're really looking for.
               <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
               <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
             </div>
-            <div className="flex gap-4">
+            {/* Desktop Nav */}
+            <div className="hidden md:flex gap-4">
               <Button variant="ghost" onClick={() => navigate("/")}>
                 Home
               </Button>
@@ -952,7 +2284,26 @@ And sometimes, that direction is all you're really looking for.
                 Portal
               </Button>
             </div>
+            {/* Mobile Hamburger */}
+            <button
+              className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </nav>
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-sm">
+              <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
+                <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>Home</Button>
+                <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/programs"); setMobileMenuOpen(false); }}>Programs</Button>
+                <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/blogs"); setMobileMenuOpen(false); }}>Blogs</Button>
+                <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>Portal</Button>
+              </div>
+            </div>
+          )}
         </header>
 
         {/* Blog Detail Content */}
@@ -1130,7 +2481,8 @@ And sometimes, that direction is all you're really looking for.
             <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
             <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
           </div>
-          <div className="flex gap-4">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex gap-4">
             <Button variant="ghost" onClick={() => navigate("/")}>
               Home
             </Button>
@@ -1141,7 +2493,25 @@ And sometimes, that direction is all you're really looking for.
               Portal
             </Button>
           </div>
+          {/* Mobile Hamburger */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </nav>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>Home</Button>
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/programs"); setMobileMenuOpen(false); }}>Programs</Button>
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>Portal</Button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}

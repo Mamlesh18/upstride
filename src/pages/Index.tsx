@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { GraduationCap, Users, Award, TrendingUp, Heart, Clock, Mail, Star, ChevronLeft, ChevronRight, Briefcase, UserCheck, Building2, Shield } from "lucide-react";
+import { GraduationCap, Users, Award, TrendingUp, Heart, Clock, Mail, Star, ChevronLeft, ChevronRight, Briefcase, UserCheck, Building2, Shield, Menu, X } from "lucide-react";
 import SocialProof from "@/components/SocialProof";
 
 const Index = () => {
   const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const testimonials = [
     {
@@ -80,13 +81,14 @@ const Index = () => {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20 overflow-visible">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center overflow-visible">
+      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
+        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
             <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
             <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
           </div>
-          <div className="flex gap-4 items-center">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex gap-4 items-center">
             <Button variant="ghost" onClick={() => scrollToSection("home")}>
               Home
             </Button>
@@ -100,7 +102,34 @@ const Index = () => {
               Portal
             </Button>
           </div>
+          {/* Mobile Hamburger */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </nav>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { scrollToSection("home"); setMobileMenuOpen(false); }}>
+                Home
+              </Button>
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/programs"); setMobileMenuOpen(false); }}>
+                Programs
+              </Button>
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/blogs"); setMobileMenuOpen(false); }}>
+                Blogs
+              </Button>
+              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>
+                Portal
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -135,11 +164,11 @@ const Index = () => {
               Welcome to Learning Excellence
             </span>
           </div>
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-foreground tracking-tight">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-foreground tracking-tight">
             UPSTRIDE
           </h1>
           <p className="text-2xl md:text-4xl text-foreground/80 font-medium mb-4 tracking-tight">
-            We are not selling course, we are selling experience
+            We don't sell courses. We sell experience.
           </p>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto font-normal">
             Connecting the gap between students and industry via an experience driven approach to make your career easier
@@ -194,7 +223,7 @@ const Index = () => {
           {/* Recognition Partners */}
           <div className="space-y-4">
             <h3 className="text-2xl md:text-3xl font-black text-center mb-8">Recognition & Partnerships</h3>
-            <div className="grid md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
               {/* Clutch Recognition */}
               <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
                 <Award className="w-10 h-10 text-primary" />
@@ -257,6 +286,38 @@ const Index = () => {
                   />
                 </div>
                 <p className="text-sm text-muted-foreground text-center">Kongunadu Arts and Science College</p>
+              </div>
+
+              {/* SRM-AP Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">SRM-AP Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/srm-ap.png"
+                    alt="SRM University AP Recognition"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">SRM University, Andhra Pradesh</p>
+              </div>
+
+              {/* NBKRIST Recognition */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
+                <Award className="w-10 h-10 text-primary" />
+                <h4 className="text-lg font-bold text-foreground text-center">NBKRIST Recognized</h4>
+                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
+                  <img
+                    src="/NBKRIST_logo.png"
+                    alt="NBKRIST Recognition"
+                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">NBK R Institute of Science & Technology</p>
               </div>
             </div>
           </div>
