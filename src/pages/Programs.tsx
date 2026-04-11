@@ -1,50 +1,146 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Rocket, Phone, Menu, X, Shield, Star, Users, Compass, Layers, Zap, Eye, MessageSquare } from "lucide-react";
-import SocialProof from "@/components/SocialProof";
+import { ArrowLeft, Phone, Menu, X, CheckCircle, Star, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const weeks = [
+// ─── Theme ────────────────────────────────────────────────────────────────────
+const Y    = "#FFE500";
+const B    = "#0A0A0A";
+const W    = "#FFFFFF";
+const BG   = "#FAFAFA";
+const BORD = "#E5E5E5";
+const MUTE = "#6B7280";
+
+const BEBAS: React.CSSProperties = { fontFamily: "'Bebas Neue', cursive" };
+const MONO: React.CSSProperties  = { fontFamily: "'IBM Plex Mono', monospace" };
+
+// ─── Roadmap Data — 8 weeks / 2 months ───────────────────────────────────────
+const roadmap = [
   {
-    num: 1,
-    phase: "Uncover",
-    desc: "Discover why most students don't get placed — and what you'll do differently from day one",
-    icon: Compass,
+    week: "WEEK 1",
+    title: "REALITY CHECK",
+    why: "Most students don't know what they're actually competing against. Before you can win, you need to see the board clearly.",
+    what: [
+      "What companies actually look for vs. what colleges teach",
+      "Why 90% of applications never get opened",
+      "Your honest skill gap — no sugarcoating",
+      "Defining your lane: Tech / Data / Business / Design",
+    ],
   },
   {
-    num: 2,
-    phase: "Blueprint",
-    desc: "Build a resume, strategy, and identity that actually reflects your true potential",
-    icon: Layers,
+    week: "WEEK 2",
+    title: "BUILD YOUR IDENTITY",
+    why: "Your resume, LinkedIn, and GitHub are your silent salespeople. Right now, they're probably saying the wrong things.",
+    what: [
+      "Resume built for ATS — 80+ score guaranteed",
+      "LinkedIn profile overhauled from top to bottom",
+      "GitHub README customized to your story",
+      "Personal brand positioning across every platform",
+    ],
   },
   {
-    num: 3,
-    phase: "Amplify",
-    desc: "Create projects and a LinkedIn presence that makes recruiters reach out to you",
-    icon: Zap,
+    week: "WEEK 3",
+    title: "PROJECTS THAT PROVE YOU",
+    why: "A degree tells them you completed a syllabus. A project tells them you can build something real. One matters more.",
+    what: [
+      "Selecting the right project for your target role",
+      "How to present a project so it impresses in 10 seconds",
+      "Custom portfolio site built and deployed",
+      "GitHub contributions that show consistent activity",
+    ],
   },
   {
-    num: 4,
-    phase: "Insider Edge",
-    desc: "Learn what HR really thinks and wants — straight from people inside the industry",
-    icon: Eye,
+    week: "WEEK 4",
+    title: "THE OUTREACH SYSTEM",
+    why: "Jobs are not found — they're reached for. 80% of roles are filled before they're posted. You need to be in rooms where the hiring happens.",
+    what: [
+      "Cold email templates that get replies from HR",
+      "LinkedIn messaging strategy (the ones that actually work)",
+      "How to reach decision-makers directly",
+      "Building a referral pipeline from scratch",
+    ],
   },
   {
-    num: 5,
-    phase: "Win the Room",
-    desc: "Master every interview format and answer any question with confidence and clarity",
-    icon: MessageSquare,
+    week: "WEEK 5",
+    title: "CRACK THE INTERVIEW",
+    why: "Preparation without structure leads to blanking out. Structure turns every round — HR, technical, managerial — into a conversation you control.",
+    what: [
+      "HR round: Tell me about yourself, that actually lands",
+      "Technical: DSA patterns + company-specific prep",
+      "Behavioural: STAR method for every scenario",
+      "3 mock interviews with real feedback",
+    ],
   },
   {
-    num: 6,
-    phase: "Launch",
-    desc: "Walk out with offers, a powerful network, and unstoppable career momentum",
-    icon: Rocket,
+    week: "WEEK 6",
+    title: "NEGOTIATE & CLOSE",
+    why: "Getting an offer is step one. Knowing what you're worth — and asking for it — is the step most students skip and regret.",
+    what: [
+      "Salary negotiation — how to do it without losing the offer",
+      "Evaluating an offer: base, growth, culture, optionality",
+      "Counter-offer scripts that work",
+      "Setting up your first 90-day success plan",
+    ],
+  },
+  {
+    week: "WEEK 7",
+    title: "PLACEMENT BLITZ",
+    why: "After 6 weeks of prep, you need volume with precision — not mass applying, but strategic targeting of companies that fit you.",
+    what: [
+      "Company-specific prep (TCS, Infosys, Wipro, Accenture, HCL, Cognizant)",
+      "Product company strategy (Zepto, Swiggy, Zomato, Paytm)",
+      "Tier-1 applications (Google, Deloitte, EY) — what actually works",
+      "Application tracking + follow-up cadence",
+    ],
+  },
+  {
+    week: "WEEK 8",
+    title: "LAUNCH & MOMENTUM",
+    why: "The goal isn't just an offer — it's momentum. You need systems that keep working for you even after the program ends.",
+    what: [
+      "Offer received: what to do in the first 30 days",
+      "Building your network so opportunities come to you",
+      "Long-term career roadmap — where to go from here",
+      "Lifetime access to the Upstride portal and community",
+    ],
   },
 ];
 
+const portalHighlights = [
+  "500+ cold email templates for every company type",
+  "LinkedIn message scripts that get 40%+ reply rates",
+  "Resume templates for 12 different roles",
+  "Career roadmaps for Tech, Data, Business & Design",
+  "Projects you should build — with guidance",
+  "Open source contribution guide (first PR in 3 days)",
+  "Interview question banks for 17 top companies",
+  "Placement resources: TCS, Infosys, HCL, Wipro, Accenture, Cognizant, Zoho, EY, Deloitte, Capgemini, Swiggy, Zepto, Zomato, Paytm",
+];
+
+const guarantees = [
+  {
+    title: "80+ ATS Resume",
+    desc: "We build your resume from scratch, tested against ATS systems. 80+ score guaranteed — or we rebuild it.",
+    tag: "GUARANTEED",
+  },
+  {
+    title: "Custom Portfolio, Deployed",
+    desc: "A portfolio that's actually yours, live on the internet. Not a template. Built around your story and your projects.",
+    tag: "DELIVERED",
+  },
+  {
+    title: "LinkedIn Full Overhaul",
+    desc: "We rewrite every section — headline, about, experience, skills. The kind of profile that makes recruiters reach out to you.",
+    tag: "DELIVERED",
+  },
+  {
+    title: "GitHub README Template",
+    desc: "A customized GitHub profile README that shows you're serious before anyone reads a single line of your code.",
+    tag: "DELIVERED",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 const Programs = () => {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -53,331 +149,300 @@ const Programs = () => {
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid 10-digit phone number",
-        variant: "destructive",
-      });
+    if (!/^[0-9]{10}$/.test(phoneNumber)) {
+      toast({ title: "Invalid number", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      const now = new Date();
-      const dateTime = now.toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-        dateStyle: "full",
-        timeStyle: "long",
-      });
-
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const dateTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "long" });
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: "f4edb229-9419-4f5c-a18f-8f67c1ec3082",
-          subject: "🔥 New Call Request - UPSTRIDE Career Launchpad",
+          subject: "🔥 New Call Request - UPSTRIDE Programs Page",
           from_name: "UPSTRIDE Website",
           to: "mamlesh.va06@gmail.com",
           phone: phoneNumber,
-          name: "Career Launchpad Inquiry",
-          message: `
-📞 NEW CALL REQUEST FROM UPSTRIDE WEBSITE
-
-Phone Number: ${phoneNumber}
-Date & Time: ${dateTime}
-Source Page: Programs Page (The Career Launchpad)
-Program Interest: The Career Launchpad — 6-Week Program
-
----
-ACTION REQUIRED: Call this number within 24 hours as promised on the website.
-
-Browser Info: ${navigator.userAgent}
-          `.trim(),
+          message: `📞 NEW CALL REQUEST\nPhone: ${phoneNumber}\nDate: ${dateTime}\nSource: Programs Page`,
         }),
       });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({
-          title: "You're on the list!",
-          description: "Our founder will call you personally within 24 hours.",
-        });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "You're on the list!", description: "Mamlesh will call you personally within 24 hours." });
         setPhoneNumber("");
-      } else {
-        throw new Error("Submission failed");
-      }
+      } else throw new Error();
     } catch {
-      toast({
-        title: "Submission Failed",
-        description: "Please try again or reach us at upstride.in@gmail.com",
-        variant: "destructive",
-      });
+      toast({ title: "Failed", description: "Please try again or email mamlesh@upstrides.in", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <SocialProof />
+    <div style={{ minHeight: "100vh", backgroundColor: BG, ...MONO }}>
 
-      {/* Decorative Color Element */}
-      <div className="fixed top-4 right-4 z-50 pointer-events-none">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 opacity-80 blur-xl animate-pulse" />
-        <div className="absolute top-0 right-0 w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-primary opacity-60 blur-lg animate-float" />
-      </div>
-
-      {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate("/")}
-          >
-            <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: Y, borderBottom: `4px solid ${B}` }}>
+        <nav style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "stretch" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 0", cursor: "pointer" }} onClick={() => navigate("/")}>
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "32px", objectFit: "contain" }} />
+            <span style={{ ...BEBAS, fontSize: "24px", letterSpacing: "0.1em", color: B }}>UPSTRIDE</span>
           </div>
-          <div className="hidden md:flex gap-4">
-            <Button variant="ghost" onClick={() => navigate("/")}>Home</Button>
-            <Button variant="ghost" onClick={() => navigate("/login")}>Portal</Button>
+          <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
+            {[
+              { label: "← HOME", action: () => navigate("/") },
+              { label: "PORTAL →", action: () => navigate("/login"), highlight: true },
+            ].map(({ label, action, highlight }) => (
+              <button key={label} onClick={action}
+                style={{ padding: "14px 24px", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, backgroundColor: highlight ? B : "transparent", color: highlight ? Y : B, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.backgroundColor = highlight ? W : B; el.style.color = B; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.backgroundColor = highlight ? B : "transparent"; el.style.color = highlight ? Y : B; }}
+              >{label}</button>
+            ))}
           </div>
-          <button
-            className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <button className="md:hidden" style={{ padding: "12px 16px", background: "transparent", border: "none", borderLeft: `3px solid ${B}`, cursor: "pointer" }} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={22} color={B} /> : <Menu size={22} color={B} />}
           </button>
         </nav>
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-sm">
-            <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>Home</Button>
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>Portal</Button>
-            </div>
+          <div style={{ borderTop: `3px solid ${B}` }}>
+            <button onClick={() => navigate("/")} style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", borderBottom: `2px solid ${B}`, background: "transparent", cursor: "pointer", ...MONO }}>← HOME</button>
+            <button onClick={() => navigate("/login")} style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", backgroundColor: B, color: Y, cursor: "pointer", ...MONO }}>PORTAL →</button>
           </div>
         )}
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pt-28 pb-20 relative">
-        {/* Background Orbs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
-          <div className="absolute top-10 right-0 w-[480px] h-[480px] bg-gradient-to-br from-primary/25 via-purple-500/20 to-pink-500/25 rounded-full blur-3xl animate-move-left-right" />
-          <div className="absolute top-1/3 right-20 w-[400px] h-[400px] bg-gradient-to-br from-cyan-400/20 via-blue-500/25 to-primary/20 rounded-full blur-3xl animate-move-diagonal-1" style={{ animationDelay: "2s" }} />
-          <div className="absolute bottom-0 right-1/4 w-[420px] h-[420px] bg-gradient-to-tl from-purple-500/20 via-pink-400/20 to-primary/25 rounded-full blur-3xl animate-move-up-down" style={{ animationDelay: "4s" }} />
-          <div className="absolute top-2/3 -left-20 w-[360px] h-[360px] bg-gradient-to-br from-pink-400/25 via-blue-400/20 to-cyan-400/25 rounded-full blur-3xl animate-move-right-left" style={{ animationDelay: "1s" }} />
-        </div>
-
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-10 hover:translate-x-[-4px] transition-transform"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-
-        {/* ── HERO ─────────────────────────────────────────────── */}
-        <div className="text-center mb-24 animate-fade-in">
-          <div className="mb-5 inline-flex items-center gap-2">
-            <span className="bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-semibold border border-primary/20 tracking-wide uppercase">
-              UPSTRIDE presents
-            </span>
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <section style={{ paddingTop: "80px", backgroundColor: W, borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 24px 60px" }}>
+          <div style={{ display: "inline-block", backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px" }}>
+            UPSTRIDE PRESENTS
           </div>
-
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none mb-4">
-            <span className="text-foreground">The Career</span>
-            <br />
-            <span
-              className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent animate-text-gradient"
-            >
-              Launchpad
-            </span>
+          <h1 style={{ ...BEBAS, fontSize: "clamp(60px, 12vw, 140px)", lineHeight: 0.88, color: B, marginBottom: "20px" }}>
+            THE CAREER<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>LAUNCHPAD</span>
           </h1>
-
-          <p className="text-xl md:text-2xl font-bold text-foreground/60 mb-6 tracking-tight">
-            6 Weeks. One Transformation. Unlimited Future.
+          <p style={{ fontSize: "20px", fontWeight: 700, color: B, marginBottom: "12px", letterSpacing: "-0.01em" }}>
+            2 Months. 8 Sessions. One complete transformation.
+          </p>
+          <p style={{ fontSize: "15px", color: MUTE, maxWidth: "600px", lineHeight: 1.8, marginBottom: "36px" }}>
+            Six weeks from now, you could be fielding interview calls instead of sending applications into silence. 250+ students have done this before you. Now it's your turn.
           </p>
 
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Just imagine — 6 weeks from now, you could have your first offer in hand.
-            Not by luck. By design. By doing exactly what we've helped 250+ students do before you.
-          </p>
+          {/* Phone CTA */}
+          <div style={{ backgroundColor: Y, border: `3px solid ${B}`, boxShadow: `5px 5px 0 ${B}`, padding: "28px 32px", maxWidth: "560px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              <Phone size={18} color={B} />
+              <span style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.12em" }}>MAMLESH WILL CALL YOU PERSONALLY</span>
+            </div>
+            <p style={{ fontSize: "13px", color: `${B}bb`, lineHeight: 1.6, marginBottom: "18px" }}>
+              You're not just a lead — you're somebody, and you matter to Upstride. Drop your number and Mamlesh calls you himself. No scripts. No sales pitch. Just an honest conversation about your next move.
+            </p>
+            <form onSubmit={handlePhoneSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <input
+                type="tel"
+                placeholder="Your 10-digit number"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                disabled={isSubmitting}
+                style={{ flex: 1, minWidth: "180px", padding: "13px 16px", border: `2px solid ${B}`, backgroundColor: W, fontSize: "14px", ...MONO, outline: "none", color: B }}
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting || phoneNumber.length !== 10}
+                style={{ padding: "13px 24px", backgroundColor: B, color: Y, border: `2px solid ${B}`, fontWeight: 700, fontSize: "13px", letterSpacing: "0.1em", ...MONO, cursor: phoneNumber.length === 10 && !isSubmitting ? "pointer" : "not-allowed", opacity: phoneNumber.length === 10 && !isSubmitting ? 1 : 0.6, transition: "all 0.15s" }}
+              >
+                {isSubmitting ? "SENDING..." : "GET MY CALL →"}
+              </button>
+            </form>
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginTop: "12px" }}>
+              {["Founder calls personally", "Zero spam", "Within 24 hours"].map(t => (
+                <span key={t} style={{ fontSize: "11px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span style={{ color: B, fontWeight: 700 }}>✓</span> {t}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* ── 6-WEEK JOURNEY ───────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto mb-28">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-black text-foreground mb-3">
-              What happens in those 6 weeks?
+      {/* ── ROADMAP ───────────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: BG, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "60px" }}>
+            <div style={{ display: "inline-block", backgroundColor: B, color: Y, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "20px" }}>THE 2-MONTH MAP</div>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 7vw, 80px)", color: B, lineHeight: 0.9, marginBottom: "16px" }}>
+              WHAT HAPPENS<br /><span style={{ color: Y, WebkitTextStroke: `2px ${B}` }}>EACH SESSION</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Six phases. Each one carefully engineered to take you closer to your first offer.
+            <p style={{ fontSize: "14px", color: MUTE, maxWidth: "480px", margin: "0 auto", lineHeight: 1.7 }}>
+              Every session exists for a specific reason. Nothing is filler. Everything builds toward one outcome: your first offer.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {weeks.map((week) => (
+          {/* Vertical roadmap */}
+          <div style={{ position: "relative" }}>
+            {/* Spine line */}
+            <div style={{ position: "absolute", left: "28px", top: "40px", bottom: "40px", width: "4px", backgroundColor: Y, border: `2px solid ${B}` }} className="hidden md:block" />
+
+            {roadmap.map((session, i) => (
               <div
-                key={week.num}
-                className="group relative bg-background border border-border rounded-2xl p-6 hover:border-primary/50 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-default overflow-hidden animate-reveal-up"
-                style={{ animationDelay: `${(week.num - 1) * 100}ms` }}
+                key={i}
+                style={{ display: "flex", gap: "32px", marginBottom: "24px", alignItems: "flex-start" }}
               >
-                {/* Hover bg glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-purple-500/0 to-pink-500/0 group-hover:from-primary/5 group-hover:via-purple-500/5 group-hover:to-pink-500/5 transition-all duration-500 rounded-2xl" />
-
-                <div className="relative">
-                  {/* Week number + icon row */}
-                  <div className="flex items-start justify-between mb-4">
-                    <span
-                      className="text-6xl font-black leading-none text-primary/15 group-hover:text-primary/30 transition-colors duration-300 animate-number-pop"
-                      style={{ animationDelay: `${(week.num - 1) * 100 + 200}ms` }}
-                    >
-                      {String(week.num).padStart(2, "0")}
-                    </span>
-                    <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300 mt-1">
-                      <week.icon className="w-5 h-5 text-primary" />
-                    </div>
+                {/* Node */}
+                <div className="hidden md:flex" style={{ flexShrink: 0, width: "60px", flexDirection: "column", alignItems: "center", paddingTop: "16px" }}>
+                  <div style={{ width: "28px", height: "28px", backgroundColor: i % 2 === 0 ? Y : B, border: `3px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, position: "relative" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: i % 2 === 0 ? B : Y }}>{i + 1}</span>
                   </div>
-
-                  <h3 className="text-xl font-black text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
-                    {week.phase}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {week.desc}
-                  </p>
                 </div>
 
-                {/* Bottom accent line */}
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-purple-500 to-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-b-2xl" />
+                {/* Card */}
+                <div
+                  style={{ flex: 1, backgroundColor: W, border: `2px solid ${B}`, boxShadow: `4px 4px 0 ${B}`, padding: "24px 28px", transition: "all 0.15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-2px,-2px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `6px 6px 0 ${B}`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `4px 4px 0 ${B}`; }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+                    <span style={{ backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "3px 10px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em" }}>{session.week}</span>
+                    <h3 style={{ ...BEBAS, fontSize: "28px", color: B, lineHeight: 1 }}>{session.title}</h3>
+                  </div>
+
+                  {/* Why it exists */}
+                  <p style={{ fontSize: "13px", color: MUTE, lineHeight: 1.7, marginBottom: "14px", borderLeft: `3px solid ${Y}`, paddingLeft: "12px", fontStyle: "italic" }}>
+                    {session.why}
+                  </p>
+
+                  {/* What we cover */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }} className="grid-cols-1 sm:grid-cols-2">
+                    {session.what.map((item, j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                        <span style={{ color: B, fontSize: "12px", marginTop: "2px", flexShrink: 0 }}>▶</span>
+                        <span style={{ fontSize: "12px", color: B, lineHeight: 1.5 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <p className="text-center mt-10 text-muted-foreground italic text-base">
-            Each phase builds on the last — by week 6, you're not just ready, you're{" "}
-            <span className="text-primary font-bold not-italic">unstoppable.</span>
+      {/* ── PORTAL ACCESS ─────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: B, padding: "80px 24px", borderBottom: `4px solid ${Y}` }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "start" }} className="grid-cols-1 md:grid-cols-2">
+            <div>
+              <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "20px" }}>
+                WHAT YOU ALSO GET
+              </div>
+              <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 6vw, 72px)", color: W, lineHeight: 0.9, marginBottom: "20px" }}>
+                ACCESS TO THE<br /><span style={{ color: Y }}>PORTAL</span><br />500+ RESOURCES
+              </h2>
+              <p style={{ fontSize: "14px", color: `${W}99`, lineHeight: 1.8 }}>
+                Every student in the program gets full portal access. This isn't a bonus — it's a career library built from years of helping students land real roles at real companies.
+              </p>
+            </div>
+
+            <div>
+              {portalHighlights.map((item, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px 0", borderBottom: `1px solid ${W}18` }}>
+                  <CheckCircle size={16} color={Y} style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <span style={{ fontSize: "13px", color: `${W}dd`, lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHAT NO OTHER EDTECH DOES ─────────────────────────────────────── */}
+      <section style={{ backgroundColor: Y, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "48px" }}>
+            <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "20px" }}>
+              SOMETHING NO OTHER EDTECH DOES
+            </div>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 6vw, 72px)", color: B, lineHeight: 0.9, marginBottom: "16px" }}>
+              WE DON'T JUST TEACH.<br />WE BUILD IT <span style={{ WebkitTextStroke: `2px ${B}`, color: Y }}>FOR YOU.</span>
+            </h2>
+            <p style={{ fontSize: "14px", color: `${B}99`, maxWidth: "520px", margin: "0 auto", lineHeight: 1.8 }}>
+              Most programs give you information. We give you deliverables — actual assets you can use in your next application tomorrow.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
+            {guarantees.map((g, i) => (
+              <div
+                key={i}
+                style={{ backgroundColor: W, border: `3px solid ${B}`, boxShadow: `5px 5px 0 ${B}`, padding: "28px", transition: "all 0.15s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `8px 8px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = B; (e.currentTarget as HTMLDivElement).style.color = W; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `5px 5px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = W; (e.currentTarget as HTMLDivElement).style.color = B; }}
+              >
+                <div style={{ backgroundColor: Y, border: `2px solid ${B}`, display: "inline-block", padding: "3px 10px", fontSize: "9px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "16px", color: B }}>
+                  {g.tag}
+                </div>
+                <h3 style={{ ...BEBAS, fontSize: "26px", color: "inherit", lineHeight: 1, marginBottom: "10px" }}>{g.title}</h3>
+                <p style={{ fontSize: "12px", color: "inherit", opacity: 0.75, lineHeight: 1.7 }}>{g.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: W, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px" }}>
+            <Star size={13} /> 250+ STUDENTS. 30+ OFFERS. ONE CONVERSATION.
+          </div>
+          <h2 style={{ ...BEBAS, fontSize: "clamp(44px, 8vw, 96px)", color: B, lineHeight: 0.88, marginBottom: "20px" }}>
+            ONE CALL CAN<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>CHANGE</span><br />EVERYTHING.
+          </h2>
+          <p style={{ fontSize: "15px", color: MUTE, lineHeight: 1.8, marginBottom: "40px", maxWidth: "520px", margin: "0 auto 40px" }}>
+            Drop your number. Mamlesh will call you personally — no scripts, no pressure, no sales pitch. Just a real conversation about where you are and what the next 8 weeks could look like for you.
           </p>
-        </div>
 
-        {/* ── THE CTA ───────────────────────────────────────────── */}
-        <div className="max-w-3xl mx-auto mb-20">
-          {/* Glowing wrapper */}
-          <div className="relative group animate-glow-pulse rounded-3xl">
-            {/* Animated blur glow behind the card */}
-            <div
-              className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 animate-gradient"
-              style={{ backgroundSize: "200% 200%" }}
-            />
-
-            <div className="relative bg-background border-2 border-primary/20 rounded-3xl p-8 md:p-12">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-semibold border border-primary/20 mb-6">
-                  <Phone className="w-4 h-4" />
-                  Our founder calls you personally
-                </div>
-
-                <h2 className="text-3xl md:text-5xl font-black text-foreground mb-4 leading-tight">
-                  One conversation can
-                  <br />
-                  <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent animate-text-gradient">
-                    change everything.
-                  </span>
-                </h2>
-
-                <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                  Drop your number below. Our founder will call you personally —
-                  no scripts, no pressure, no sales pitch. Just an honest conversation
-                  about where you are and how 6 weeks can completely transform your career.
-                </p>
-              </div>
-
-              <form onSubmit={handlePhoneSubmit} className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-                  <Input
-                    type="tel"
-                    placeholder="Your 10-digit phone number"
-                    value={phoneNumber}
-                    onChange={(e) =>
-                      setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))
-                    }
-                    className="flex-1 h-14 text-lg text-center sm:text-left border-primary/30 focus:border-primary"
-                    disabled={isSubmitting}
-                  />
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="h-14 bg-primary hover:bg-primary/90 text-white px-8 text-base font-bold shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
-                    disabled={isSubmitting || phoneNumber.length !== 10}
-                  >
-                    {isSubmitting ? "Sending..." : "Get My Call →"}
-                  </Button>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <span className="text-green-500 font-bold">✓</span> Founder calls personally
-                  </span>
-                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <span className="text-green-500 font-bold">✓</span> Zero spam, ever
-                  </span>
-                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <span className="text-green-500 font-bold">✓</span> Response within 24 hours
-                  </span>
-                </div>
-              </form>
+          <div style={{ backgroundColor: Y, border: `3px solid ${B}`, boxShadow: `5px 5px 0 ${B}`, padding: "32px", maxWidth: "500px", margin: "0 auto" }}>
+            <form onSubmit={handlePhoneSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "16px" }}>
+              <input
+                type="tel"
+                placeholder="Your 10-digit number"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                disabled={isSubmitting}
+                style={{ flex: 1, minWidth: "180px", padding: "14px 16px", border: `2px solid ${B}`, backgroundColor: W, fontSize: "15px", ...MONO, outline: "none", color: B }}
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting || phoneNumber.length !== 10}
+                style={{ padding: "14px 28px", backgroundColor: B, color: Y, border: `2px solid ${B}`, fontWeight: 700, fontSize: "13px", letterSpacing: "0.1em", ...MONO, cursor: phoneNumber.length === 10 && !isSubmitting ? "pointer" : "not-allowed", opacity: phoneNumber.length === 10 && !isSubmitting ? 1 : 0.6 }}
+              >
+                {isSubmitting ? "SENDING..." : "GET MY CALL →"}
+              </button>
+            </form>
+            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+              {["Founder calls personally", "Zero spam", "Within 24 hours"].map(t => (
+                <span key={t} style={{ fontSize: "11px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span style={{ fontWeight: 700, color: B }}>✓</span> {t}
+                </span>
+              ))}
             </div>
           </div>
         </div>
+      </section>
 
-        {/* ── TRUST BAR ────────────────────────────────────────── */}
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-secondary/30 rounded-2xl border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 animate-fade-in animate-stagger-1">
-              <Users className="w-8 h-8 text-primary mx-auto mb-3" />
-              <div className="text-4xl font-black text-foreground mb-1">250+</div>
-              <p className="text-sm text-muted-foreground font-medium">Students Trained</p>
-            </div>
-            <div className="text-center p-6 bg-secondary/30 rounded-2xl border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 animate-fade-in animate-stagger-2">
-              <Star className="w-8 h-8 text-primary mx-auto mb-3" />
-              <div className="text-4xl font-black text-foreground mb-1">30+</div>
-              <p className="text-sm text-muted-foreground font-medium">Offers After Training</p>
-            </div>
-            <div className="text-center p-6 bg-secondary/30 rounded-2xl border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 animate-fade-in animate-stagger-3">
-              <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
-              <div className="text-4xl font-black text-foreground mb-1">MSME</div>
-              <p className="text-sm text-muted-foreground font-medium">Government Certified</p>
-            </div>
+      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+      <footer style={{ backgroundColor: B, borderTop: `4px solid ${Y}`, padding: "40px 24px" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "28px", filter: "brightness(0) invert(1)" }} />
+            <span style={{ ...BEBAS, fontSize: "22px", color: W, letterSpacing: "0.1em" }}>UPSTRIDE</span>
           </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-secondary/30 border-t border-border mt-8">
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" />
-              <div>
-                <h3 className="text-lg font-bold text-foreground">UPSTRIDE</h3>
-                <p className="text-xs text-muted-foreground">Certified by MSME, Government of India</p>
-              </div>
-            </div>
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <a href="mailto:upstride.in@gmail.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                upstride.in@gmail.com
-              </a>
-              <p className="text-sm text-muted-foreground">© 2026 UPSTRIDE Learning. All rights reserved.</p>
-            </div>
+          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+            <a href="mailto:mamlesh@upstrides.in" style={{ ...MONO, fontSize: "12px", color: Y, textDecoration: "none" }}>mamlesh@upstrides.in</a>
+            <span style={{ ...MONO, fontSize: "12px", color: `${W}55` }}>© 2026 UPSTRIDE</span>
           </div>
         </div>
       </footer>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronUp, ArrowRight, Phone } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -123,12 +124,10 @@ const colleges = [
 ];
 
 const achievements = [
-  { stat: "250+", label: "Students Trained", img: "/kongunadu.png" },
-  { stat: "30+",  label: "Internships & Full-Time Offers", img: "/srm-ap.png" },
-  { stat: "5+",   label: "Hackathons Won", img: "/kongunadu.png" },
-  { stat: "6+",   label: "Colleges Visited", img: "/vit.jpg" },
-  { stat: "MSME", label: "Government Registered", img: "/SONASIS-MSME.webp" },
-  { stat: "Clutch", label: "B2B Recognized", img: "/Clutch.png" },
+  { stat: "250+", label: "Students Trained" },
+  { stat: "30+",  label: "Internships & Full-Time Offers" },
+  { stat: "5+",   label: "Hackathons Won" },
+  { stat: "6+",   label: "Colleges Visited" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -140,6 +139,41 @@ const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
   const [openFaq, setOpenFaq]                 = useState<number | null>(null);
   const [heroLoaded, setHeroLoaded]           = useState(false);
+  const [phoneNumber, setPhoneNumber]         = useState("");
+  const [isSubmitting, setIsSubmitting]       = useState(false);
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[0-9]{10}$/.test(phoneNumber)) {
+      toast({ title: "Invalid number", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const dateTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "long" });
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: "f4edb229-9419-4f5c-a18f-8f67c1ec3082",
+          subject: "🔥 New Call Request - UPSTRIDE Homepage",
+          from_name: "UPSTRIDE Website",
+          to: "mamlesh.va06@gmail.com",
+          phone: phoneNumber,
+          message: `📞 NEW CALL REQUEST\nPhone: ${phoneNumber}\nDate: ${dateTime}\nSource: Homepage Hero`,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "You're on the list!", description: "Mamlesh will call you personally within 24 hours." });
+        setPhoneNumber("");
+      } else throw new Error();
+    } catch {
+      toast({ title: "Failed", description: "Please try again or email mamlesh@upstrides.in", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const [nodeVisible, setNodeVisible]         = useState<boolean[]>(roadmapData.map(() => false));
   const [activeNode, setActiveNode]           = useState<number | null>(null);
   const nodeRefs                              = useRef<(HTMLDivElement | null)[]>([]);
@@ -300,7 +334,7 @@ const Index = () => {
           </p>
 
           {/* CTA buttons */}
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 1.15s ease" }}>
+          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 1.15s ease", marginBottom: "36px" }}>
             {[
               { label: "EXPLORE PROGRAMS →", bg: B, color: Y, shadow: SHADOW_Y, action: () => navigate("/programs") },
               { label: "ACCESS PORTAL",       bg: Y, color: B, shadow: SHADOW,   action: () => navigate("/login") },
@@ -311,6 +345,45 @@ const Index = () => {
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = shadow.boxShadow as string; }}
               >{label}</button>
             ))}
+          </div>
+
+          {/* Phone CTA */}
+          <div style={{ opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 1.3s ease", maxWidth: "540px" }}>
+            <div style={{ backgroundColor: Y, border: `3px solid ${B}`, ...SHADOW, padding: "24px 28px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <Phone size={18} color={B} />
+                <span style={{ ...MONO, fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.12em" }}>
+                  MAMLESH WILL CALL YOU PERSONALLY
+                </span>
+              </div>
+              <p style={{ ...MONO, fontSize: "13px", color: `${B}bb`, lineHeight: 1.6, marginBottom: "16px" }}>
+                You're not just a lead — you're somebody now, and you matter to Upstride. Drop your number and Mamlesh will call you himself. No scripts. No sales pitch. Just a real conversation about your next move.
+              </p>
+              <form onSubmit={handlePhoneSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <input
+                  type="tel"
+                  placeholder="Your 10-digit number"
+                  value={phoneNumber}
+                  onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  disabled={isSubmitting}
+                  style={{ flex: 1, minWidth: "180px", padding: "12px 16px", border: `2px solid ${B}`, backgroundColor: W, fontSize: "14px", ...MONO, outline: "none", color: B }}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting || phoneNumber.length !== 10}
+                  style={{ padding: "12px 24px", backgroundColor: B, color: Y, border: `2px solid ${B}`, fontWeight: 700, fontSize: "13px", letterSpacing: "0.1em", ...MONO, cursor: phoneNumber.length === 10 && !isSubmitting ? "pointer" : "not-allowed", opacity: phoneNumber.length === 10 && !isSubmitting ? 1 : 0.6, transition: "all 0.15s" }}
+                >
+                  {isSubmitting ? "SENDING..." : "GET MY CALL →"}
+                </button>
+              </form>
+              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginTop: "12px" }}>
+                {["Founder calls personally", "Zero spam", "Within 24 hours"].map(t => (
+                  <span key={t} style={{ ...MONO, fontSize: "11px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ color: B, fontWeight: 700 }}>✓</span> {t}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -359,7 +432,7 @@ const Index = () => {
           {/* Right: Image */}
           <div style={{ opacity: eventSec.inView ? 1 : 0, transform: eventSec.inView ? "translateX(0)" : "translateX(60px)", transition: "all 0.6s 0.2s cubic-bezier(0.16,1,0.3,1)" }}>
             <div style={{ border: `4px solid ${Y}`, ...{ boxShadow: `-8px 8px 0 ${Y}` }, position: "relative", overflow: "hidden" }}>
-              <img src="/kongunadu.png" alt="Event at SRM Ramapuram" style={{ width: "100%", display: "block", objectFit: "cover", aspectRatio: "4/3", filter: "grayscale(20%)" }} />
+              <img src="/srm-rama.jpg" alt="Event at SRM Ramapuram" style={{ width: "100%", display: "block", objectFit: "cover", aspectRatio: "4/3" }} />
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 20px", backgroundColor: `${B}dd` }}>
                 <span style={{ ...BEBAS, color: Y, fontSize: "18px", letterSpacing: "0.1em" }}>SRM RAMAPURAM — APRIL 9TH</span>
               </div>
@@ -469,19 +542,16 @@ const Index = () => {
           </div>
 
           {/* Achievements grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
             {achievements.map((a, i) => (
               <div
                 key={i}
-                style={{ backgroundColor: W, border: `3px solid ${B}`, ...SHADOW, padding: "28px", opacity: whatSec.inView ? 1 : 0, transform: whatSec.inView ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)", transition: `all 0.5s ${i * 0.08}s cubic-bezier(0.34, 1.56, 0.64, 1)`, cursor: "default" }}
+                style={{ backgroundColor: W, border: `3px solid ${B}`, ...SHADOW, padding: "32px 28px", opacity: whatSec.inView ? 1 : 0, transform: whatSec.inView ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)", transition: `all 0.5s ${i * 0.08}s cubic-bezier(0.34, 1.56, 0.64, 1)`, cursor: "default" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `8px 8px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = B; (e.currentTarget as HTMLDivElement).style.color = Y; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `5px 5px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = W; (e.currentTarget as HTMLDivElement).style.color = B; }}
               >
-                <div style={{ height: "80px", marginBottom: "16px", overflow: "hidden", display: "flex", alignItems: "center" }}>
-                  <img src={a.img} alt={a.label} style={{ maxHeight: "70px", maxWidth: "100%", objectFit: "contain", filter: "grayscale(100%)", mixBlendMode: "multiply" }} />
-                </div>
-                <div style={{ ...BEBAS, fontSize: "52px", color: "inherit", lineHeight: 1 }}>{a.stat}</div>
-                <div style={{ ...MONO, fontSize: "12px", fontWeight: 600, letterSpacing: "0.1em", color: "inherit", marginTop: "6px" }}>{a.label}</div>
+                <div style={{ ...BEBAS, fontSize: "64px", color: "inherit", lineHeight: 1 }}>{a.stat}</div>
+                <div style={{ ...MONO, fontSize: "12px", fontWeight: 600, letterSpacing: "0.1em", color: "inherit", marginTop: "8px" }}>{a.label}</div>
               </div>
             ))}
           </div>
@@ -502,8 +572,8 @@ const Index = () => {
               { name: "Saveetha", src: "/saveetha.gif" },
               { name: "Kongunadu", src: "/kongunadu.png" },
               { name: "SRM AP", src: "/srm-ap.png" },
+              { name: "SRM IST", src: "/srm-ist-logo.jpg" },
               { name: "NBKRIST", src: "/NBKRIST_logo.png" },
-              { name: "Clutch", src: "/Clutch.png" },
             ].map((r, i) => (
               <div
                 key={i}
@@ -532,7 +602,7 @@ const Index = () => {
             {/* Left: Portrait */}
             <div style={{ opacity: teamSec.inView ? 1 : 0, transform: teamSec.inView ? "translateX(0)" : "translateX(-60px)", transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
               <div style={{ border: `4px solid ${Y}`, ...{ boxShadow: `8px 8px 0 ${Y}` }, position: "relative", backgroundColor: `${Y}22` }}>
-                <img src="/kongunadu.png" alt="Mamlesh" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", display: "block", filter: "grayscale(20%)" }} />
+                <img src="/Profile_Picture_Mamlesh.png" alt="Mamlesh" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", objectPosition: "top", display: "block" }} />
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: Y, padding: "14px 20px", borderTop: `4px solid ${Y}` }}>
                   <span style={{ ...BEBAS, fontSize: "32px", color: B }}>MAMLESH</span>
                 </div>
