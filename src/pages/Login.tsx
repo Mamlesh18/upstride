@@ -1,34 +1,35 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+
+// ─── Theme ───────────────────────────────────────────────────────────────────
+const Y    = "#FFE500";  // yellow
+const B    = "#0A0A0A";  // black
+const W    = "#FFFFFF";  // white
+const BG   = "#FAFAFA";  // off-white page bg
+const BORD = "#E5E5E5";  // light border
+const MUTE = "#6B7280";  // muted text
+
+const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail]               = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading]       = useState(false);
+  const [focused, setFocused]           = useState<string | null>(null);
+  const [mounted, setMounted]           = useState(false);
 
-  // Check if user is already logged in
   useEffect(() => {
+    setMounted(true);
     const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    const loginTimestamp = localStorage.getItem("loginTimestamp");
-
+    const loginTimestamp  = localStorage.getItem("loginTimestamp");
     if (isAuthenticated && loginTimestamp) {
-      const currentTime = new Date().getTime();
-      const timeDifference = currentTime - parseInt(loginTimestamp);
-      const oneHour = 3600000;
-
-      // If token is still valid, redirect to portal
-      if (timeDifference <= oneHour) {
-        navigate("/portal");
-      } else {
-        // Token expired, clear auth data
+      const diff = Date.now() - parseInt(loginTimestamp);
+      if (diff <= 3_600_000) navigate("/portal");
+      else {
         localStorage.removeItem("isAuthenticated");
         localStorage.removeItem("loginTimestamp");
         localStorage.removeItem("userEmail");
@@ -39,169 +40,240 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simple validation
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please enter both email and password",
-        variant: "destructive",
-      });
+      toast({ title: "Missing fields", description: "Please enter both email and password", variant: "destructive" });
       setIsLoading(false);
       return;
     }
-
-    // Validate credentials
-    const validEmail = "upstrideintern@gmail.com";
-    const validPassword = "upstride#04";
-
     setTimeout(() => {
-      if (email === validEmail && password === validPassword) {
-        // Store authentication token with timestamp (expires in 1 hour)
-        const loginTime = new Date().getTime();
+      if (email === "upstrideintern@gmail.com" && password === "upstride#04") {
         localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("loginTimestamp", loginTime.toString());
+        localStorage.setItem("loginTimestamp", Date.now().toString());
         localStorage.setItem("userEmail", email);
-
-        toast({
-          title: "Success!",
-          description: "You have been logged in successfully",
-        });
-
+        toast({ title: "Access granted", description: "Welcome to the Upstride portal" });
         setIsLoading(false);
-        // Redirect to portal
         navigate("/portal");
       } else {
-        toast({
-          title: "Invalid Credentials",
-          description: "The email or password you entered is incorrect",
-          variant: "destructive",
-        });
+        toast({ title: "Invalid credentials", description: "The email or password is incorrect", variant: "destructive" });
         setIsLoading(false);
       }
-    }, 1000);
+    }, 900);
   };
 
+  const inputStyle = (name: string): React.CSSProperties => ({
+    width: "100%",
+    padding: "12px 16px 12px 44px",
+    backgroundColor: W,
+    border: `2px solid ${focused === name ? B : BORD}`,
+    borderRadius: "6px",
+    color: B,
+    fontSize: "14px",
+    ...MONO,
+    outline: "none",
+    transition: "border-color 0.15s",
+    boxSizing: "border-box" as const,
+  });
+
+  const stats = [
+    { value: "250+", label: "Students Trained" },
+    { value: "30+",  label: "Internships Secured" },
+    { value: "6+",   label: "Colleges Visited" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Aesthetic Moving Gradient Orbs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-gradient-to-br from-primary/30 via-purple-500/20 to-pink-500/30 rounded-full blur-3xl animate-float-slow"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-br from-cyan-400/25 via-blue-500/30 to-primary/25 rounded-full blur-3xl animate-float-medium" style={{ animationDelay: '2s' }}></div>
+    <div style={{ minHeight: "100vh", backgroundColor: BG, display: "flex", ...MONO }}>
+
+      {/* ── LEFT: Brand panel ──────────────────────────────────────── */}
+      <div
+        className="hidden lg:flex"
+        style={{
+          width: "44%",
+          backgroundColor: B,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "48px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Yellow accent square */}
+        <div style={{ position: "absolute", top: 0, right: 0, width: "120px", height: "120px", backgroundColor: Y, borderBottomLeftRadius: "0" }} />
+
+        {/* Logo */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "56px", position: "relative", zIndex: 1 }}>
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "36px", filter: "brightness(0) invert(1)" }} />
+            <span style={{ fontSize: "20px", fontWeight: 700, color: W, letterSpacing: "0.08em" }}>UPSTRIDE</span>
+          </div>
+
+          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s 0.1s ease" }}>
+            <div style={{ display: "inline-block", backgroundColor: Y, color: B, padding: "5px 12px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px" }}>
+              STUDENT PORTAL
+            </div>
+            <h1 style={{ fontSize: "clamp(30px, 3vw, 44px)", fontWeight: 700, color: W, lineHeight: 1.15, marginBottom: "20px", letterSpacing: "-0.02em" }}>
+              Your career<br />resources,<br />
+              <span style={{ color: Y }}>all in one place.</span>
+            </h1>
+            <p style={{ fontSize: "14px", color: `${W}99`, lineHeight: 1.8, maxWidth: "340px" }}>
+              Access curated training materials, placement prep, company-specific resources, and mentorship guides — built by people who've been through it.
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", backgroundColor: `${W}22`, opacity: mounted ? 1 : 0, transition: "all 0.6s 0.3s ease" }}>
+          {stats.map(({ value, label }) => (
+            <div key={label} style={{ backgroundColor: `${W}08`, padding: "20px 16px", textAlign: "center", border: `1px solid ${W}15` }}>
+              <div style={{ fontSize: "26px", fontWeight: 700, color: Y, marginBottom: "4px" }}>{value}</div>
+              <div style={{ fontSize: "10px", color: `${W}77`, letterSpacing: "0.1em", lineHeight: 1.4 }}>{label.toUpperCase()}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quote */}
+        <div style={{ borderLeft: `3px solid ${Y}`, paddingLeft: "20px", opacity: mounted ? 1 : 0, transition: "all 0.6s 0.5s ease" }}>
+          <p style={{ fontSize: "13px", color: `${W}88`, lineHeight: 1.8, fontStyle: "italic" }}>
+            "The gap between where you are and where you want to be is just information."
+          </p>
+          <span style={{ fontSize: "11px", color: Y, fontWeight: 600, letterSpacing: "0.1em" }}>— Mamlesh, Founder</span>
+        </div>
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6 hover:translate-x-[-4px] transition-transform"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-
-        <Card className="border-2 border-primary/20 shadow-2xl">
-          <CardHeader className="space-y-1 text-center pb-8">
-            <div className="flex justify-center mb-4">
-              <div className="p-4 bg-primary/10 rounded-2xl">
-                <Lock className="w-12 h-12 text-primary" />
-              </div>
-            </div>
-            <CardTitle className="text-3xl font-black">Student Portal Login</CardTitle>
-            <CardDescription className="text-base">
-              Enter your credentials to access the portal
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="student@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-medium"
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login to Portal"}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground mb-4">
-                Don't have access? Contact your instructor
-              </p>
-              <a
-                href="mailto:upstride.in@gmail.com"
-                className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-              >
-                upstride.in@gmail.com
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mt-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            By logging in, you agree to our{" "}
-            <button
-              onClick={() => navigate("/terms")}
-              className="text-primary hover:underline"
-            >
-              Terms of Service
-            </button>{" "}
-            and{" "}
-            <button
-              onClick={() => navigate("/privacy-policy")}
-              className="text-primary hover:underline"
-            >
-              Privacy Policy
-            </button>
-          </p>
+      {/* ── RIGHT: Form ────────────────────────────────────────────── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 24px", position: "relative", backgroundColor: BG }}>
+        {/* Back */}
+        <div style={{ position: "absolute", top: "24px", left: "24px" }}>
+          <button
+            onClick={() => navigate("/")}
+            style={{ display: "flex", alignItems: "center", gap: "8px", color: MUTE, background: "none", border: "none", cursor: "pointer", fontSize: "13px", ...MONO, transition: "color 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = B; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}
+          >
+            <ArrowLeft size={16} /> Back to home
+          </button>
         </div>
+
+        {/* Card */}
+        <div style={{
+          width: "100%", maxWidth: "420px",
+          backgroundColor: W,
+          border: `2px solid ${BORD}`,
+          borderRadius: "12px",
+          padding: "40px",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? "translateY(0)" : "translateY(20px)",
+          transition: "all 0.5s 0.2s ease",
+        }}>
+          {/* Icon */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+            <div style={{ width: "52px", height: "52px", borderRadius: "10px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `3px 3px 0 ${B}` }}>
+              <ShieldCheck size={24} color={B} />
+            </div>
+          </div>
+
+          <h2 style={{ fontSize: "22px", fontWeight: 700, color: B, textAlign: "center", marginBottom: "6px", letterSpacing: "-0.01em" }}>
+            Portal Access
+          </h2>
+          <p style={{ fontSize: "13px", color: MUTE, textAlign: "center", marginBottom: "32px" }}>
+            Enter your credentials to continue
+          </p>
+
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+            {/* Email */}
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "8px" }}>
+                EMAIL ADDRESS
+              </label>
+              <div style={{ position: "relative" }}>
+                <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", transition: "color 0.15s" }} />
+                <input
+                  type="email"
+                  placeholder="student@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onFocus={() => setFocused("email")}
+                  onBlur={() => setFocused(null)}
+                  style={inputStyle("email")}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "8px" }}>
+                PASSWORD
+              </label>
+              <div style={{ position: "relative" }}>
+                <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", transition: "color 0.15s" }} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocused("password")}
+                  onBlur={() => setFocused(null)}
+                  style={{ ...inputStyle("password"), paddingRight: "44px" }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: MUTE, display: "flex", alignItems: "center" }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: "100%", padding: "14px",
+                backgroundColor: isLoading ? `${B}cc` : B,
+                color: Y,
+                border: `2px solid ${B}`,
+                borderRadius: "6px",
+                fontSize: "13px", fontWeight: 700,
+                letterSpacing: "0.12em",
+                ...MONO,
+                cursor: isLoading ? "not-allowed" : "pointer",
+                transition: "all 0.15s",
+                marginTop: "4px",
+                boxShadow: `3px 3px 0 ${Y}`,
+              }}
+              onMouseEnter={e => { if (!isLoading) { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-2px,-2px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `5px 5px 0 ${Y}`; } }}
+              onMouseLeave={e => { if (!isLoading) { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `3px 3px 0 ${Y}`; } }}
+            >
+              {isLoading ? "AUTHENTICATING..." : "ACCESS PORTAL →"}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: `1px solid ${BORD}`, textAlign: "center" }}>
+            <p style={{ fontSize: "12px", color: MUTE, marginBottom: "6px" }}>
+              Don't have access? Contact your instructor
+            </p>
+            <a href="mailto:mamlesh@upstrides.in" style={{ fontSize: "12px", color: B, fontWeight: 700, textDecoration: "none" }}>
+              mamlesh@upstrides.in
+            </a>
+          </div>
+        </div>
+
+        {/* Legal */}
+        <p style={{ marginTop: "18px", fontSize: "11px", color: MUTE, textAlign: "center", maxWidth: "320px", lineHeight: 1.7 }}>
+          By accessing the portal, you agree to our{" "}
+          <button onClick={() => navigate("/terms")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700, ...MONO, textDecoration: "underline" }}>
+            Terms
+          </button>{" "}
+          and{" "}
+          <button onClick={() => navigate("/privacy-policy")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700, ...MONO, textDecoration: "underline" }}>
+            Privacy Policy
+          </button>
+        </p>
       </div>
     </div>
   );

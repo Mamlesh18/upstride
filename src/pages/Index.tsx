@@ -1,487 +1,821 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { GraduationCap, Users, Award, TrendingUp, Heart, Clock, Mail, Star, ChevronLeft, ChevronRight, Briefcase, UserCheck, Building2, Shield, Menu, X } from "lucide-react";
-import SocialProof from "@/components/SocialProof";
+import { Menu, X, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────────────────────────
+const Y = "#FFE500";   // yellow
+const B = "#0A0A0A";   // black
+const W = "#FAFAFA";   // white
+
+const BEBAS: React.CSSProperties = { fontFamily: "'Bebas Neue', cursive" };
+const MONO: React.CSSProperties  = { fontFamily: "'IBM Plex Mono', monospace" };
+
+const BORDER: React.CSSProperties  = { border: `3px solid ${B}` };
+const SHADOW: React.CSSProperties  = { boxShadow: `5px 5px 0 ${B}` };
+const SHADOW_Y: React.CSSProperties = { boxShadow: `5px 5px 0 ${Y}` };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOOK: useInView
+// ─────────────────────────────────────────────────────────────────────────────
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const roadmapData = [
+  {
+    year: "FRESHER",
+    icon: "🎯",
+    focus:  ["Understand what you actually want", "Stop comparing yourself to others", "Learn one skill deeply, not many shallowly"],
+    avoid:  ["Chasing every trend at once", "Fake projects on resume", "Waiting for placement season to start"],
+    build:  ["LinkedIn profile that doesn't look like everyone else's", "First ugly project (that's fine)", "A daily communication habit"],
+    mindset: "6 months to go from zero → first real opportunity",
+  },
+  {
+    year: "1ST YEAR",
+    icon: "🔨",
+    focus:  ["DSA fundamentals", "Pick your lane: AI / Web / Data / Design", "Build your first real (not tutorial) project"],
+    avoid:  ["Skipping fundamentals for frameworks", "Tutorial hell loops", "Overthinking instead of shipping"],
+    build:  ["GitHub with actual commits", "Simple portfolio site", "First internship application (even if rejected)"],
+    mindset: "Foundation year — don't rush it. Bad foundations collapse later.",
+  },
+  {
+    year: "2ND YEAR",
+    icon: "⚡",
+    focus:  ["Domain deep-dive", "Open source contributions (even small ones)", "Hackathons — don't wait to be 'ready'"],
+    avoid:  ["CGPA obsession over skill building", "Saying no to imperfect opportunities", "Working in isolation"],
+    build:  ["2–3 domain-specific projects with real use cases", "Research paper or internship experience", "Online presence with proof of work"],
+    mindset: "Execution year — stop planning. Shipping beats perfecting.",
+  },
+  {
+    year: "3RD YEAR",
+    icon: "🚀",
+    focus:  ["Internship hunting (start early)", "Resume as positioning, not just listing", "Interview prep with real mock sessions"],
+    avoid:  ["Mass-applying without research", "Ignoring soft skills and communication", "Last-minute cramming"],
+    build:  ["Internship (paid or unpaid — both count)", "Strong recommendation letters", "Domain authority online"],
+    mindset: "Conversion year — everything you built starts paying dividends.",
+  },
+  {
+    year: "4TH YEAR",
+    icon: "🏆",
+    focus:  ["Full-time offer strategy", "Salary negotiation (most students don't)", "Brand yourself intentionally"],
+    avoid:  ["Settling for the first offer out of fear", "Undervaluing yourself", "Stopping to learn after placement"],
+    build:  ["Full-time role with real growth potential", "Professional network that actually knows you", "Side income or project running in parallel"],
+    mindset: "Harvest year — own the narrative. You wrote this story.",
+  },
+];
+
+const testimonials = [
+  { name: "Shrusti", review: "The Experience Selling Bootcamp completely changed my perspective. Mock interviews and LinkedIn strategies helped me land my internship!", rating: 5, linkedin: "https://www.linkedin.com/in/shrusti-d-bhujange-834515382/" },
+  { name: "Divya",   review: "'Resume vs Reality' was eye-opening. I got placed within a month of completing the bootcamp. The mentors showed me exactly what HR actually wants.", rating: 5, linkedin: "https://www.linkedin.com/in/divya-sood-8b205b374/" },
+  { name: "Jessica", review: "Project ideation sessions were game-changers. I built a portfolio that actually stands out — not just another to-do app.", rating: 5, linkedin: "https://www.linkedin.com/in/jessica-c7684/" },
+  { name: "Praneeth", review: "From time management to top 1% coder mindset — this covers everything. Guest talks were invaluable and very real.", rating: 5, linkedin: "https://www.linkedin.com/in/praneeth-v-p/" },
+  { name: "Uwais",   review: "Best decision I made for my career. Got my full-time offer DURING the bootcamp itself. Couldn't believe it happened that fast.", rating: 5, linkedin: "https://www.linkedin.com/in/mohammed-uwais-58892132b/" },
+];
+
+const faqs = [
+  {
+    q: "What if I have zero skills?",
+    a: "Perfect starting point. Upstride was built exactly for that. You don't need skills — you need a direction and a system. We give you both.",
+  },
+  {
+    q: "Do I need to be from a top college?",
+    a: "No. We've seen students from tier-3 colleges outperform IIT graduates because they had clarity and execution. Your college doesn't define you. Your actions do.",
+  },
+  {
+    q: "What if I fail?",
+    a: "You will. Multiple times. That's part of the system. What Upstride does is reduce the number of times you fail blindly — because most failures are avoidable with the right information.",
+  },
+  {
+    q: "What exactly is BYOM?",
+    a: "Bring Your Own Money. You decide what you pay. We don't believe financial capability should gatekeep career knowledge. If you can afford more, you pay more. If you can't, you still get in.",
+  },
+  {
+    q: "Is this for any branch — not just CS?",
+    a: "Yes. CS, ECE, Mechanical, Civil — doesn't matter. The principles of building a career are the same. Only the domain-specific content changes.",
+  },
+  {
+    q: "How is this different from other courses?",
+    a: "Most courses sell information. We sell transformation. The difference is accountability, personalization, and honest mentorship — not a certificate at the end.",
+  },
+];
+
+const colleges = [
+  "VIT Vellore", "SRM Ramapuram", "Saveetha University",
+  "Kongunadu Arts & Science", "NBKRIST", "SRM AP",
+  "Sathyabama University", "Amrita Chennai", "Vel Tech",
+];
+
+const achievements = [
+  { stat: "250+", label: "Students Trained", img: "/kongunadu.png" },
+  { stat: "30+",  label: "Internships & Full-Time Offers", img: "/srm-ap.png" },
+  { stat: "5+",   label: "Hackathons Won", img: "/kongunadu.png" },
+  { stat: "6+",   label: "Colleges Visited", img: "/vit.jpg" },
+  { stat: "MSME", label: "Government Registered", img: "/SONASIS-MSME.webp" },
+  { stat: "Clutch", label: "B2B Recognized", img: "/Clutch.png" },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
 const Index = () => {
   const navigate = useNavigate();
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const testimonials = [
-    {
-      name: "Shrusti",
-      linkedin: "https://www.linkedin.com/in/shrusti-d-bhujange-834515382/",
-      review: "The Experience Selling Bootcamp completely changed my perspective on placements. The mock interview session and LinkedIn building strategies helped me land my internship!",
-      rating: 5
-    },
-    {
-      name: "Divya",
-      linkedin: "https://www.linkedin.com/in/divya-sood-8b205b374/",
-      review: "Learning about 'Resume vs Reality' was eye-opening. The mentors showed me exactly what HR thinks and wants. I got placed within a month of completing the bootcamp!",
-      rating: 5
-    },
-    {
-      name: "Jessica",
-      linkedin: "https://www.linkedin.com/in/jessica-c7684/",
-      review: "The project ideation and execution sessions were game-changers. I built a portfolio that actually stands out. The networking strategies really work!",
-      rating: 5
-    },
-    {
-      name: "Praneeth",
-      linkedin: "https://www.linkedin.com/in/praneeth-v-p/",
-      review: "From learning time management to becoming a top 1% coder mindset - this bootcamp covers everything. The guest talk and mentorship were invaluable!",
-      rating: 5
-    },
-    {
-      name: "Uwais",
-      linkedin: "https://www.linkedin.com/in/mohammed-uwais-58892132b/",
-      review: "Best decision I made for my career! The entrepreneurship thinking and leadership sessions opened my eyes. Got my full-time offer during the bootcamp itself!",
-      rating: 5
-    }
-  ];
+  const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
+  const [openFaq, setOpenFaq]                 = useState<number | null>(null);
+  const [heroLoaded, setHeroLoaded]           = useState(false);
+  const [nodeVisible, setNodeVisible]         = useState<boolean[]>(roadmapData.map(() => false));
+  const [activeNode, setActiveNode]           = useState<number | null>(null);
+  const nodeRefs                              = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Auto-scroll testimonials every 5 seconds
+  // Section in-view hooks
+  const eventSec    = useInView(0.1);
+  const roadmapSec  = useInView(0.05);
+  const whatSec     = useInView(0.1);
+  const teamSec     = useInView(0.1);
+  const whySec      = useInView(0.1);
+  const testSec     = useInView(0.1);
+  const faqSec      = useInView(0.1);
+  const achSec      = useInView(0.1);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
+    const t = setTimeout(() => setHeroLoaded(true), 80);
+    return () => clearTimeout(t);
+  }, []);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    element?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Observe roadmap nodes individually
+  useEffect(() => {
+    const observers = nodeRefs.current.map((el, i) => {
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setNodeVisible(prev => { const n = [...prev]; n[i] = true; return n; });
+          }
+        },
+        { threshold: 0.3 }
+      );
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach(o => o?.disconnect());
+  }, []);
 
+  // Helpers
+  const navBtn = (label: string, action: () => void, highlight = false) => (
+    <button
+      key={label}
+      onClick={action}
+      style={{
+        padding: "16px 28px",
+        fontWeight: 700,
+        fontSize: "12px",
+        letterSpacing: "0.15em",
+        borderLeft: `3px solid ${B}`,
+        background: highlight ? B : "transparent",
+        color: highlight ? Y : B,
+        cursor: "pointer",
+        transition: "all 0.15s",
+        ...MONO,
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.backgroundColor = highlight ? W : B;
+        el.style.color           = highlight ? B : Y;
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.backgroundColor = highlight ? B : "transparent";
+        el.style.color           = highlight ? Y : B;
+      }}
+    >
+      {label}{highlight ? " →" : ""}
+    </button>
+  );
 
-  const features = [
-    { icon: TrendingUp, title: "Industry Level Curriculum", description: "Learn with cutting-edge content" },
-    { icon: GraduationCap, title: "Hands-on Learning", description: "Practical experience with real projects" },
-    { icon: Users, title: "Career Mentorship", description: "Guidance by top professionals" },
-    { icon: Award, title: "Comprehensive Career Support", description: "Complete job placement assistance" },
-    { icon: Heart, title: "Inclusive Environment", description: "Supportive learning community" },
-    { icon: Clock, title: "Flexible Learning", description: "Accessible anytime, anywhere" },
-  ];
+  const visibleCount = nodeVisible.filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Social Proof Notifications */}
-      <SocialProof />
+    <div style={{ ...MONO, backgroundColor: W, color: B, overflowX: "hidden" }}>
 
-      {/* Decorative Color Element - Top Right */}
-      <div className="fixed top-4 right-4 z-50 pointer-events-none">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 opacity-80 blur-xl animate-pulse"></div>
-        <div className="absolute top-0 right-0 w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-primary opacity-60 blur-lg animate-float"></div>
-      </div>
-
-      {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
-          </div>
-          {/* Desktop Nav */}
-          <div className="hidden md:flex gap-4 items-center">
-            <Button variant="ghost" onClick={() => scrollToSection("home")}>
-              Home
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/programs")}>
-              Programs
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/blogs")}>
-              Blogs
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/login")}>
-              Portal
-            </Button>
-          </div>
-          {/* Mobile Hamburger */}
-          <button
-            className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+      {/* ================================================================
+          HEADER
+          ================================================================ */}
+      <header style={{ backgroundColor: Y, position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, borderBottom: `4px solid ${B}` }}>
+        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "stretch", maxWidth: "1400px", margin: "0 auto" }}>
+          {/* Logo */}
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 24px", cursor: "pointer", borderRight: `3px solid ${B}` }}
+            onClick={() => navigate("/")}
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "36px", width: "36px", objectFit: "contain" }} />
+            <span style={{ ...BEBAS, fontSize: "28px", letterSpacing: "0.1em", color: B }}>UPSTRIDE</span>
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
+            {navBtn("PORTAL", () => navigate("/login"), true)}
+          </div>
+
+          {/* Mobile burger */}
+          <button
+            className="md:hidden"
+            style={{ padding: "16px 20px", background: "transparent", border: "none", borderLeft: `3px solid ${B}`, cursor: "pointer" }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} color={B} /> : <Menu size={24} color={B} />}
           </button>
         </nav>
-        {/* Mobile Menu */}
+
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-sm">
-            <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { scrollToSection("home"); setMobileMenuOpen(false); }}>
-                Home
-              </Button>
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/programs"); setMobileMenuOpen(false); }}>
-                Programs
-              </Button>
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/blogs"); setMobileMenuOpen(false); }}>
-                Blogs
-              </Button>
-              <Button variant="ghost" className="justify-start w-full" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>
-                Portal
-              </Button>
-            </div>
+          <div style={{ borderTop: `3px solid ${B}` }}>
+            <button onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
+              style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", backgroundColor: B, color: Y, cursor: "pointer", ...MONO }}
+            >PORTAL →</button>
           </div>
         )}
       </header>
 
-      {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center pt-20 bg-background relative overflow-hidden">
-        {/* Aesthetic Moving Gradient Orbs - Traversing Across Screen */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Orb 1: Moving Right to Left */}
-          <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-gradient-to-br from-primary/30 via-purple-500/20 to-pink-500/30 rounded-full blur-3xl animate-move-left-right"></div>
+      {/* ================================================================
+          HERO
+          ================================================================ */}
+      <section style={{ minHeight: "100vh", paddingTop: "80px", backgroundColor: W, position: "relative", overflow: "hidden", display: "flex", alignItems: "center" }}>
+        {/* Grid BG */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${B}18 1px, transparent 1px), linear-gradient(90deg, ${B}18 1px, transparent 1px)`, backgroundSize: "60px 60px", pointerEvents: "none" }} />
 
-          {/* Orb 2: Moving Left to Right */}
-          <div className="absolute top-1/3 -left-32 w-[450px] h-[450px] bg-gradient-to-br from-cyan-400/25 via-blue-500/30 to-primary/25 rounded-full blur-3xl animate-move-right-left" style={{ animationDelay: '3s' }}></div>
+        {/* Floating yellow squares */}
+        <div style={{ position: "absolute", top: "8%", right: "-80px", width: "340px", height: "340px", backgroundColor: Y, border: `4px solid ${B}`, animation: "brutBounce 5s ease-in-out infinite", opacity: 0.55, zIndex: 0 }} />
+        <div style={{ position: "absolute", bottom: "6%", left: "-60px", width: "180px", height: "180px", backgroundColor: Y, border: `4px solid ${B}`, animation: "brutBounce 7s ease-in-out infinite reverse", opacity: 0.35, zIndex: 0 }} />
+        <div style={{ position: "absolute", top: "55%", right: "12%", width: "80px", height: "80px", backgroundColor: B, animation: "brutBounce 3.5s ease-in-out infinite 1s", zIndex: 0 }} />
 
-          {/* Orb 3: Moving Up and Down */}
-          <div className="absolute -top-40 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-purple-500/20 via-pink-400/25 to-primary/20 rounded-full blur-3xl animate-move-up-down" style={{ animationDelay: '2s' }}></div>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "60px 24px", position: "relative", zIndex: 1, width: "100%" }}>
+          {/* Badge */}
+          <div style={{ display: "inline-block", backgroundColor: B, color: Y, padding: "8px 18px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.25em", marginBottom: "28px", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(20px)", transition: "all 0.4s 0.1s ease", ...MONO }}>
+            ★ INDIA'S 1ST BYOM PLATFORM ★
+          </div>
 
-          {/* Orb 4: Moving Down to Up */}
-          <div className="absolute bottom-0 right-20 w-[350px] h-[350px] bg-gradient-to-br from-pink-400/30 via-purple-400/25 to-blue-400/20 rounded-full blur-3xl animate-move-down-up" style={{ animationDelay: '5s' }}></div>
+          {/* Main headline — animated letters */}
+          <h1 style={{ ...BEBAS, fontSize: "clamp(56px, 11vw, 152px)", lineHeight: 0.88, marginBottom: "20px", color: B }}>
+            {"BRING YOUR".split("").map((ch, i) => (
+              <span key={i} style={{ display: "inline-block", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0) rotate(0deg)" : "translateY(70px) rotate(-8deg)", transition: `all 0.45s ${i * 0.022}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
+                {ch === " " ? "\u00A0" : ch}
+              </span>
+            ))}
+            <br />
+            {"OWN MONEY".split("").map((ch, i) => (
+              <span key={i} style={{ display: "inline-block", color: Y, WebkitTextStroke: `3px ${B}`, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "scale(1) rotate(0deg)" : "scale(0) rotate(20deg)", transition: `all 0.5s ${0.28 + i * 0.034}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
+                {ch === " " ? "\u00A0" : ch}
+              </span>
+            ))}
+          </h1>
 
-          {/* Orb 5: Diagonal Movement 1 */}
-          <div className="absolute top-1/2 right-10 w-[380px] h-[380px] bg-gradient-to-br from-blue-400/20 via-cyan-400/25 to-primary/30 rounded-full blur-3xl animate-move-diagonal-1" style={{ animationDelay: '1s' }}></div>
-
-          {/* Orb 6: Diagonal Movement 2 */}
-          <div className="absolute bottom-1/4 -left-20 w-[420px] h-[420px] bg-gradient-to-br from-primary/35 via-blue-400/20 to-purple-400/25 rounded-full blur-3xl animate-move-diagonal-2" style={{ animationDelay: '4s' }}></div>
-
-          {/* Orb 7: Circular Movement */}
-          <div className="absolute top-1/4 right-1/3 w-[300px] h-[300px] bg-gradient-to-br from-pink-500/25 via-purple-500/20 to-cyan-400/25 rounded-full blur-3xl animate-move-circular" style={{ animationDelay: '6s' }}></div>
-        </div>
-
-        <div className="text-center animate-fade-in relative z-10 px-4">
-          <div className="mb-8 inline-block">
-            <span className="bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-medium border border-primary/20">
-              Welcome to Learning Excellence
+          {/* BYOM pill */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "14px", backgroundColor: Y, border: `4px solid ${B}`, ...SHADOW, padding: "14px 28px", marginBottom: "32px", opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 0.75s ease" }}>
+            <span style={{ ...BEBAS, fontSize: "52px", color: B, letterSpacing: "0.08em" }} className="brut-flicker">BYOM</span>
+            <div style={{ width: "3px", height: "44px", backgroundColor: B }} />
+            <span style={{ fontSize: "11px", fontWeight: 700, maxWidth: "220px", lineHeight: 1.5, letterSpacing: "0.05em" }}>
+              STUDENTS PAY WHAT THEY'RE COMFORTABLE WITH.<br />
+              BUILT FROM PASSION, NOT PROFIT.
             </span>
           </div>
-          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-foreground tracking-tight">
-            UPSTRIDE
-          </h1>
-          <p className="text-2xl md:text-4xl text-foreground/80 font-medium mb-4 tracking-tight">
-            We don't sell courses. We sell experience.
+
+          <p style={{ fontSize: "15px", maxWidth: "540px", lineHeight: 1.8, color: `${B}bb`, marginBottom: "44px", opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 0.95s ease" }}>
+            We're not a course factory. We're a mission — built from the frustration of watching capable students fail due to information gaps that should never exist in the first place.
           </p>
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto font-normal">
-            Connecting the gap between students and industry via an experience driven approach to make your career easier
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-300 text-base font-medium px-8 py-6 rounded-lg"
-              onClick={() => navigate("/programs")}
-            >
-              Explore Programs
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-border hover:bg-secondary transition-all duration-300 text-base font-medium px-8 py-6 rounded-lg"
-              onClick={() => window.location.href = "mailto:upstride.in@gmail.com?subject=Course Inquiry"}
-            >
-              Get in Touch
-            </Button>
+
+          {/* CTA buttons */}
+          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", opacity: heroLoaded ? 1 : 0, transition: "all 0.4s 1.15s ease" }}>
+            {[
+              { label: "EXPLORE PROGRAMS →", bg: B, color: Y, shadow: SHADOW_Y, action: () => navigate("/programs") },
+              { label: "ACCESS PORTAL",       bg: Y, color: B, shadow: SHADOW,   action: () => navigate("/login") },
+            ].map(({ label, bg, color, shadow, action }) => (
+              <button key={label} onClick={action}
+                style={{ backgroundColor: bg, color, padding: "16px 32px", fontWeight: 700, fontSize: "13px", letterSpacing: "0.12em", border: `3px solid ${B}`, ...shadow, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `8px 8px 0 ${bg === B ? Y : B}`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = shadow.boxShadow as string; }}
+              >{label}</button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Stats & Credentials Section */}
-      <section className="py-20 px-4 bg-secondary/30 border-y border-border">
-        <div className="container mx-auto max-w-7xl">
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16 max-w-5xl mx-auto">
-            {/* Students Trained */}
-            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in">
-              <UserCheck className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">250+</div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Students Trained</p>
+      {/* ================================================================
+          MARQUEE BAND
+          ================================================================ */}
+      <div style={{ backgroundColor: B, borderTop: `4px solid ${B}`, borderBottom: `4px solid ${B}`, padding: "14px 0", overflow: "hidden" }}>
+        <div className="brut-marquee" style={{ gap: "0" }}>
+          {[...Array(2)].map((_, rep) => (
+            <div key={rep} style={{ display: "flex", alignItems: "center", gap: "0" }}>
+              {["BYOM", "●", "INDIA'S 1ST", "●", "CAREER CLARITY", "●", "NOT A COURSE", "●", "250+ STUDENTS", "●", "REAL RESULTS", "●", "UPSTRIDE", "●"].map((item, i) => (
+                <span key={i} style={{ ...BEBAS, fontSize: "22px", color: i % 2 === 1 ? Y : W, padding: "0 24px", letterSpacing: "0.12em", whiteSpace: "nowrap" }}>{item}</span>
+              ))}
             </div>
+          ))}
+        </div>
+      </div>
 
-            {/* Placements */}
-            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-1">
-              <Briefcase className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-4xl md:text-5xl font-black text-foreground mb-2">30+</div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Internships & Full-Time Offers After joining Training</p>
+      {/* ================================================================
+          UPCOMING EVENT
+          ================================================================ */}
+      <section ref={eventSec.ref} style={{ backgroundColor: B, padding: "100px 24px", overflow: "hidden" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }} className="grid-cols-1 md:grid-cols-2">
+          {/* Left: Text */}
+          <div style={{ opacity: eventSec.inView ? 1 : 0, transform: eventSec.inView ? "translateX(0)" : "translateX(-60px)", transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+            <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "6px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "24px", ...MONO }}>
+              UPCOMING EVENT
             </div>
-
-            {/* MSME Registered */}
-            <div className="text-center p-6 bg-background rounded-xl border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg animate-fade-in animate-stagger-2">
-              <Shield className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3" />
-              <div className="text-xl md:text-2xl font-black text-foreground mb-2">MSME Registered</div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Government Certified</p>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 6vw, 80px)", color: W, lineHeight: 0.92, marginBottom: "20px" }}>
+              UPSTRIDE IS<br />
+              <span style={{ color: Y }}>COMING TO</span><br />
+              SRM RAMAPURAM
+            </h2>
+            <div style={{ backgroundColor: Y, border: `3px solid ${Y}`, display: "inline-block", padding: "10px 20px", marginBottom: "28px", ...MONO }}>
+              <span style={{ fontWeight: 700, fontSize: "14px", color: B }}>📅 APRIL 9TH, 2025</span>
             </div>
+            <h3 style={{ ...BEBAS, fontSize: "clamp(22px, 3.5vw, 42px)", color: W, marginBottom: "16px", lineHeight: 1 }}>
+              "HOW TO START YOUR CAREER<br />BEFORE YOU GRADUATE"
+            </h3>
+            <p style={{ color: `${W}99`, fontSize: "14px", lineHeight: 1.8, maxWidth: "420px" }}>
+              A live session covering the exact roadmap from 0 → first opportunity. Real talk, no fluff. Come with questions.
+            </p>
           </div>
 
-          {/* Recognition Partners */}
-          <div className="space-y-4">
-            <h3 className="text-2xl md:text-3xl font-black text-center mb-8">Recognition & Partnerships</h3>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
-              {/* Clutch Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">Clutch Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/Clutch.png"
-                    alt="Clutch Recognition Badge"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">Leading B2B platform</p>
-              </div>
-
-              {/* VIT Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">VIT Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/vit.jpg"
-                    alt="Vellore Institute of Technology Recognition"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">Vellore Institute of Technology</p>
-              </div>
-
-              {/* Saveetha Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">Saveetha Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/saveetha.gif"
-                    alt="Saveetha University Recognition"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">Saveetha University</p>
-              </div>
-
-              {/* Kongunadu Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">Kongunadu Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/kongunadu.png"
-                    alt="Kongunadu Arts and Science College Recognition"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">Kongunadu Arts and Science College</p>
-              </div>
-
-              {/* SRM-AP Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">SRM-AP Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/srm-ap.png"
-                    alt="SRM University AP Recognition"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">SRM University, Andhra Pradesh</p>
-              </div>
-
-              {/* NBKRIST Recognition */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-background rounded-2xl p-6 border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-                <Award className="w-10 h-10 text-primary" />
-                <h4 className="text-lg font-bold text-foreground text-center">NBKRIST Recognized</h4>
-                <div className="bg-white p-4 rounded-xl shadow-md w-full flex items-center justify-center">
-                  <img
-                    src="/NBKRIST_logo.png"
-                    alt="NBKRIST Recognition"
-                    className="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">NBK R Institute of Science & Technology</p>
+          {/* Right: Image */}
+          <div style={{ opacity: eventSec.inView ? 1 : 0, transform: eventSec.inView ? "translateX(0)" : "translateX(60px)", transition: "all 0.6s 0.2s cubic-bezier(0.16,1,0.3,1)" }}>
+            <div style={{ border: `4px solid ${Y}`, ...{ boxShadow: `-8px 8px 0 ${Y}` }, position: "relative", overflow: "hidden" }}>
+              <img src="/kongunadu.png" alt="Event at SRM Ramapuram" style={{ width: "100%", display: "block", objectFit: "cover", aspectRatio: "4/3", filter: "grayscale(20%)" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 20px", backgroundColor: `${B}dd` }}>
+                <span style={{ ...BEBAS, color: Y, fontSize: "18px", letterSpacing: "0.1em" }}>SRM RAMAPURAM — APRIL 9TH</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Student Testimonials Section */}
-      <section className="py-12 px-4 bg-background">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-2">Student Feedbacks</h2>
-          <p className="text-center text-muted-foreground text-sm mb-8 max-w-xl mx-auto">
-            Hear from students who transformed their careers
-          </p>
-
-          {/* Testimonial Carousel */}
-          <div className="relative">
-            <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
-              <CardContent className="pt-6 pb-6">
-                {/* Current Testimonial */}
-                <div className="text-center px-6 md:px-12">
-                  <div className="flex justify-center gap-1 mb-4">
-                    {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-
-                  <blockquote className="text-base md:text-lg font-normal italic text-foreground mb-4 line-clamp-3">
-                    "{testimonials[currentTestimonial].review}"
-                  </blockquote>
-
-                  <div className="space-y-2">
-                    <p className="text-base font-bold text-primary">
-                      {testimonials[currentTestimonial].name}
-                    </p>
-                    <a
-                      href={testimonials[currentTestimonial].linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                      </svg>
-                      LinkedIn
-                    </a>
-                  </div>
-                </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex items-center justify-between mt-6 px-4">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-primary/10"
-                    onClick={() => setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Dots */}
-                  <div className="flex gap-1.5">
-                    {testimonials.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentTestimonial(index)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          index === currentTestimonial ? "bg-primary w-6" : "bg-primary/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-primary/10"
-                    onClick={() => setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      {/* ================================================================
+          ROADMAP TO UPSKILL
+          ================================================================ */}
+      <section ref={roadmapSec.ref} style={{ backgroundColor: W, padding: "100px 24px", position: "relative", overflow: "hidden" }}>
+        {/* Section header */}
+        <div style={{ textAlign: "center", marginBottom: "80px", opacity: roadmapSec.inView ? 1 : 0, transform: roadmapSec.inView ? "translateY(0)" : "translateY(40px)", transition: "all 0.5s ease" }}>
+          <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>
+            THE ROADMAP
           </div>
+          <h2 style={{ ...BEBAS, fontSize: "clamp(48px, 9vw, 120px)", color: B, lineHeight: 0.9 }}>
+            ROADMAP TO<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>UPSKILL</span>
+          </h2>
+          <p style={{ ...MONO, fontSize: "14px", color: `${B}99`, maxWidth: "500px", margin: "20px auto 0", lineHeight: 1.7 }}>
+            A year-by-year execution guide. Not generic advice. Built from watching hundreds of students succeed and fail.
+          </p>
         </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="bg-foreground/5 border-t border-border">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-3 gap-12 mb-12 max-w-5xl mx-auto">
-            {/* About Section */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" loading="lazy" decoding="async" />
-                <h3 className="text-xl font-bold text-foreground">UPSTRIDE</h3>
-              </div>
-              <p className="text-muted-foreground text-sm mb-4">
-                Transforming careers through world-class online education. Certified by MSME, Government of India.
-              </p>
-              <a
-                href="mailto:upstride.in@gmail.com"
-                className="text-primary hover:text-primary/80 font-semibold text-sm transition-colors"
+        {/* Timeline */}
+        <div style={{ maxWidth: "900px", margin: "0 auto", position: "relative" }}>
+          {/* Vertical line */}
+          <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: "4px", backgroundColor: `${B}22`, transform: "translateX(-50%)" }} className="hidden md:block" />
+          <div
+            style={{ position: "absolute", left: "50%", top: 0, width: "4px", backgroundColor: Y, border: `2px solid ${B}`, transform: "translateX(-50%)", height: `${(visibleCount / roadmapData.length) * 100}%`, transition: "height 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}
+            className="hidden md:block"
+          />
+
+          {/* Nodes */}
+          {roadmapData.map((item, i) => {
+            const isLeft = i % 2 === 0;
+            const visible = nodeVisible[i];
+            return (
+              <div
+                key={i}
+                ref={el => { nodeRefs.current[i] = el; }}
+                style={{ display: "flex", flexDirection: isLeft ? "row" : "row-reverse", gap: "40px", marginBottom: "60px", alignItems: "flex-start", opacity: visible ? 1 : 0, transform: visible ? "translateX(0)" : `translateX(${isLeft ? "-60px" : "60px"})`, transition: `all 0.6s ${i * 0.1}s cubic-bezier(0.16, 1, 0.3, 1)` }}
+                className="flex-col md:flex-row"
               >
-                upstride.in@gmail.com
-              </a>
+                {/* Card */}
+                <div
+                  style={{ flex: 1, backgroundColor: activeNode === i ? Y : W, border: `3px solid ${B}`, ...SHADOW, padding: "28px", cursor: "pointer", transition: "all 0.2s" }}
+                  onClick={() => setActiveNode(activeNode === i ? null : i)}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `8px 8px 0 ${B}`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `5px 5px 0 ${B}`; }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                    <span style={{ ...BEBAS, fontSize: "36px", color: B }}>{item.icon} {item.year}</span>
+                    {activeNode === i ? <ChevronUp size={20} color={B} /> : <ChevronDown size={20} color={B} />}
+                  </div>
+                  <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "4px 12px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "12px", ...MONO }}>
+                    {item.mindset}
+                  </div>
+
+                  {activeNode === i && (
+                    <div style={{ marginTop: "16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }} className="grid-cols-1 md:grid-cols-3">
+                      {[
+                        { title: "✅ FOCUS ON", items: item.focus, bg: B, fg: Y },
+                        { title: "❌ AVOID",    items: item.avoid, bg: Y, fg: B },
+                        { title: "🔨 BUILD",    items: item.build, bg: W, fg: B },
+                      ].map(({ title, items, bg, fg }) => (
+                        <div key={title} style={{ backgroundColor: bg, border: `2px solid ${B}`, padding: "14px" }}>
+                          <div style={{ ...MONO, fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", color: fg, marginBottom: "10px" }}>{title}</div>
+                          {items.map((item, j) => (
+                            <div key={j} style={{ ...MONO, fontSize: "11px", color: fg, marginBottom: "6px", lineHeight: 1.5 }}>— {item}</div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Center dot */}
+                <div className="hidden md:flex" style={{ flexShrink: 0, width: "24px", alignItems: "flex-start", justifyContent: "center", paddingTop: "16px" }}>
+                  <div style={{ width: "20px", height: "20px", backgroundColor: visible ? Y : `${B}33`, border: `3px solid ${B}`, transition: "all 0.4s", transform: visible ? "scale(1)" : "scale(0)" }} />
+                </div>
+
+                {/* Spacer for opposite side */}
+                <div style={{ flex: 1 }} className="hidden md:block" />
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ================================================================
+          WHAT WE DO + ACHIEVEMENTS
+          ================================================================ */}
+      <section ref={whatSec.ref} style={{ backgroundColor: Y, padding: "100px 24px", borderTop: `4px solid ${B}`, borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ opacity: whatSec.inView ? 1 : 0, transform: whatSec.inView ? "translateY(0)" : "translateY(40px)", transition: "all 0.5s ease", marginBottom: "60px" }}>
+            <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>
+              WHAT WE DO
+            </div>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(48px, 8vw, 110px)", color: B, lineHeight: 0.9, maxWidth: "800px" }}>
+              WE DON'T SELL<br />COURSES.<br /><span style={{ WebkitTextStroke: `3px ${B}`, color: Y }}>WE SELL</span><br />EXPERIENCE.
+            </h2>
+            <p style={{ ...MONO, fontSize: "15px", color: `${B}cc`, maxWidth: "560px", lineHeight: 1.8, marginTop: "24px" }}>
+              Upstride exists to close the gap between what colleges teach and what companies actually need. We do this through mentorship, community, and a model where your financial situation doesn't decide your future.
+            </p>
+          </div>
+
+          {/* Achievements grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+            {achievements.map((a, i) => (
+              <div
+                key={i}
+                style={{ backgroundColor: W, border: `3px solid ${B}`, ...SHADOW, padding: "28px", opacity: whatSec.inView ? 1 : 0, transform: whatSec.inView ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)", transition: `all 0.5s ${i * 0.08}s cubic-bezier(0.34, 1.56, 0.64, 1)`, cursor: "default" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `8px 8px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = B; (e.currentTarget as HTMLDivElement).style.color = Y; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `5px 5px 0 ${B}`; (e.currentTarget as HTMLDivElement).style.backgroundColor = W; (e.currentTarget as HTMLDivElement).style.color = B; }}
+              >
+                <div style={{ height: "80px", marginBottom: "16px", overflow: "hidden", display: "flex", alignItems: "center" }}>
+                  <img src={a.img} alt={a.label} style={{ maxHeight: "70px", maxWidth: "100%", objectFit: "contain", filter: "grayscale(100%)", mixBlendMode: "multiply" }} />
+                </div>
+                <div style={{ ...BEBAS, fontSize: "52px", color: "inherit", lineHeight: 1 }}>{a.stat}</div>
+                <div style={{ ...MONO, fontSize: "12px", fontWeight: 600, letterSpacing: "0.1em", color: "inherit", marginTop: "6px" }}>{a.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          RECOGNITIONS
+          ================================================================ */}
+      <section ref={achSec.ref} style={{ backgroundColor: W, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "48px", opacity: achSec.inView ? 1 : 0, transform: achSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
+            <h3 style={{ ...BEBAS, fontSize: "clamp(32px, 5vw, 64px)", color: B }}>RECOGNIZED BY</h3>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0", border: `3px solid ${B}` }}>
+            {[
+              { name: "VIT", src: "/vit.jpg" },
+              { name: "Saveetha", src: "/saveetha.gif" },
+              { name: "Kongunadu", src: "/kongunadu.png" },
+              { name: "SRM AP", src: "/srm-ap.png" },
+              { name: "NBKRIST", src: "/NBKRIST_logo.png" },
+              { name: "Clutch", src: "/Clutch.png" },
+            ].map((r, i) => (
+              <div
+                key={i}
+                style={{ flex: "1 1 160px", borderRight: i < 5 ? `3px solid ${B}` : "none", borderBottom: `3px solid ${B}`, padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", opacity: achSec.inView ? 1 : 0, transition: `all 0.4s ${i * 0.07}s ease`, backgroundColor: W }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = Y; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = W; }}
+              >
+                <img src={r.src} alt={r.name} style={{ height: "50px", objectFit: "contain", filter: "grayscale(100%)", mixBlendMode: "multiply" }} />
+                <span style={{ ...MONO, fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", color: B }}>{r.name.toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          MEET THE TEAM — MAMLESH
+          ================================================================ */}
+      <section ref={teamSec.ref} style={{ backgroundColor: B, padding: "100px 24px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "16px", opacity: teamSec.inView ? 1 : 0, transition: "all 0.4s ease" }}>
+            <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", ...MONO }}>MEET THE FOUNDER</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }} className="grid-cols-1 md:grid-cols-2">
+            {/* Left: Portrait */}
+            <div style={{ opacity: teamSec.inView ? 1 : 0, transform: teamSec.inView ? "translateX(0)" : "translateX(-60px)", transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+              <div style={{ border: `4px solid ${Y}`, ...{ boxShadow: `8px 8px 0 ${Y}` }, position: "relative", backgroundColor: `${Y}22` }}>
+                <img src="/kongunadu.png" alt="Mamlesh" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", display: "block", filter: "grayscale(20%)" }} />
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: Y, padding: "14px 20px", borderTop: `4px solid ${Y}` }}>
+                  <span style={{ ...BEBAS, fontSize: "32px", color: B }}>MAMLESH</span>
+                </div>
+              </div>
             </div>
 
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/programs")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Experience Selling Bootcamp
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Student Portal
-                  </button>
-                </li>
-              </ul>
-            </div>
+            {/* Right: Info */}
+            <div style={{ opacity: teamSec.inView ? 1 : 0, transform: teamSec.inView ? "translateX(0)" : "translateX(60px)", transition: "all 0.6s 0.2s cubic-bezier(0.16,1,0.3,1)" }}>
+              <h2 style={{ ...BEBAS, fontSize: "clamp(56px, 8vw, 100px)", color: W, lineHeight: 0.88, marginBottom: "32px" }}>
+                THE GUY<br />BEHIND<br /><span style={{ color: Y }}>ALL OF<br />THIS.</span>
+              </h2>
 
-            {/* Legal Links */}
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/privacy-policy")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Privacy Policy
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/terms")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Terms of Agreement
-                  </button>
-                </li>
-              </ul>
+              {/* Stats newspaper style */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0", border: `3px solid ${Y}`, marginBottom: "32px" }}>
+                {[
+                  { stat: "10x", label: "Internships" },
+                  { stat: "4x",  label: "Research Papers" },
+                  { stat: "2x",  label: "Patents Filed" },
+                  { stat: "1x",  label: "Singapore Consultancy Lead" },
+                ].map(({ stat, label }, i) => (
+                  <div key={i} style={{ padding: "20px", borderRight: i % 2 === 0 ? `2px solid ${Y}` : "none", borderBottom: i < 2 ? `2px solid ${Y}` : "none" }}>
+                    <div style={{ ...BEBAS, fontSize: "44px", color: Y }}>{stat}</div>
+                    <div style={{ ...MONO, fontSize: "11px", color: `${W}aa`, letterSpacing: "0.1em" }}>{label.toUpperCase()}</div>
+                  </div>
+                ))}
+              </div>
+
+              <p style={{ ...MONO, fontSize: "13px", color: `${W}bb`, lineHeight: 1.8 }}>
+                AI Team Lead at a Singapore-based consultancy. Business owner. Multiple-time researcher. The kind of student most colleges never produce — not because of talent, but because of access to the right information at the right time.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          WHY AM I DOING THIS — Personal Letter
+          ================================================================ */}
+      <section ref={whySec.ref} style={{ backgroundColor: Y, padding: "100px 24px", borderTop: `4px solid ${B}`, borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "780px", margin: "0 auto" }}>
+          <div style={{ opacity: whySec.inView ? 1 : 0, transform: whySec.inView ? "translateY(0)" : "translateY(40px)", transition: "all 0.5s ease" }}>
+            <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "6px 14px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "32px", ...MONO }}>
+              A PERSONAL NOTE
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-border pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-muted-foreground text-sm">
-                © 2026 UPSTRIDE Learning. All rights reserved.
+          <div
+            style={{ backgroundColor: W, border: `4px solid ${B}`, ...SHADOW, padding: "40px 48px", opacity: whySec.inView ? 1 : 0, transform: whySec.inView ? "rotate(0deg)" : "rotate(-2deg)", transition: "all 0.6s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+          >
+            {/* Pin effect */}
+            <div style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: Y, border: `3px solid ${B}`, margin: "0 auto 24px", ...SHADOW }} />
+
+            <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 5vw, 64px)", color: B, lineHeight: 1, marginBottom: "28px" }}>
+              WHY AM I<br />DOING THIS?
+            </h2>
+
+            <div style={{ ...MONO, fontSize: "14px", lineHeight: 1.9, color: `${B}dd` }}>
+              <p style={{ marginBottom: "20px" }}>
+                Not too long ago, I was the student who had potential but no clarity. I watched people around me get opportunities not because they were smarter — but because they knew things I didn't.
               </p>
-              <p className="text-muted-foreground text-sm">
-                Recognized by MSME, Government of India
+              <p style={{ marginBottom: "20px" }}>
+                I figured it out eventually. But I wasted time I didn't need to waste. Made mistakes that were completely avoidable. Missed opportunities because nobody told me they existed.
               </p>
+              <p style={{ marginBottom: "20px" }}>
+                Most students don't figure it out in time. That gap — between knowing and not knowing — is why Upstride exists.
+              </p>
+              <p style={{ fontWeight: 700, color: B }}>
+                This isn't a business first. It's a mission first. The business part just makes it sustainable.
+              </p>
+            </div>
+
+            <div style={{ borderTop: `2px solid ${B}`, marginTop: "28px", paddingTop: "20px", display: "flex", justifyContent: "flex-end" }}>
+              <span style={{ ...BEBAS, fontSize: "28px", color: B }}>— Mamlesh</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          TESTIMONIALS
+          ================================================================ */}
+      <section ref={testSec.ref} style={{ backgroundColor: W, padding: "100px 24px", borderBottom: `4px solid ${B}` }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "60px", opacity: testSec.inView ? 1 : 0, transform: testSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
+            <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>WHAT STUDENTS SAY</div>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(44px, 7vw, 96px)", color: B, lineHeight: 0.9 }}>
+              REAL WORDS.<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>REAL PEOPLE.</span>
+            </h2>
+          </div>
+
+          {/* Brutalist testimonial grid — intentionally uneven */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
+            {testimonials.map((t, i) => {
+              const rotations = ["-1deg", "1.5deg", "-0.5deg", "1deg", "-1.5deg"];
+              return (
+                <div
+                  key={i}
+                  style={{
+                    backgroundColor: i % 3 === 0 ? B : i % 3 === 1 ? Y : W,
+                    color:           i % 3 === 0 ? W : B,
+                    border: `3px solid ${B}`,
+                    ...SHADOW,
+                    padding: "28px",
+                    transform: `rotate(${rotations[i]})`,
+                    opacity: testSec.inView ? 1 : 0,
+                    transition: `all 0.5s ${i * 0.1}s cubic-bezier(0.34, 1.56, 0.64, 1)`,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "rotate(0deg) translate(-3px,-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `8px 8px 0 ${B}`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = `rotate(${rotations[i]})`; (e.currentTarget as HTMLDivElement).style.boxShadow = `5px 5px 0 ${B}`; }}
+                >
+                  {/* Stars */}
+                  <div style={{ marginBottom: "12px" }}>
+                    {"★".repeat(t.rating).split("").map((s, j) => (
+                      <span key={j} style={{ color: i % 3 === 0 ? Y : B, fontSize: "16px" }}>{s}</span>
+                    ))}
+                  </div>
+                  <p style={{ ...MONO, fontSize: "13px", lineHeight: 1.7, marginBottom: "20px" }}>
+                    "{t.review}"
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ ...BEBAS, fontSize: "24px" }}>{t.name.toUpperCase()}</span>
+                    <a href={t.linkedin} target="_blank" rel="noopener noreferrer"
+                      style={{ ...MONO, fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textDecoration: "none", color: "inherit", opacity: 0.7 }}
+                    >LI →</a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          FAQ
+          ================================================================ */}
+      <section ref={faqSec.ref} style={{ backgroundColor: B, padding: "100px 24px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "60px", opacity: faqSec.inView ? 1 : 0, transform: faqSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
+            <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>
+              THE REAL QUESTIONS
+            </div>
+            <h2 style={{ ...BEBAS, fontSize: "clamp(44px, 7vw, 96px)", color: W, lineHeight: 0.9 }}>
+              YOU'RE<br />THINKING IT.<br /><span style={{ color: Y }}>WE'LL SAY IT.</span>
+            </h2>
+          </div>
+
+          {/* FAQ items */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+            {faqs.map((faq, i) => (
+              <div key={i} style={{ borderTop: i === 0 ? `3px solid ${Y}` : "none", borderBottom: `3px solid ${Y}`, borderLeft: `3px solid ${Y}`, borderRight: `3px solid ${Y}` }}>
+                <button
+                  style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 28px", background: openFaq === i ? Y : "transparent", cursor: "pointer", transition: "background 0.15s", ...MONO }}
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  <span style={{ fontWeight: 700, fontSize: "14px", color: openFaq === i ? B : W, textAlign: "left", letterSpacing: "0.05em" }}>
+                    {faq.q}
+                  </span>
+                  {openFaq === i
+                    ? <ChevronUp size={20} color={B} style={{ flexShrink: 0 }} />
+                    : <ChevronDown size={20} color={Y} style={{ flexShrink: 0 }} />
+                  }
+                </button>
+                {openFaq === i && (
+                  <div style={{ padding: "0 28px 24px", backgroundColor: `${Y}22` }}>
+                    <p style={{ ...MONO, fontSize: "13px", color: `${W}cc`, lineHeight: 1.8 }}>{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          PRE-FOOTER — Giant UPSTRIDE
+          ================================================================ */}
+      <section style={{ backgroundColor: W, padding: "60px 0", borderBottom: `4px solid ${B}`, overflow: "hidden", position: "relative" }}>
+        <div style={{ backgroundColor: Y, border: `4px solid ${B}`, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", margin: "0 24px 24px", ...MONO }}>
+          JOIN THE MOVEMENT
+        </div>
+        <div style={{ overflow: "hidden", borderTop: `4px solid ${B}`, borderBottom: `4px solid ${B}` }}>
+          <div style={{ ...BEBAS, fontSize: "clamp(80px, 18vw, 240px)", color: B, whiteSpace: "nowrap", lineHeight: 0.85, padding: "10px 40px", letterSpacing: "-0.02em" }}>
+            UP<span style={{ color: Y, WebkitTextStroke: `4px ${B}` }}>STRIDE</span>
+          </div>
+        </div>
+        <div style={{ padding: "32px 24px", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
+          <button
+            onClick={() => navigate("/programs")}
+            style={{ backgroundColor: B, color: Y, padding: "18px 40px", fontWeight: 700, fontSize: "14px", letterSpacing: "0.12em", border: `3px solid ${B}`, ...SHADOW_Y, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `8px 8px 0 ${Y}`; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `5px 5px 0 ${Y}`; }}
+          >
+            START YOUR JOURNEY →
+          </button>
+          <a
+            href="mailto:mamlesh@upstrides.in"
+            style={{ backgroundColor: Y, color: B, padding: "18px 40px", fontWeight: 700, fontSize: "14px", letterSpacing: "0.12em", border: `3px solid ${B}`, ...SHADOW, cursor: "pointer", transition: "all 0.15s", textDecoration: "none", display: "inline-block", ...MONO }}
+          >
+            CONTACT US
+          </a>
+        </div>
+      </section>
+
+      {/* ================================================================
+          FOOTER — Large, Dense, Brutalist
+          ================================================================ */}
+      <footer style={{ backgroundColor: B, borderTop: `4px solid ${Y}`, padding: "80px 24px 40px" }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+          {/* Top row */}
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "48px", marginBottom: "60px", borderBottom: `2px solid ${Y}44`, paddingBottom: "60px" }} className="grid-cols-1 md:grid-cols-4">
+            {/* Brand column */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                <img src="/upstride-logo.png" alt="Upstride" style={{ height: "40px", filter: "brightness(0) invert(1)" }} />
+                <span style={{ ...BEBAS, fontSize: "32px", color: W, letterSpacing: "0.1em" }}>UPSTRIDE</span>
+              </div>
+              <p style={{ ...MONO, fontSize: "12px", color: `${W}77`, lineHeight: 1.8, marginBottom: "20px" }}>
+                India's 1st BYOM platform for student career transformation. MSME registered. Passion-first, not profit-first.
+              </p>
+              <div style={{ marginBottom: "12px" }}>
+                <a href="mailto:mamlesh@upstrides.in" style={{ ...MONO, color: Y, fontSize: "13px", fontWeight: 700, textDecoration: "none" }}>
+                  mamlesh@upstrides.in
+                </a>
+              </div>
+              <div>
+                <a href="tel:+917358580180" style={{ ...MONO, color: Y, fontSize: "13px", fontWeight: 700, textDecoration: "none" }}>
+                  +91 7358580180
+                </a>
+              </div>
+            </div>
+
+            {/* Quick links */}
+            <div>
+              <div style={{ ...BEBAS, fontSize: "20px", color: Y, letterSpacing: "0.1em", marginBottom: "20px", borderBottom: `2px solid ${Y}44`, paddingBottom: "8px" }}>NAVIGATE</div>
+              {[
+                { label: "Programs",       action: () => navigate("/programs") },
+                { label: "Blogs",          action: () => navigate("/blogs") },
+                { label: "Student Portal", action: () => navigate("/login") },
+                { label: "Contact Us",     action: () => navigate("/contact") },
+              ].map(({ label, action }) => (
+                <button key={label} onClick={action}
+                  style={{ display: "block", ...MONO, fontSize: "12px", color: `${W}99`, marginBottom: "10px", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", transition: "color 0.15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = `${W}99`; }}
+                >{label}</button>
+              ))}
+            </div>
+
+            {/* Legal */}
+            <div>
+              <div style={{ ...BEBAS, fontSize: "20px", color: Y, letterSpacing: "0.1em", marginBottom: "20px", borderBottom: `2px solid ${Y}44`, paddingBottom: "8px" }}>LEGAL</div>
+              {[
+                { label: "Privacy Policy",      path: "/privacy-policy" },
+                { label: "Terms of Agreement",  path: "/terms" },
+              ].map(({ label, path }) => (
+                <button key={label} onClick={() => navigate(path)}
+                  style={{ display: "block", ...MONO, fontSize: "12px", color: `${W}99`, marginBottom: "10px", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", transition: "color 0.15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = `${W}99`; }}
+                >{label}</button>
+              ))}
+            </div>
+
+            {/* Colleges visited */}
+            <div>
+              <div style={{ ...BEBAS, fontSize: "20px", color: Y, letterSpacing: "0.1em", marginBottom: "20px", borderBottom: `2px solid ${Y}44`, paddingBottom: "8px" }}>COLLEGES VISITED</div>
+              {colleges.map((college, i) => (
+                <div key={i} style={{ ...MONO, fontSize: "11px", color: `${W}88`, marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ color: Y, fontSize: "8px" }}>▶</span>
+                  {college}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+            <span style={{ ...MONO, fontSize: "11px", color: `${W}55` }}>© 2026 UPSTRIDE. ALL RIGHTS RESERVED.</span>
+            <span style={{ ...MONO, fontSize: "11px", color: `${W}55` }}>MSME REGISTERED · GOVERNMENT OF INDIA</span>
+            <div style={{ display: "flex", gap: "16px" }}>
+              {["VIT", "SRM", "SAVEETHA", "KONGUNADU"].map(c => (
+                <span key={c} style={{ ...MONO, fontSize: "10px", color: `${W}44`, letterSpacing: "0.1em" }}>{c}</span>
+              ))}
             </div>
           </div>
         </div>

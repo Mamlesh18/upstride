@@ -11,9 +11,13 @@
       "Bash(del menubar.tsx navigation-menu.tsx pagination.tsx popover.tsx progress.tsx radio-group.tsx)",
       "Bash(del resizable.tsx scroll-area.tsx select.tsx separator.tsx sheet.tsx sidebar.tsx)",
       "Bash(del skeleton.tsx slider.tsx switch.tsx table.tsx tabs.tsx toggle-group.tsx toggle.tsx)",
-      "Bash(del use-mobile.tsx)"
+      "Bash(del use-mobile.tsx)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
   }
 }
