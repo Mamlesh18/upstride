@@ -2,32 +2,20 @@ import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowedRoles?: string[];
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const loginTimestamp = localStorage.getItem("loginTimestamp");
+const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("userRole");
 
-  // Check if token exists and is valid
-  if (!isAuthenticated || !loginTimestamp) {
-    // Clear any stale auth data
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("loginTimestamp");
-    localStorage.removeItem("userEmail");
-    return <Navigate to="/login" replace />;
-  }
+  if (!token) return <Navigate to="/login" replace />;
 
-  // Check if token has expired (1 hour = 3600000 milliseconds)
-  const currentTime = new Date().getTime();
-  const timeDifference = currentTime - parseInt(loginTimestamp);
-  const oneHour = 3600000;
-
-  if (timeDifference > oneHour) {
-    // Token expired, clear auth data
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("loginTimestamp");
-    localStorage.removeItem("userEmail");
-    return <Navigate to="/login" replace />;
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    if (role === "super_admin") return <Navigate to="/admin" replace />;
+    if (role === "project_manager") return <Navigate to="/projects" replace />;
+    if (role === "sales_person") return <Navigate to="/sales" replace />;
+    return <Navigate to="/portal" replace />;
   }
 
   return <>{children}</>;

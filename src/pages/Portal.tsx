@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FileText, Mail, Linkedin, ListChecks, FileCode, MessageSquare,
   Building2, Code2, LogOut, GraduationCap, Star, Database, Network,
   Cpu, MessageCircle, Lightbulb, Brain, Target, BookOpen, ArrowUpRight,
   Flame, Zap, Trophy, Eye, ShoppingCart, Server, Coffee,
+  PlayCircle, Lock, CheckSquare, X, Send,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { api } from "@/services/api";
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const Y    = "#FFE500";   // yellow
@@ -21,7 +23,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "recommended" | "training" | "placement";
+type ViewType = "recommended" | "training" | "placement" | "sessions";
 type Badge = { label: string; accent: boolean } | null;
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -161,17 +163,44 @@ const questionTypes = [
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────
+interface Session { id: string; session_number: number; week: number; title: string; drive_link: string; description: string; unlocked: boolean; }
+
 const Portal = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView]         = useState<ViewType>("recommended");
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [sessions, setSessions]               = useState<Session[]>([]);
+  const [sessionsInfo, setSessionsInfo]       = useState<{ weeks_completed: number; unlocked_count: number; days_enrolled: number } | null>(null);
+  const [showFeedback, setShowFeedback]       = useState(false);
+  const [feedbackForm, setFeedbackForm]       = useState({ type: "resource_request", message: "", resource_name: "" });
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+  const loadSessions = useCallback(async () => {
+    try {
+      const r = await api.student.getSessions() as { data: { sessions: Session[]; weeks_completed: number; unlocked_count: number; days_enrolled: number } };
+      setSessions(r.data.sessions);
+      setSessionsInfo({ weeks_completed: r.data.weeks_completed, unlocked_count: r.data.unlocked_count, days_enrolled: r.data.days_enrolled });
+    } catch { /* portal still works without sessions */ }
+  }, []);
+
+  useEffect(() => { loadSessions(); }, [loadSessions]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("loginTimestamp");
-    localStorage.removeItem("userEmail");
+    ["token", "userRole", "userEmail", "userName", "mustChangePassword"].forEach(k => localStorage.removeItem(k));
     toast({ title: "Logged out", description: "You have been logged out successfully" });
     navigate("/login");
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackForm.message.trim()) { toast({ title: "Please write a message", variant: "destructive" }); return; }
+    setFeedbackLoading(true);
+    try {
+      await api.student.submitFeedback(feedbackForm);
+      toast({ title: "Feedback sent!", description: "We'll review your request." });
+      setShowFeedback(false);
+      setFeedbackForm({ type: "resource_request", message: "", resource_name: "" });
+    } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+    finally { setFeedbackLoading(false); }
   };
 
   const switchView = (view: ViewType) => {
@@ -184,6 +213,7 @@ const Portal = () => {
     { view: "recommended", label: "Recommended", icon: Star,          count: "9" },
     { view: "training",    label: "Training",    icon: GraduationCap, count: `${trainingResourcesCategories.reduce((a, c) => a + c.resources.length, 0)}` },
     { view: "placement",   label: "Placement",   icon: Building2,     count: "17" },
+    { view: "sessions",    label: "Sessions",    icon: PlayCircle,    count: "11" },
   ];
 
   const cardHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -216,14 +246,22 @@ const Portal = () => {
               PORTAL
             </span>
           </div>
-          <button
-            onClick={handleLogout}
-            style={{ display: "flex", alignItems: "center", gap: "8px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#EF4444"; (e.currentTarget as HTMLButtonElement).style.color = "#EF4444"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORD; (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}
-          >
-            <LogOut size={14} /> Sign Out
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button onClick={() => navigate("/workspace")}
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: B, background: Y, border: `2px solid ${B}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", fontWeight: 700, ...MONO }}>
+              <CheckSquare size={14} /> My Workspace
+            </button>
+            <button onClick={() => setShowFeedback(true)}
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO }}>
+              <MessageSquare size={14} /> Request Resource
+            </button>
+            <button onClick={handleLogout}
+              style={{ display: "flex", alignItems: "center", gap: "8px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#EF4444"; (e.currentTarget as HTMLButtonElement).style.color = "#EF4444"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORD; (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}>
+              <LogOut size={14} /> Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -486,7 +524,110 @@ const Portal = () => {
             </div>
           </div>
         )}
+
+        {/* ── SESSIONS VIEW ──────────────────────────────────────────── */}
+        {currentView === "sessions" && (
+          <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
+            {sessionsInfo && (
+              <div style={{ display: "flex", gap: "12px", marginBottom: "28px", flexWrap: "wrap" }}>
+                <div style={{ backgroundColor: Y, border: `2px solid ${B}`, borderRadius: "8px", padding: "12px 20px" }}>
+                  <div style={{ fontSize: "20px", fontWeight: 700, color: B }}>{sessionsInfo.days_enrolled}</div>
+                  <div style={{ fontSize: "10px", color: B, letterSpacing: "0.1em" }}>DAYS ENROLLED</div>
+                </div>
+                <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "8px", padding: "12px 20px" }}>
+                  <div style={{ fontSize: "20px", fontWeight: 700, color: B }}>Week {sessionsInfo.weeks_completed}</div>
+                  <div style={{ fontSize: "10px", color: MUTE, letterSpacing: "0.1em" }}>CURRENT WEEK</div>
+                </div>
+                <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "8px", padding: "12px 20px" }}>
+                  <div style={{ fontSize: "20px", fontWeight: 700, color: "#16A34A" }}>{sessionsInfo.unlocked_count} / 11</div>
+                  <div style={{ fontSize: "10px", color: MUTE, letterSpacing: "0.1em" }}>SESSIONS UNLOCKED</div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {sessions.map(s => (
+                <div key={s.id} style={{
+                  backgroundColor: W,
+                  border: `2px solid ${s.unlocked ? BORD : BORD}`,
+                  borderLeft: `4px solid ${s.unlocked ? Y : BORD}`,
+                  borderRadius: "10px",
+                  padding: "18px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "16px",
+                  opacity: s.unlocked ? 1 : 0.6,
+                }}>
+                  <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: s.unlocked ? B : `${B}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {s.unlocked ? <PlayCircle size={18} color={Y} /> : <Lock size={16} color={MUTE} />}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+                      <span style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em" }}>SESSION {s.session_number} · WEEK {s.week}</span>
+                      {s.unlocked && <span style={{ fontSize: "9px", backgroundColor: "#DCFCE7", color: "#16A34A", padding: "1px 6px", borderRadius: "4px", fontWeight: 700 }}>UNLOCKED</span>}
+                      {!s.unlocked && <span style={{ fontSize: "9px", backgroundColor: "#F3F4F6", color: MUTE, padding: "1px 6px", borderRadius: "4px", fontWeight: 700 }}>LOCKED</span>}
+                    </div>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: B }}>{s.title}</div>
+                    {s.description && <div style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>{s.description}</div>}
+                  </div>
+                  {s.unlocked && s.drive_link ? (
+                    <a href={s.drive_link} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", backgroundColor: B, color: Y, borderRadius: "6px", fontSize: "11px", fontWeight: 700, textDecoration: "none", flexShrink: 0, ...MONO }}>
+                      <PlayCircle size={13} /> WATCH
+                    </a>
+                  ) : s.unlocked ? (
+                    <span style={{ fontSize: "11px", color: MUTE, padding: "8px 14px", border: `1px solid ${BORD}`, borderRadius: "6px" }}>Recording soon</span>
+                  ) : (
+                    <span style={{ fontSize: "11px", color: MUTE }}>Unlocks Week {s.week}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* ── FEEDBACK MODAL ──────────────────────────────────────────────── */}
+      {showFeedback && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" }}>
+          <div style={{ backgroundColor: W, border: `2px solid ${B}`, borderRadius: "12px", padding: "32px", width: "100%", maxWidth: "460px", boxShadow: `6px 6px 0 ${Y}`, ...MONO }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 700, color: B }}>Request a Resource</h3>
+              <button onClick={() => setShowFeedback(false)} style={{ background: "none", border: "none", cursor: "pointer", color: MUTE }}><X size={20} /></button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "6px" }}>TYPE</label>
+                <select value={feedbackForm.type} onChange={e => setFeedbackForm(f => ({ ...f, type: e.target.value }))}
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="resource_request">Resource Request</option>
+                  <option value="suggestion">Suggestion</option>
+                  <option value="bug">Report an Issue</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "6px" }}>RESOURCE NAME (optional)</label>
+                <input type="text" placeholder="e.g. Node.js Interview Questions"
+                  value={feedbackForm.resource_name} onChange={e => setFeedbackForm(f => ({ ...f, resource_name: e.target.value }))}
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" as const }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "6px" }}>MESSAGE</label>
+                <textarea rows={4} placeholder="Describe what you need or what's missing..."
+                  value={feedbackForm.message} onChange={e => setFeedbackForm(f => ({ ...f, message: e.target.value }))}
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <button onClick={() => setShowFeedback(false)} style={{ padding: "9px 16px", backgroundColor: W, color: MUTE, border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", cursor: "pointer", ...MONO }}>Cancel</button>
+                <button onClick={submitFeedback} disabled={feedbackLoading}
+                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 18px", backgroundColor: B, color: Y, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: feedbackLoading ? "not-allowed" : "pointer", ...MONO }}>
+                  <Send size={13} /> {feedbackLoading ? "Sending..." : "Send Request"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

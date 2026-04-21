@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { api } from "@/services/api";
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const Y    = "#FFE500";  // yellow
@@ -24,40 +25,49 @@ const Login = () => {
 
   useEffect(() => {
     setMounted(true);
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    const loginTimestamp  = localStorage.getItem("loginTimestamp");
-    if (isAuthenticated && loginTimestamp) {
-      const diff = Date.now() - parseInt(loginTimestamp);
-      if (diff <= 3_600_000) navigate("/portal");
-      else {
-        localStorage.removeItem("isAuthenticated");
-        localStorage.removeItem("loginTimestamp");
-        localStorage.removeItem("userEmail");
-      }
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("userRole");
+    if (token) {
+      if (role === "super_admin") navigate("/admin");
+      else if (role === "project_manager") navigate("/projects");
+      else navigate("/portal");
     }
   }, [navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     if (!email || !password) {
       toast({ title: "Missing fields", description: "Please enter both email and password", variant: "destructive" });
-      setIsLoading(false);
       return;
     }
-    setTimeout(() => {
-      if (email === "upstrideintern@gmail.com" && password === "upstride#04") {
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("loginTimestamp", Date.now().toString());
-        localStorage.setItem("userEmail", email);
-        toast({ title: "Access granted", description: "Welcome to the Upstride portal" });
-        setIsLoading(false);
-        navigate("/portal");
+    setIsLoading(true);
+    try {
+      const res = await api.auth.login(email, password);
+      localStorage.setItem("token", res.access_token);
+      localStorage.setItem("userRole", res.user.role as string);
+      localStorage.setItem("userEmail", res.user.email as string);
+      localStorage.setItem("userName", res.user.name as string);
+      localStorage.setItem("mustChangePassword", String(res.user.must_change_password));
+
+      toast({ title: "Access granted", description: `Welcome, ${res.user.name}!` });
+
+      if (res.user.must_change_password) {
+        navigate("/change-password");
+      } else if (res.user.role === "super_admin") {
+        navigate("/admin");
+      } else if (res.user.role === "project_manager") {
+        navigate("/projects");
+      } else if (res.user.role === "sales_person") {
+        navigate("/sales");
       } else {
-        toast({ title: "Invalid credentials", description: "The email or password is incorrect", variant: "destructive" });
-        setIsLoading(false);
+        navigate("/portal");
       }
-    }, 900);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed";
+      toast({ title: "Login failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputStyle = (name: string): React.CSSProperties => ({

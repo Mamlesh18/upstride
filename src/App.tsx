@@ -12,10 +12,14 @@ const Programs = lazy(() => import("./pages/Programs"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Portal = lazy(() => import("./pages/Portal"));
 const Login = lazy(() => import("./pages/Login"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const Admin = lazy(() => import("./pages/Admin"));
+const ProjectManager = lazy(() => import("./pages/ProjectManager"));
+const SalesPerson = lazy(() => import("./pages/SalesPerson"));
+const Workspace = lazy(() => import("./pages/Workspace"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
-// Blogs removed
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -42,9 +46,34 @@ const App = () => (
             <Route path="/programs" element={<Programs />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/portal" element={
+            <Route path="/change-password" element={
               <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            } />
+            <Route path="/portal" element={
+              <ProtectedRoute allowedRoles={["student"]}>
                 <Portal />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={["super_admin"]}>
+                <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute allowedRoles={["project_manager"]}>
+                <ProjectManager />
+              </ProtectedRoute>
+            } />
+            <Route path="/sales" element={
+              <ProtectedRoute allowedRoles={["sales_person"]}>
+                <SalesPerson />
+              </ProtectedRoute>
+            } />
+            <Route path="/workspace" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Workspace />
               </ProtectedRoute>
             } />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

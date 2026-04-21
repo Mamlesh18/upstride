@@ -12,7 +12,8 @@
       "Bash(del resizable.tsx scroll-area.tsx select.tsx separator.tsx sheet.tsx sidebar.tsx)",
       "Bash(del skeleton.tsx slider.tsx switch.tsx table.tsx tabs.tsx toggle-group.tsx toggle.tsx)",
       "Bash(del use-mobile.tsx)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//c/Users/mamle/visualstudiocode/Upstride/**)"
     ],
     "deny": [],
     "ask": []
