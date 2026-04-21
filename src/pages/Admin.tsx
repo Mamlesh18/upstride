@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle } from "lucide-react";
+import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -8,12 +8,12 @@ const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFA
 const BORD = "#E5E5E5"; const MUTE = "#6B7280"; const RED = "#EF4444"; const GREEN = "#22C55E";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events";
+type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources";
 type ContactStatus = "pending" | "picked" | "rejected" | "missed" | "joining" | "will_discuss";
 
 interface Student { id: string; name: string; email: string; is_active: boolean; must_change_password: boolean; }
 interface Manager { id: string; name: string; email: string; is_active: boolean; }
-interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; manager_id: string; manager_name: string; }
+interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string; manager_name: string; }
 interface Salesperson { id: string; name: string; email: string; is_active: boolean; }
 interface Contact { id: string; name: string; phone: string; email: string; status: ContactStatus; notes: string; assigned_to: string | null; assigned_to_name: string | null; }
 interface Stats {
@@ -85,6 +85,12 @@ export default function Admin() {
   interface EventItem { id: string; title: string; location: string; date: string; description: string; is_active: boolean; image_data: string | null; image_type: string | null; }
   const [eventsList, setEventsList] = useState<EventItem[]>([]);
   const [showAddEvent, setShowAddEvent] = useState(false);
+
+  interface AdminResource { id: string; section: string; category: string; name: string; tagline: string; url: string; company_type?: string; sub_type?: string; emoji?: string; badge_label?: string; badge_accent?: boolean; }
+  const [adminResources, setAdminResources] = useState<AdminResource[]>([]);
+  const [showAddResource, setShowAddResource] = useState(false);
+  const [resourceSection, setResourceSection] = useState("recommended");
+  const [resourceForm, setResourceForm] = useState({ section: "recommended", category: "", name: "", tagline: "", url: "", company_type: "service", sub_type: "", emoji: "", badge_label: "", badge_accent: false });
   const [eventForm, setEventForm] = useState({ title: "", location: "", date: "", description: "", is_active: true });
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventImagePreview, setEventImagePreview] = useState<string | null>(null);
@@ -103,7 +109,7 @@ export default function Admin() {
   // Forms
   const [studentForm, setStudentForm] = useState({ emails: "", password: "" });
   const [managerForm, setManagerForm] = useState({ email: "", name: "", password: "" });
-  const [projectForm, setProjectForm] = useState({ title: "", description: "", project_link: "", meeting_link: "", manager_id: "" });
+  const [projectForm, setProjectForm] = useState({ title: "", description: "", project_link: "", meeting_link: "", github_link: "", day: "", time: "", manager_id: "" });
   const [spForm, setSpForm] = useState({ email: "", name: "", password: "" });
   const [bulkContactsRaw, setBulkContactsRaw] = useState("");
   const [allotForm, setAllotForm] = useState({ salesperson_id: "", count: 10 });
@@ -200,6 +206,15 @@ export default function Admin() {
 
   useEffect(() => { if (tab === "events") loadEvents(); }, [tab, loadEvents]);
 
+  const loadAdminResources = useCallback(async () => {
+    try {
+      const r = await api.resources.adminList() as { data: { resources: AdminResource[] } };
+      setAdminResources(r.data.resources);
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { if (tab === "resources") loadAdminResources(); }, [tab, loadAdminResources]);
+
   const handleAddStudent = async () => {
     const emails = studentForm.emails.split(/[\n,]+/).map(e => e.trim()).filter(Boolean);
     if (!emails.length) { toast({ title: "No emails entered", variant: "destructive" }); return; }
@@ -229,7 +244,7 @@ export default function Admin() {
       await api.admin.addProject(projectForm);
       toast({ title: "Project added" });
       setShowAddProject(false);
-      setProjectForm({ title: "", description: "", project_link: "", meeting_link: "", manager_id: "" });
+      setProjectForm({ title: "", description: "", project_link: "", meeting_link: "", github_link: "", day: "", time: "", manager_id: "" });
       loadProjects(); loadStats();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
@@ -285,6 +300,12 @@ export default function Admin() {
       setShowBulkContacts(false); setBulkContactsRaw("");
       loadContacts();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const handleDeleteContact = async (id: string) => {
+    if (!confirm("Remove this contact?")) return;
+    try { await api.admin.deleteContact(id); loadContacts(); toast({ title: "Contact removed" }); }
+    catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
   const handleAllot = async () => {
@@ -355,6 +376,39 @@ export default function Admin() {
     catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
+  const handleAddResource = async () => {
+    if (!resourceForm.name || !resourceForm.tagline || !resourceForm.url) {
+      toast({ title: "Name, tagline and URL are required", variant: "destructive" }); return;
+    }
+    const payload: Record<string, unknown> = {
+      section: resourceForm.section,
+      category: resourceForm.category || resourceForm.name,
+      name: resourceForm.name,
+      tagline: resourceForm.tagline,
+      url: resourceForm.url,
+    };
+    if (resourceForm.section === "placement") {
+      payload.company_type = resourceForm.company_type;
+      if (resourceForm.company_type === "service" && resourceForm.sub_type) payload.sub_type = resourceForm.sub_type;
+      if (resourceForm.emoji) payload.emoji = resourceForm.emoji;
+    }
+    if (resourceForm.badge_label) { payload.badge_label = resourceForm.badge_label; payload.badge_accent = resourceForm.badge_accent; }
+    if (resourceForm.emoji && resourceForm.section !== "placement") payload.emoji = resourceForm.emoji;
+    try {
+      await api.resources.add(payload as Parameters<typeof api.resources.add>[0]);
+      toast({ title: "Resource added" });
+      setShowAddResource(false);
+      setResourceForm({ section: "recommended", category: "", name: "", tagline: "", url: "", company_type: "service", sub_type: "", emoji: "", badge_label: "", badge_accent: false });
+      loadAdminResources();
+    } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const handleDeleteResource = async (id: string, name: string) => {
+    if (!confirm(`Delete "${name}"?`)) return;
+    try { await api.resources.delete(id); loadAdminResources(); toast({ title: "Deleted" }); }
+    catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -372,6 +426,7 @@ export default function Admin() {
     { key: "sessions", label: "Sessions", icon: <PlayCircle size={15} /> },
     { key: "feedback", label: "Feedback", icon: <MessageSquare size={15} /> },
     { key: "events", label: "Events", icon: <CalendarDays size={15} /> },
+    { key: "resources", label: "Resources", icon: <BookOpen size={15} /> },
   ];
 
   return (
@@ -619,13 +674,20 @@ export default function Admin() {
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {projects.map(p => (
                 <div key={p.id} style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "10px", padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "14px", fontWeight: 700, color: B, marginBottom: "4px" }}>{p.title}</div>
-                    <div style={{ fontSize: "12px", color: MUTE, marginBottom: "8px" }}>Manager: <strong style={{ color: B }}>{p.manager_name}</strong></div>
+                    <div style={{ fontSize: "12px", color: MUTE, marginBottom: "6px" }}>Manager: <strong style={{ color: B }}>{p.manager_name}</strong></div>
+                    {(p.day || p.time) && (
+                      <div style={{ display: "flex", gap: "12px", marginBottom: "6px" }}>
+                        {p.day && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: Y, color: B, padding: "2px 8px", border: `1px solid ${B}`, borderRadius: "4px" }}>📅 {p.day}</span>}
+                        {p.time && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${B}10`, color: B, padding: "2px 8px", border: `1px solid ${BORD}`, borderRadius: "4px" }}>🕐 {p.time}</span>}
+                      </div>
+                    )}
                     {p.description && <div style={{ fontSize: "12px", color: MUTE, marginBottom: "8px" }}>{p.description}</div>}
                     <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                       {p.project_link && <a href={p.project_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Project Link ↗</a>}
                       {p.meeting_link && <a href={p.meeting_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#0EA5E9", fontWeight: 700 }}>Meeting Link ↗</a>}
+                      {p.github_link && <a href={p.github_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#111827", fontWeight: 700 }}>GitHub ↗</a>}
                     </div>
                   </div>
                   <button onClick={() => deleteProject(p.id)} style={{ background: "none", border: "none", cursor: "pointer", color: RED, flexShrink: 0 }}><Trash2 size={16} /></button>
@@ -840,40 +902,162 @@ export default function Admin() {
               <Btn onClick={() => setShowAllot(true)} small><PhoneCall size={12} style={{ display: "inline", marginRight: "4px" }} />Allot Contacts</Btn>
             </div>
 
-            {/* Contacts table */}
+            {/* Contacts grouped by assigned date */}
+            {(() => {
+              const formatAdminDay = (iso: string) => {
+                try {
+                  const d = new Date(iso);
+                  const today = new Date();
+                  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+                  if (d.toDateString() === today.toDateString()) return "Today";
+                  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+                  return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                } catch { return iso; }
+              };
+              const grouped = (() => {
+                const map: Record<string, Contact[]> = {};
+                for (const c of contacts) {
+                  const key = (c as Contact & { assigned_at?: string }).assigned_at
+                    ? new Date((c as Contact & { assigned_at?: string }).assigned_at!).toDateString()
+                    : "Unassigned";
+                  if (!map[key]) map[key] = [];
+                  map[key].push(c);
+                }
+                return Object.entries(map)
+                  .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
+              })();
+
+              if (contacts.length === 0 && !loading) return (
+                <div style={{ textAlign: "center", padding: "32px", color: MUTE, fontSize: "13px", backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "10px" }}>
+                  No contacts found. Import contacts to get started.
+                </div>
+              );
+
+              return grouped.map(([dateKey, dayContacts]) => {
+                const byCfg = Object.entries(STATUS_CONFIG).reduce((acc, [k, v]) => {
+                  const n = dayContacts.filter(c => c.status === k as ContactStatus).length;
+                  if (n > 0) acc.push({ key: k, label: v.label, color: v.color, bg: v.bg, n });
+                  return acc;
+                }, [] as { key: string; label: string; color: string; bg: string; n: number }[]);
+
+                return (
+                  <div key={dateKey} style={{ marginBottom: "20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: B, borderRadius: "8px 8px 0 0", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: Y }}>📅 {formatAdminDay(dateKey)}</span>
+                      <span style={{ fontSize: "11px", color: `${W}70` }}>{dayContacts.length} contacts</span>
+                      <div style={{ display: "flex", gap: "6px", marginLeft: "auto", flexWrap: "wrap" }}>
+                        {byCfg.map(({ key, label, color, bg, n }) => (
+                          <span key={key} style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", backgroundColor: bg, color }}>{label}: {n}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ backgroundColor: `${B}06`, borderBottom: `1px solid ${BORD}` }}>
+                            {["#", "Name", "Phone", "Email", "Assigned To", "Status", "Notes", ""].map(h => (
+                              <th key={h} style={{ padding: "9px 14px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", whiteSpace: "nowrap" }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dayContacts.map((c, i) => {
+                            const cfg = STATUS_CONFIG[c.status] || STATUS_CONFIG.pending;
+                            return (
+                              <tr key={c.id} style={{ borderBottom: `1px solid ${BORD}`, backgroundColor: i % 2 === 0 ? W : `${B}02` }}>
+                                <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE }}>{i + 1}</td>
+                                <td style={{ padding: "9px 14px", fontSize: "13px", fontWeight: 600, color: B }}>{c.name}</td>
+                                <td style={{ padding: "9px 14px", fontSize: "12px", color: B }}>{c.phone}</td>
+                                <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE }}>{c.email || "—"}</td>
+                                <td style={{ padding: "9px 14px", fontSize: "12px", color: c.assigned_to_name ? B : MUTE }}>{c.assigned_to_name || <em>Unassigned</em>}</td>
+                                <td style={{ padding: "9px 14px" }}>
+                                  <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "10px", backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+                                </td>
+                                <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes || "—"}</td>
+                                <td style={{ padding: "9px 14px" }}>
+                                  <button onClick={() => handleDeleteContact(c.id)} title="Remove contact" style={{ background: "none", border: "none", cursor: "pointer", color: RED }}>
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+            <p style={{ fontSize: "11px", color: MUTE, marginTop: "8px" }}>Showing {contacts.length} of {contactTotal} contacts</p>
+          </div>
+        )}
+
+        {/* ── Resources Tab ─────────────────────────────────────── */}
+        {tab === "resources" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {["all", "recommended", "training", "placement"].map(s => (
+                  <button key={s} onClick={() => setResourceSection(s)}
+                    style={{ padding: "6px 14px", borderRadius: "20px", border: `2px solid ${resourceSection === s ? B : BORD}`, backgroundColor: resourceSection === s ? B : W, color: resourceSection === s ? Y : MUTE, fontSize: "11px", fontWeight: 700, cursor: "pointer", ...MONO }}>
+                    {s === "all" ? "ALL" : s.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Btn onClick={loadAdminResources} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
+                <Btn onClick={() => setShowAddResource(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Add Resource</Btn>
+              </div>
+            </div>
+
             <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: `${B}08`, borderBottom: `2px solid ${BORD}` }}>
-                    {["#", "Name", "Phone", "Email", "Assigned To", "Status", "Notes"].map(h => (
+                    {["Section", "Category", "Name", "Tagline", "Sub-type / Company Type", "Actions"].map(h => (
                       <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", whiteSpace: "nowrap" }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {contacts.map((c, i) => {
-                    const cfg = STATUS_CONFIG[c.status] || STATUS_CONFIG.pending;
-                    return (
-                      <tr key={c.id} style={{ borderBottom: `1px solid ${BORD}`, backgroundColor: i % 2 === 0 ? W : `${B}02` }}>
-                        <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE }}>{i + 1}</td>
-                        <td style={{ padding: "9px 14px", fontSize: "13px", fontWeight: 600, color: B }}>{c.name}</td>
-                        <td style={{ padding: "9px 14px", fontSize: "12px", color: B }}>{c.phone}</td>
-                        <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE }}>{c.email || "—"}</td>
-                        <td style={{ padding: "9px 14px", fontSize: "12px", color: c.assigned_to_name ? B : MUTE }}>{c.assigned_to_name || <em>Unassigned</em>}</td>
-                        <td style={{ padding: "9px 14px" }}>
-                          <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "10px", backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+                  {adminResources
+                    .filter(r => resourceSection === "all" || r.section === resourceSection)
+                    .map((r, i, arr) => (
+                      <tr key={r.id} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${BORD}` : "none" }}>
+                        <td style={{ padding: "10px 14px" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px",
+                            backgroundColor: r.section === "recommended" ? Y : r.section === "training" ? "#E0F2FE" : "#EDE9FE",
+                            color: r.section === "recommended" ? B : r.section === "training" ? "#0369A1" : "#7C3AED" }}>
+                            {r.section.toUpperCase()}
+                          </span>
                         </td>
-                        <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes || "—"}</td>
+                        <td style={{ padding: "10px 14px", fontSize: "12px", color: MUTE }}>{r.category}</td>
+                        <td style={{ padding: "10px 14px", fontSize: "13px", fontWeight: 600, color: B }}>
+                          {r.emoji && <span style={{ marginRight: "6px" }}>{r.emoji}</span>}
+                          {r.name}
+                        </td>
+                        <td style={{ padding: "10px 14px", fontSize: "11px", color: MUTE, maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.tagline}</td>
+                        <td style={{ padding: "10px 14px", fontSize: "11px", color: MUTE }}>
+                          {r.sub_type || r.company_type || "—"}
+                        </td>
+                        <td style={{ padding: "10px 14px" }}>
+                          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                            <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Open ↗</a>
+                            <button onClick={() => handleDeleteResource(r.id, r.name)} style={{ background: "none", border: "none", cursor: "pointer", color: RED }}><Trash2 size={14} /></button>
+                          </div>
+                        </td>
                       </tr>
-                    );
-                  })}
-                  {contacts.length === 0 && !loading && (
-                    <tr><td colSpan={7} style={{ padding: "32px", textAlign: "center", color: MUTE, fontSize: "13px" }}>No contacts found. Import contacts to get started.</td></tr>
+                    ))}
+                  {adminResources.filter(r => resourceSection === "all" || r.section === resourceSection).length === 0 && (
+                    <tr><td colSpan={6} style={{ padding: "32px", textAlign: "center", color: MUTE, fontSize: "13px" }}>No resources in this section</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
-            <p style={{ fontSize: "11px", color: MUTE, marginTop: "8px" }}>Showing {contacts.length} of {contactTotal} contacts</p>
+            <p style={{ fontSize: "11px", color: MUTE, marginTop: "8px" }}>
+              Total: {adminResources.length} resources
+            </p>
           </div>
         )}
       </div>
@@ -921,7 +1105,7 @@ export default function Admin() {
       {/* Add Project Modal */}
       {showAddProject && (
         <Modal title="Add Project" onClose={() => setShowAddProject(false)}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxHeight: "70vh", overflowY: "auto" }}>
             <div>
               <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>ASSIGN TO MANAGER</label>
               <select value={projectForm.manager_id} onChange={e => setProjectForm(f => ({ ...f, manager_id: e.target.value }))}
@@ -932,8 +1116,13 @@ export default function Admin() {
             </div>
             <Input label="PROJECT TITLE" type="text" placeholder="Project title" value={projectForm.title} onChange={e => setProjectForm(f => ({ ...f, title: e.target.value }))} />
             <Input label="DESCRIPTION" type="text" placeholder="Short description (optional)" value={projectForm.description} onChange={e => setProjectForm(f => ({ ...f, description: e.target.value }))} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <Input label="DAY" type="text" placeholder="e.g. Monday" value={projectForm.day} onChange={e => setProjectForm(f => ({ ...f, day: e.target.value }))} />
+              <Input label="TIME" type="text" placeholder="e.g. 10:00 AM" value={projectForm.time} onChange={e => setProjectForm(f => ({ ...f, time: e.target.value }))} />
+            </div>
             <Input label="PROJECT LINK" type="url" placeholder="https://..." value={projectForm.project_link} onChange={e => setProjectForm(f => ({ ...f, project_link: e.target.value }))} />
             <Input label="MEETING LINK" type="url" placeholder="https://meet.google.com/..." value={projectForm.meeting_link} onChange={e => setProjectForm(f => ({ ...f, meeting_link: e.target.value }))} />
+            <Input label="GITHUB LINK" type="url" placeholder="https://github.com/..." value={projectForm.github_link} onChange={e => setProjectForm(f => ({ ...f, github_link: e.target.value }))} />
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
               <Btn onClick={() => setShowAddProject(false)} color={MUTE} small>Cancel</Btn>
               <Btn onClick={handleAddProject} small>Add Project</Btn>
@@ -1023,6 +1212,70 @@ export default function Admin() {
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
               <Btn onClick={() => setShowAllot(false)} color={MUTE} small>Cancel</Btn>
               <Btn onClick={handleAllot} small>Allot Contacts</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Add Resource Modal */}
+      {showAddResource && (
+        <Modal title="Add Resource" onClose={() => setShowAddResource(false)}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxHeight: "70vh", overflowY: "auto" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>SECTION</label>
+              <select value={resourceForm.section} onChange={e => setResourceForm(f => ({ ...f, section: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                <option value="recommended">Recommended</option>
+                <option value="training">Training</option>
+                <option value="placement">Placement</option>
+              </select>
+            </div>
+
+            {resourceForm.section === "placement" && (
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>COMPANY TYPE</label>
+                <select value={resourceForm.company_type} onChange={e => setResourceForm(f => ({ ...f, company_type: e.target.value }))}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="service">Service (TCS, Infosys...)</option>
+                  <option value="product">Product (Google, Amazon...)</option>
+                </select>
+              </div>
+            )}
+
+            <Input
+              label={resourceForm.section === "placement" && resourceForm.company_type === "service" ? "COMPANY NAME (Category)" : "CATEGORY"}
+              type="text"
+              placeholder={resourceForm.section === "training" ? "e.g. Python, React, DSA" : resourceForm.section === "placement" ? "e.g. TCS, Infosys, Google" : "e.g. Resume, LinkedIn"}
+              value={resourceForm.category}
+              onChange={e => setResourceForm(f => ({ ...f, category: e.target.value }))}
+            />
+
+            {resourceForm.section === "placement" && resourceForm.company_type === "service" && (
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>QUESTION TYPE</label>
+                <select value={resourceForm.sub_type} onChange={e => setResourceForm(f => ({ ...f, sub_type: e.target.value }))}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="">Select type...</option>
+                  <option value="Aptitude">Aptitude</option>
+                  <option value="DSA">DSA</option>
+                  <option value="Technical Interview">Technical Interview</option>
+                </select>
+              </div>
+            )}
+
+            <Input label="RESOURCE NAME" type="text" placeholder="e.g. Python Crash Course" value={resourceForm.name} onChange={e => setResourceForm(f => ({ ...f, name: e.target.value }))} />
+            <Input label="TAGLINE / DESCRIPTION" type="text" placeholder="One line that sells this resource" value={resourceForm.tagline} onChange={e => setResourceForm(f => ({ ...f, tagline: e.target.value }))} />
+            <Input label="URL" type="url" placeholder="https://..." value={resourceForm.url} onChange={e => setResourceForm(f => ({ ...f, url: e.target.value }))} />
+
+            <Input label="EMOJI (optional)" type="text" placeholder="e.g. 🚀" value={resourceForm.emoji} onChange={e => setResourceForm(f => ({ ...f, emoji: e.target.value }))} />
+
+            {resourceForm.section === "recommended" && (
+              <Input label="BADGE LABEL (optional)" type="text" placeholder="e.g. MUST USE, TOP PICK" value={resourceForm.badge_label} onChange={e => setResourceForm(f => ({ ...f, badge_label: e.target.value }))} />
+            )}
+
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Btn onClick={() => setShowAddResource(false)} color={MUTE} small>Cancel</Btn>
+              <Btn onClick={handleAddResource} small>Add Resource</Btn>
             </div>
           </div>
         </Modal>

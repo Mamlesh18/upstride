@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Video, FolderKanban, LogOut, RefreshCw } from "lucide-react";
+import { ExternalLink, Video, FolderKanban, LogOut, RefreshCw, Github, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -8,7 +8,7 @@ const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFA
 const BORD = "#E5E5E5"; const MUTE = "#6B7280";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; }
+interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; }
 
 export default function ProjectManager() {
   const navigate = useNavigate();
@@ -82,6 +82,20 @@ export default function ProjectManager() {
               <div key={p.id} style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "12px", padding: "24px", boxShadow: `4px 4px 0 ${Y}`, display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div>
                   <h3 style={{ fontSize: "15px", fontWeight: 700, color: B, marginBottom: "6px" }}>{p.title}</h3>
+                  {(p.day || p.time) && (
+                    <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
+                      {p.day && (
+                        <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, backgroundColor: Y, color: B, padding: "3px 10px", border: `1px solid ${B}`, borderRadius: "4px" }}>
+                          📅 {p.day}
+                        </span>
+                      )}
+                      {p.time && (
+                        <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, backgroundColor: `${B}08`, color: B, padding: "3px 10px", border: `1px solid ${BORD}`, borderRadius: "4px" }}>
+                          <Clock size={11} /> {p.time}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {p.description && <p style={{ fontSize: "12px", color: MUTE, lineHeight: 1.6 }}>{p.description}</p>}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "auto", paddingTop: "12px", borderTop: `1px solid ${BORD}` }}>
@@ -91,7 +105,7 @@ export default function ProjectManager() {
                       <ExternalLink size={13} /> VIEW PROJECT
                     </a>
                   ) : (
-                    <div style={{ padding: "8px 12px", backgroundColor: `${BORD}`, borderRadius: "6px", fontSize: "11px", color: MUTE }}>No project link</div>
+                    <div style={{ padding: "8px 12px", backgroundColor: BORD, borderRadius: "6px", fontSize: "11px", color: MUTE }}>No project link</div>
                   )}
                   {p.meeting_link ? (
                     <a href={p.meeting_link} target="_blank" rel="noopener noreferrer"
@@ -99,7 +113,13 @@ export default function ProjectManager() {
                       <Video size={13} /> JOIN MEETING
                     </a>
                   ) : (
-                    <div style={{ padding: "8px 12px", backgroundColor: `${BORD}`, borderRadius: "6px", fontSize: "11px", color: MUTE }}>No meeting link</div>
+                    <div style={{ padding: "8px 12px", backgroundColor: BORD, borderRadius: "6px", fontSize: "11px", color: MUTE }}>No meeting link</div>
+                  )}
+                  {p.github_link && (
+                    <a href={p.github_link} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", backgroundColor: "#111827", color: W, borderRadius: "6px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", textDecoration: "none" }}>
+                      <Github size={13} /> VIEW ON GITHUB
+                    </a>
                   )}
                 </div>
               </div>

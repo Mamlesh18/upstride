@@ -1,4 +1,5 @@
 const BASE_URL = "https://upstride-backend-portal.vercel.app";
+// const BASE_URL = "http://localhost:8000";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -72,7 +73,7 @@ export const api = {
     deleteManager: (id: string) =>
       request(`/api/admin/managers/${id}`, { method: "DELETE" }),
 
-    addProject: (data: { title: string; description: string; project_link: string; meeting_link: string; manager_id: string }) =>
+    addProject: (data: { title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string }) =>
       request("/api/admin/projects", { method: "POST", body: JSON.stringify(data) }),
     listProjects: () => request("/api/admin/projects"),
     updateProject: (id: string, data: Record<string, unknown>) =>
@@ -101,6 +102,7 @@ export const api = {
       return request(`/api/admin/contacts?${q}`);
     },
     contactStats: () => request("/api/admin/contacts/stats"),
+    deleteContact: (id: string) => request(`/api/admin/contacts/${id}`, { method: "DELETE" }),
     clearUnassigned: () => request("/api/admin/contacts/clear-unassigned", { method: "DELETE" }),
   },
 
@@ -137,6 +139,17 @@ export const api = {
     create: (fd: FormData) => formRequest("/api/admin/events", fd),
     update: (id: string, fd: FormData) => formRequest(`/api/admin/events/${id}`, fd, "PATCH"),
     delete: (id: string) => request(`/api/admin/events/${id}`, { method: "DELETE" }),
+  },
+
+  resources: {
+    getAll: () => request("/api/resources"),
+    adminList: () => request("/api/admin/resources"),
+    add: (data: {
+      section: string; category: string; name: string; tagline: string; url: string;
+      order?: number; company_type?: string; sub_type?: string; emoji?: string;
+      badge_label?: string; badge_accent?: boolean;
+    }) => request("/api/admin/resources", { method: "POST", body: JSON.stringify(data) }),
+    delete: (id: string) => request(`/api/admin/resources/${id}`, { method: "DELETE" }),
   },
 
   adminExtra: {
