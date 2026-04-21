@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://upstride-backend-portal.vercel.app";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
