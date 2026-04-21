@@ -526,6 +526,12 @@ Inspired by clueso.io - clean, modern, minimalist aesthetic
     60%       { opacity: 1;   transform: skewX(2deg); }
   }
 
+  @keyframes webinarPulse {
+    0%, 100% { transform: translate(0, 0);   box-shadow: 6px 6px 0 #0A0A0A; }
+    40%      { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 #0A0A0A; }
+    70%      { transform: translate(-1px, -1px); box-shadow: 7px 7px 0 #0A0A0A; }
+  }
+
   .brut-marquee {
     display: flex;
     width: max-content;

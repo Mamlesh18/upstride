@@ -434,8 +434,20 @@ const Index = () => {
                   <span style={{ color: Y }}>COMING TO</span><br />
                   {ev.location.toUpperCase()}
                 </h2>
-                <div style={{ backgroundColor: Y, border: `3px solid ${Y}`, display: "inline-block", padding: "10px 20px", marginBottom: "28px", ...MONO }}>
-                  <span style={{ fontWeight: 700, fontSize: "14px", color: B }}>📅 {dateStr.toUpperCase()}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "28px" }}>
+                  <div style={{ backgroundColor: Y, border: `3px solid ${Y}`, display: "inline-block", padding: "10px 20px", ...MONO }}>
+                    <span style={{ fontWeight: 700, fontSize: "14px", color: B }}>📅 {dateStr.toUpperCase()}</span>
+                  </div>
+                  <a
+                    href="https://jumbled-otter-c02.notion.site/74c1902d7b3a42a59ecb9dcca6cdf7e9?pvs=105"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: "inline-block", backgroundColor: Y, color: B, padding: "10px 22px", fontWeight: 700, fontSize: "13px", letterSpacing: "0.1em", border: `3px solid ${Y}`, boxShadow: `4px 4px 0 ${Y}`, textDecoration: "none", ...MONO, transition: "transform 0.15s, box-shadow 0.15s" }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.transform = "translate(-2px,-2px)"; el.style.boxShadow = `6px 6px 0 ${Y}`; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.transform = "translate(0,0)"; el.style.boxShadow = `4px 4px 0 ${Y}`; }}
+                  >
+                    REGISTER NOW →
+                  </a>
                 </div>
                 {ev.title && (
                   <h3 style={{ ...BEBAS, fontSize: "clamp(22px, 3.5vw, 42px)", color: W, marginBottom: "16px", lineHeight: 1 }}>
