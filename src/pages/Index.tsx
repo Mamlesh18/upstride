@@ -417,44 +417,61 @@ const Index = () => {
       {/* ================================================================
           UPCOMING EVENTS (dynamic from MongoDB)
           ================================================================ */}
-      {liveEvents.length > 0 && (
-        <section ref={eventSec.ref} style={{ backgroundColor: B, padding: "100px 24px", overflow: "hidden" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <div style={{ opacity: eventSec.inView ? 1 : 0, transform: eventSec.inView ? "translateY(0)" : "translateY(40px)", transition: "all 0.5s ease", marginBottom: "48px" }}>
-              <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "6px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "16px", ...MONO }}>
-                UPCOMING EVENTS
-              </div>
-              <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 7vw, 96px)", color: W, lineHeight: 0.9 }}>
-                UPSTRIDE IS<br /><span style={{ color: Y }}>COMING TO YOU</span>
-              </h2>
-            </div>
+      {liveEvents.length > 0 && liveEvents.map((ev, i) => {
+        const dateStr = (() => { try { return new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }); } catch { return ev.date; } })();
+        const isFirst = i === 0;
+        return (
+          <section key={ev.id} ref={isFirst ? eventSec.ref : undefined} style={{ backgroundColor: B, padding: "100px 24px", overflow: "hidden", borderTop: i > 0 ? `2px solid ${Y}22` : "none" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }} className="grid-cols-1 md:grid-cols-2">
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "24px" }}>
-              {liveEvents.map((ev, i) => (
-                <div key={ev.id}
-                  style={{ border: `3px solid ${Y}`, backgroundColor: `${W}08`, opacity: eventSec.inView ? 1 : 0, transform: eventSec.inView ? "translateY(0)" : "translateY(40px)", transition: `all 0.5s ${i * 0.1}s ease`, overflow: "hidden", boxShadow: `-4px 4px 0 ${Y}` }}>
+              {/* Left: Text */}
+              <div style={{ opacity: 1, transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+                <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "6px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "24px", ...MONO }}>
+                  UPCOMING EVENT
+                </div>
+                <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 6vw, 80px)", color: W, lineHeight: 0.92, marginBottom: "20px" }}>
+                  UPSTRIDE IS<br />
+                  <span style={{ color: Y }}>COMING TO</span><br />
+                  {ev.location.toUpperCase()}
+                </h2>
+                <div style={{ backgroundColor: Y, border: `3px solid ${Y}`, display: "inline-block", padding: "10px 20px", marginBottom: "28px", ...MONO }}>
+                  <span style={{ fontWeight: 700, fontSize: "14px", color: B }}>📅 {dateStr.toUpperCase()}</span>
+                </div>
+                {ev.title && (
+                  <h3 style={{ ...BEBAS, fontSize: "clamp(22px, 3.5vw, 42px)", color: W, marginBottom: "16px", lineHeight: 1 }}>
+                    "{ev.title}"
+                  </h3>
+                )}
+                {ev.description && (
+                  <p style={{ color: `${W}99`, fontSize: "14px", lineHeight: 1.8, maxWidth: "420px" }}>
+                    {ev.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Right: Image */}
+              <div style={{ opacity: 1, transition: "all 0.6s 0.2s cubic-bezier(0.16,1,0.3,1)" }}>
+                <div style={{ border: `4px solid ${Y}`, boxShadow: `-8px 8px 0 ${Y}`, position: "relative", overflow: "hidden" }}>
                   {ev.image_data ? (
                     <img src={`data:${ev.image_type};base64,${ev.image_data}`} alt={ev.title}
-                      style={{ width: "100%", height: "200px", objectFit: "cover", display: "block", borderBottom: `3px solid ${Y}` }} />
+                      style={{ width: "100%", display: "block", objectFit: "contain", backgroundColor: B }} />
                   ) : (
-                    <div style={{ width: "100%", height: "200px", backgroundColor: `${Y}15`, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: `3px solid ${Y}` }}>
-                      <CalendarDays size={40} color={Y} />
+                    <div style={{ width: "100%", aspectRatio: "4/3", backgroundColor: `${Y}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <CalendarDays size={64} color={Y} />
                     </div>
                   )}
-                  <div style={{ padding: "24px" }}>
-                    <h3 style={{ ...BEBAS, fontSize: "28px", color: W, lineHeight: 1, marginBottom: "12px" }}>{ev.title.toUpperCase()}</h3>
-                    <div style={{ backgroundColor: Y, display: "inline-block", padding: "4px 12px", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.15em", marginBottom: "10px", ...MONO }}>
-                      📅 {new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()}
-                    </div>
-                    <div style={{ fontSize: "13px", color: `${W}99`, marginBottom: "8px", ...MONO }}>📍 {ev.location}</div>
-                    {ev.description && <p style={{ fontSize: "13px", color: `${W}77`, lineHeight: 1.7, ...MONO }}>{ev.description}</p>}
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 20px", backgroundColor: `${B}dd` }}>
+                    <span style={{ ...BEBAS, color: Y, fontSize: "18px", letterSpacing: "0.1em" }}>
+                      {ev.location.toUpperCase()} — {dateStr.toUpperCase()}
+                    </span>
                   </div>
                 </div>
-              ))}
+              </div>
+
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })}
 
       {/* ================================================================
           ROADMAP TO UPSKILL
