@@ -37,6 +37,16 @@ function useInView(threshold = 0.15) {
   return { ref, inView };
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────
@@ -136,6 +146,7 @@ const achievements = [
 // ─────────────────────────────────────────────────────────────────────────────
 const Index = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
   const [openFaq, setOpenFaq]                 = useState<number | null>(null);
@@ -422,7 +433,7 @@ const Index = () => {
         const isFirst = i === 0;
         return (
           <section key={ev.id} ref={isFirst ? eventSec.ref : undefined} style={{ backgroundColor: B, padding: "100px 24px", overflow: "hidden", borderTop: i > 0 ? `2px solid ${Y}22` : "none" }}>
-            <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }} className="grid-cols-1 md:grid-cols-2">
+            <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "32px" : "60px", alignItems: "center" }}>
 
               {/* Left: Text */}
               <div style={{ opacity: 1, transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
@@ -519,8 +530,7 @@ const Index = () => {
               <div
                 key={i}
                 ref={el => { nodeRefs.current[i] = el; }}
-                style={{ display: "flex", flexDirection: isLeft ? "row" : "row-reverse", gap: "40px", marginBottom: "60px", alignItems: "flex-start", opacity: visible ? 1 : 0, transform: visible ? "translateX(0)" : `translateX(${isLeft ? "-60px" : "60px"})`, transition: `all 0.6s ${i * 0.1}s cubic-bezier(0.16, 1, 0.3, 1)` }}
-                className="flex-col md:flex-row"
+                style={{ display: "flex", flexDirection: isMobile ? "column" : (isLeft ? "row" : "row-reverse"), gap: isMobile ? "0" : "40px", marginBottom: "60px", alignItems: "flex-start", opacity: visible ? 1 : 0, transform: visible ? "translateX(0)" : `translateX(${isLeft ? "-60px" : "60px"})`, transition: `all 0.6s ${i * 0.1}s cubic-bezier(0.16, 1, 0.3, 1)` }}
               >
                 {/* Card */}
                 <div
@@ -538,7 +548,7 @@ const Index = () => {
                   </div>
 
                   {activeNode === i && (
-                    <div style={{ marginTop: "16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }} className="grid-cols-1 md:grid-cols-3">
+                    <div style={{ marginTop: "16px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "16px" }}>
                       {[
                         { title: "✅ FOCUS ON", items: item.focus, bg: B, fg: Y },
                         { title: "❌ AVOID",    items: item.avoid, bg: Y, fg: B },
@@ -642,7 +652,7 @@ const Index = () => {
             <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", ...MONO }}>MEET THE FOUNDER</div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }} className="grid-cols-1 md:grid-cols-2">
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "32px" : "60px", alignItems: "center" }}>
             {/* Left: Portrait */}
             <div style={{ opacity: teamSec.inView ? 1 : 0, transform: teamSec.inView ? "translateX(0)" : "translateX(-60px)", transition: "all 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
               <div style={{ border: `4px solid ${Y}`, ...{ boxShadow: `8px 8px 0 ${Y}` }, position: "relative", backgroundColor: `${Y}22` }}>
@@ -856,7 +866,7 @@ const Index = () => {
       <footer style={{ backgroundColor: B, borderTop: `4px solid ${Y}`, padding: "80px 24px 40px" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           {/* Top row */}
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "48px", marginBottom: "60px", borderBottom: `2px solid ${Y}44`, paddingBottom: "60px" }} className="grid-cols-1 md:grid-cols-4">
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 1fr 1fr", gap: isMobile ? "28px" : "48px", marginBottom: "60px", borderBottom: `2px solid ${Y}44`, paddingBottom: "60px" }}>
             {/* Brand column */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>

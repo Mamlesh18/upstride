@@ -1,4 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
 import { useNavigate } from "react-router-dom";
 import {
   FileText, Mail, Linkedin, ListChecks, FileCode, MessageSquare,
@@ -75,6 +85,7 @@ interface Session { id: string; session_number: number; week: number; title: str
 
 const Portal = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [currentView, setCurrentView]         = useState<ViewType>("recommended");
   const [sessions, setSessions]               = useState<Session[]>([]);
   const [sessionsInfo, setSessionsInfo]       = useState<{ weeks_completed: number; unlocked_count: number; days_enrolled: number } | null>(null);
@@ -152,28 +163,31 @@ const Portal = () => {
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "30px", objectFit: "contain" }} />
-            <span style={{ fontSize: "16px", fontWeight: 700, color: B, letterSpacing: "0.05em" }}>UPSTRIDE</span>
+        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", flexShrink: 0 }} onClick={() => navigate("/")}>
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "28px", objectFit: "contain" }} />
+            {!isMobile && <span style={{ fontSize: "16px", fontWeight: 700, color: B, letterSpacing: "0.05em" }}>UPSTRIDE</span>}
             <span style={{ fontSize: "10px", backgroundColor: Y, color: B, padding: "2px 8px", borderRadius: "3px", fontWeight: 700, letterSpacing: "0.12em", border: `1px solid ${B}` }}>
               PORTAL
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <button onClick={() => navigate("/workspace")}
-              style={{ display: "flex", alignItems: "center", gap: "6px", color: B, background: Y, border: `2px solid ${B}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", fontWeight: 700, ...MONO }}>
-              <CheckSquare size={14} /> My Workspace
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: B, background: Y, border: `2px solid ${B}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", fontWeight: 700, ...MONO }}>
+              <CheckSquare size={14} />
+              {!isMobile && "My Workspace"}
             </button>
             <button onClick={() => setShowFeedback(true)}
-              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO }}>
-              <MessageSquare size={14} /> Request Resource
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO }}>
+              <MessageSquare size={14} />
+              {!isMobile && "Request Resource"}
             </button>
             <button onClick={handleLogout}
-              style={{ display: "flex", alignItems: "center", gap: "8px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#EF4444"; (e.currentTarget as HTMLButtonElement).style.color = "#EF4444"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORD; (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}>
-              <LogOut size={14} /> Sign Out
+              <LogOut size={14} />
+              {!isMobile && "Sign Out"}
             </button>
           </div>
         </div>
@@ -181,37 +195,41 @@ const Portal = () => {
 
       {/* ── TAB BAR ─────────────────────────────────────────────────────── */}
       <div style={{ position: "fixed", top: "60px", left: 0, right: 0, zIndex: 99, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 24px", display: "flex", gap: "4px", overflowX: "auto" }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 8px", display: "flex", gap: "0", overflowX: "auto", scrollbarWidth: "none" }}>
           {tabs.map(({ view, label, icon: Icon, count }) => (
             <button
               key={view}
               onClick={() => switchView(view)}
               style={{
-                display: "flex", alignItems: "center", gap: "8px",
-                padding: "14px 20px",
-                fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em",
+                display: "flex", alignItems: "center", gap: isMobile ? "5px" : "8px",
+                padding: isMobile ? "12px 10px" : "14px 20px",
+                fontSize: isMobile ? "11px" : "12px", fontWeight: 600, letterSpacing: "0.05em",
                 ...MONO,
                 background: "none", border: "none", cursor: "pointer",
                 color: currentView === view ? B : MUTE,
                 borderBottom: `3px solid ${currentView === view ? Y : "transparent"}`,
                 transition: "all 0.15s",
                 whiteSpace: "nowrap" as const,
+                flex: isMobile ? "1 1 0" : undefined,
+                justifyContent: isMobile ? "center" : undefined,
               }}
               onMouseEnter={e => { if (currentView !== view) (e.currentTarget as HTMLButtonElement).style.color = B; }}
               onMouseLeave={e => { if (currentView !== view) (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}
             >
               <Icon size={15} />
               {label}
-              <span style={{ backgroundColor: currentView === view ? Y : `${B}10`, color: B, borderRadius: "4px", padding: "1px 7px", fontSize: "10px", fontWeight: 700, border: `1px solid ${currentView === view ? B : BORD}` }}>
-                {count}
-              </span>
+              {!isMobile && (
+                <span style={{ backgroundColor: currentView === view ? Y : `${B}10`, color: B, borderRadius: "4px", padding: "1px 7px", fontSize: "10px", fontWeight: 700, border: `1px solid ${currentView === view ? B : BORD}` }}>
+                  {count}
+                </span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
       {/* ── CONTENT ─────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "120px 24px 60px" }}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: `${isMobile ? "112px" : "120px"} ${isMobile ? "12px" : "24px"} 60px` }}>
 
         {/* ══ RECOMMENDED ════════════════════════════════════════════════ */}
         {currentView === "recommended" && (
@@ -436,7 +454,7 @@ const Portal = () => {
 
         {/* ── SESSIONS VIEW ──────────────────────────────────────────── */}
         {currentView === "sessions" && (
-          <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
+          <div style={{ maxWidth: "860px", margin: "0 auto", padding: isMobile ? "8px 0" : "32px 24px" }}>
             {sessionsInfo && (
               <div style={{ display: "flex", gap: "12px", marginBottom: "28px", flexWrap: "wrap" }}>
                 <div style={{ backgroundColor: Y, border: `2px solid ${B}`, borderRadius: "8px", padding: "12px 20px" }}>
@@ -461,10 +479,11 @@ const Portal = () => {
                   border: `2px solid ${s.unlocked ? BORD : BORD}`,
                   borderLeft: `4px solid ${s.unlocked ? Y : BORD}`,
                   borderRadius: "10px",
-                  padding: "18px 20px",
+                  padding: isMobile ? "14px 12px" : "18px 20px",
                   display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
+                  flexDirection: isMobile ? "column" as const : "row" as const,
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? "10px" : "16px",
                   opacity: s.unlocked ? 1 : 0.6,
                 }}>
                   <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: s.unlocked ? B : `${B}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

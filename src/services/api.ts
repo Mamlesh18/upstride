@@ -93,12 +93,13 @@ export const api = {
       request("/api/admin/contacts/bulk", { method: "POST", body: JSON.stringify({ raw }) }),
     allotContacts: (salesperson_id: string, count: number) =>
       request("/api/admin/contacts/allot", { method: "POST", body: JSON.stringify({ salesperson_id, count }) }),
-    listContacts: (params: { status?: string; assigned_to?: string; search?: string; page?: number }) => {
+    listContacts: (params: { status?: string; assigned_to?: string; search?: string; page?: number; date?: string }) => {
       const q = new URLSearchParams();
       if (params.status) q.set("status", params.status);
       if (params.assigned_to) q.set("assigned_to", params.assigned_to);
       if (params.search) q.set("search", params.search);
       if (params.page) q.set("page", String(params.page));
+      if (params.date) q.set("date", params.date);
       return request(`/api/admin/contacts?${q}`);
     },
     contactStats: () => request("/api/admin/contacts/stats"),

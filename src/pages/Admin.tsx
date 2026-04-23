@@ -15,7 +15,7 @@ interface Student { id: string; name: string; email: string; is_active: boolean;
 interface Manager { id: string; name: string; email: string; is_active: boolean; }
 interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string; manager_name: string; }
 interface Salesperson { id: string; name: string; email: string; is_active: boolean; }
-interface Contact { id: string; name: string; phone: string; email: string; status: ContactStatus; notes: string; assigned_to: string | null; assigned_to_name: string | null; }
+interface Contact { id: string; name: string; phone: string; email: string; status: ContactStatus; notes: string; assigned_to: string | null; assigned_to_name: string | null; created_at?: string; assigned_at?: string; }
 interface Stats {
   total_students: number; active_students: number; pending_password_change: number;
   total_managers: number; total_projects: number; live_projects: number; completed_projects: number;
@@ -59,19 +59,25 @@ const Btn = ({ children, onClick, color = B, disabled = false, small = false }: 
   </button>
 );
 
+const toDateStr = (d: Date) => d.toLocaleDateString("en-CA"); // YYYY-MM-DD
+
 export default function Admin() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("students");
   const [stats, setStats] = useState<Stats | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
+  const [studentPage, setStudentPage] = useState(1);
+  const [studentTotal, setStudentTotal] = useState(0);
   const [managers, setManagers] = useState<Manager[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [salespersons, setSalespersons] = useState<Salesperson[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [contactTotal, setContactTotal] = useState(0);
+  const [contactPage, setContactPage] = useState(1);
   const [contactFilter, setContactFilter] = useState<string>("all");
   const [contactSpFilter, setContactSpFilter] = useState<string>("all");
   const [contactSearch, setContactSearch] = useState("");
+  const [contactDateFilter, setContactDateFilter] = useState(() => toDateStr(new Date()));
   const [contactStats, setContactStats] = useState<Record<string, number>>({});
 
   interface SessionItem { id: string; session_number: number; week: number; title: string; drive_link: string; description: string; }
@@ -127,11 +133,13 @@ export default function Admin() {
     return Math.round((stats.contacts_joining / stats.total_contacts) * 100);
   };
 
-  const loadStudents = useCallback(async () => {
+  const loadStudents = useCallback(async (page: number = 1) => {
     setLoading(true);
     try {
-      const r = await api.admin.listStudents(1, search) as { data: { students: Student[] } };
+      const r = await api.admin.listStudents(page, search) as { data: { students: Student[]; pagination: { total: number } } };
       setStudents(r.data.students);
+      setStudentTotal(r.data.pagination.total);
+      setStudentPage(page);
     } catch (e: unknown) {
       toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
     } finally { setLoading(false); }
@@ -158,22 +166,25 @@ export default function Admin() {
     } catch { /* silent */ }
   }, []);
 
-  const loadContacts = useCallback(async () => {
+  const loadContacts = useCallback(async (page: number = 1) => {
     setLoading(true);
     try {
       const params = {
         status: contactFilter !== "all" ? contactFilter : undefined,
         assigned_to: contactSpFilter !== "all" ? contactSpFilter : undefined,
         search: contactSearch || undefined,
+        date: contactDateFilter || undefined,
+        page,
       };
       const r = await api.admin.listContacts(params) as { data: { contacts: Contact[]; total: number } };
       setContacts(r.data.contacts);
       setContactTotal(r.data.total);
+      setContactPage(page);
       const cs = await api.admin.contactStats() as { data: { by_status: Record<string, number>; total: number; unassigned: number } };
       setContactStats({ ...cs.data.by_status, total: cs.data.total, unassigned: cs.data.unassigned });
     } catch { /* silent */ }
     finally { setLoading(false); }
-  }, [contactFilter, contactSpFilter, contactSearch]);
+  }, [contactFilter, contactSpFilter, contactSearch, contactDateFilter]);
 
   useEffect(() => { loadStats(); loadManagers(); loadSalespersons(); }, [loadStats, loadManagers, loadSalespersons]);
   useEffect(() => { if (tab === "students") loadStudents(); }, [tab, loadStudents]);
@@ -225,7 +236,7 @@ export default function Admin() {
       toast({ title: `${added.length} student(s) added`, description: skipped.length ? `${skipped.length} already existed (skipped)` : undefined });
       setShowAddStudent(false);
       setStudentForm({ emails: "", password: "" });
-      loadStudents(); loadStats();
+      loadStudents(1); loadStats();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -252,13 +263,13 @@ export default function Admin() {
   const toggleStudent = async (s: Student) => {
     try {
       await api.admin.updateStudent(s.id, { is_active: !s.is_active });
-      loadStudents();
+      loadStudents(studentPage);
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
   const deleteStudent = async (id: string) => {
     if (!confirm("Remove this student?")) return;
-    try { await api.admin.deleteStudent(id); loadStudents(); loadStats(); toast({ title: "Removed" }); }
+    try { await api.admin.deleteStudent(id); loadStudents(studentPage); loadStats(); toast({ title: "Removed" }); }
     catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -298,13 +309,13 @@ export default function Admin() {
       const r = await api.admin.bulkAddContacts(bulkContactsRaw) as { data: { added: number; skipped: string[] } };
       toast({ title: `${r.data.added} contact(s) added`, description: r.data.skipped.length ? `${r.data.skipped.length} lines skipped (missing phone)` : undefined });
       setShowBulkContacts(false); setBulkContactsRaw("");
-      loadContacts();
+      loadContacts(1);
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
   const handleDeleteContact = async (id: string) => {
     if (!confirm("Remove this contact?")) return;
-    try { await api.admin.deleteContact(id); loadContacts(); toast({ title: "Contact removed" }); }
+    try { await api.admin.deleteContact(id); loadContacts(contactPage); toast({ title: "Contact removed" }); }
     catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -314,7 +325,7 @@ export default function Admin() {
     try {
       const r = await api.admin.allotContacts(allotForm.salesperson_id, allotForm.count) as { message: string };
       toast({ title: r.message });
-      setShowAllot(false); loadContacts();
+      setShowAllot(false); loadContacts(1);
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -565,10 +576,10 @@ export default function Admin() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
               <input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && loadStudents()}
+                onKeyDown={e => e.key === "Enter" && loadStudents(1)}
                 style={{ padding: "8px 14px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", minWidth: "260px" }} />
               <div style={{ display: "flex", gap: "8px" }}>
-                <Btn onClick={loadStudents} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
+                <Btn onClick={() => loadStudents(1)} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
                 <Btn onClick={() => setShowAddStudent(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Add Student</Btn>
               </div>
             </div>
@@ -621,6 +632,32 @@ export default function Admin() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {studentTotal > 0 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ fontSize: "12px", color: MUTE }}>
+                  Showing {Math.min((studentPage - 1) * 20 + 1, studentTotal)}–{Math.min(studentPage * 20, studentTotal)} of <strong style={{ color: B }}>{studentTotal}</strong> students
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <button
+                    disabled={studentPage === 1}
+                    onClick={() => loadStudents(studentPage - 1)}
+                    style={{ padding: "6px 14px", border: `2px solid ${studentPage === 1 ? BORD : B}`, borderRadius: "6px", background: studentPage === 1 ? BG : B, color: studentPage === 1 ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: studentPage === 1 ? "not-allowed" : "pointer", ...MONO }}>
+                    ← Prev
+                  </button>
+                  <span style={{ fontSize: "12px", color: B, fontWeight: 700, padding: "0 8px" }}>
+                    Page {studentPage} of {Math.ceil(studentTotal / 20)}
+                  </span>
+                  <button
+                    disabled={studentPage * 20 >= studentTotal}
+                    onClick={() => loadStudents(studentPage + 1)}
+                    style={{ padding: "6px 14px", border: `2px solid ${studentPage * 20 >= studentTotal ? BORD : B}`, borderRadius: "6px", background: studentPage * 20 >= studentTotal ? BG : B, color: studentPage * 20 >= studentTotal ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: studentPage * 20 >= studentTotal ? "not-allowed" : "pointer", ...MONO }}>
+                    Next →
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -882,9 +919,34 @@ export default function Admin() {
               ))}
             </div>
 
+            {/* Date filter */}
+            {(() => {
+              const today = toDateStr(new Date());
+              const yesterday = toDateStr(new Date(Date.now() - 86400000));
+              return (
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px", alignItems: "center" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginRight: "4px" }}>DATE:</span>
+                  {[
+                    { label: "📅 Today", value: today },
+                    { label: "Yesterday", value: yesterday },
+                    { label: "All Time", value: "" },
+                  ].map(({ label, value }) => (
+                    <button key={label} onClick={() => setContactDateFilter(value)}
+                      style={{ padding: "5px 12px", borderRadius: "20px", border: `2px solid ${contactDateFilter === value ? B : BORD}`, backgroundColor: contactDateFilter === value ? B : W, color: contactDateFilter === value ? Y : MUTE, fontSize: "11px", fontWeight: 700, cursor: "pointer", ...MONO }}>
+                      {label}
+                    </button>
+                  ))}
+                  <input type="date" value={contactDateFilter}
+                    onChange={e => setContactDateFilter(e.target.value)}
+                    max={today}
+                    style={{ padding: "5px 10px", border: `2px solid ${contactDateFilter && contactDateFilter !== today && contactDateFilter !== yesterday ? B : BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", cursor: "pointer" }} />
+                </div>
+              );
+            })()}
+
             {/* Contacts toolbar */}
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "14px", alignItems: "center" }}>
-              <input placeholder="Search name, phone..." value={contactSearch} onChange={e => setContactSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && loadContacts()}
+              <input placeholder="Search name, phone..." value={contactSearch} onChange={e => setContactSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && loadContacts(1)}
                 style={{ padding: "8px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", minWidth: "200px" }} />
               <select value={contactFilter} onChange={e => setContactFilter(e.target.value)}
                 style={{ padding: "8px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none" }}>
@@ -897,12 +959,12 @@ export default function Admin() {
                 <option value="unassigned">Unassigned</option>
                 {salespersons.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
               </select>
-              <Btn onClick={loadContacts} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
+              <Btn onClick={() => loadContacts(1)} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
               <Btn onClick={() => setShowBulkContacts(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Import Contacts</Btn>
               <Btn onClick={() => setShowAllot(true)} small><PhoneCall size={12} style={{ display: "inline", marginRight: "4px" }} />Allot Contacts</Btn>
             </div>
 
-            {/* Contacts grouped by assigned date */}
+            {/* Contacts grouped by import date (created_at) */}
             {(() => {
               const formatAdminDay = (iso: string) => {
                 try {
@@ -917,9 +979,9 @@ export default function Admin() {
               const grouped = (() => {
                 const map: Record<string, Contact[]> = {};
                 for (const c of contacts) {
-                  const key = (c as Contact & { assigned_at?: string }).assigned_at
-                    ? new Date((c as Contact & { assigned_at?: string }).assigned_at!).toDateString()
-                    : "Unassigned";
+                  const key = c.created_at
+                    ? new Date(c.created_at).toDateString()
+                    : "Unknown";
                   if (!map[key]) map[key] = [];
                   map[key].push(c);
                 }
@@ -989,7 +1051,31 @@ export default function Admin() {
                 );
               });
             })()}
-            <p style={{ fontSize: "11px", color: MUTE, marginTop: "8px" }}>Showing {contacts.length} of {contactTotal} contacts</p>
+            {/* Contact pagination */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px", flexWrap: "wrap", gap: "8px" }}>
+              <span style={{ fontSize: "12px", color: MUTE }}>
+                Showing {Math.min((contactPage - 1) * 50 + 1, contactTotal || 0)}–{Math.min(contactPage * 50, contactTotal)} of <strong style={{ color: B }}>{contactTotal}</strong> contacts
+              </span>
+              {contactTotal > 50 && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <button
+                    disabled={contactPage === 1}
+                    onClick={() => loadContacts(contactPage - 1)}
+                    style={{ padding: "6px 14px", border: `2px solid ${contactPage === 1 ? BORD : B}`, borderRadius: "6px", background: contactPage === 1 ? BG : B, color: contactPage === 1 ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: contactPage === 1 ? "not-allowed" : "pointer", ...MONO }}>
+                    ← Prev
+                  </button>
+                  <span style={{ fontSize: "12px", color: B, fontWeight: 700, padding: "0 8px" }}>
+                    Page {contactPage} of {Math.ceil(contactTotal / 50)}
+                  </span>
+                  <button
+                    disabled={contactPage * 50 >= contactTotal}
+                    onClick={() => loadContacts(contactPage + 1)}
+                    style={{ padding: "6px 14px", border: `2px solid ${contactPage * 50 >= contactTotal ? BORD : B}`, borderRadius: "6px", background: contactPage * 50 >= contactTotal ? BG : B, color: contactPage * 50 >= contactTotal ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: contactPage * 50 >= contactTotal ? "not-allowed" : "pointer", ...MONO }}>
+                    Next →
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
