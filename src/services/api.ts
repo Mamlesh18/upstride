@@ -66,6 +66,10 @@ export const api = {
       }),
     deleteStudent: (id: string) =>
       request(`/api/admin/students/${id}`, { method: "DELETE" }),
+    setResumeEnhancer: (id: string, email: string, password: string) =>
+      request(`/api/admin/students/${id}/resume-enhancer`, { method: "PATCH", body: JSON.stringify({ email, password }) }),
+    bulkSetResumeEnhancer: (email: string, password: string) =>
+      request("/api/admin/students/resume-enhancer/bulk-set", { method: "POST", body: JSON.stringify({ email, password }) }),
 
     addManager: (data: { email: string; name: string; password: string }) =>
       request("/api/admin/managers", { method: "POST", body: JSON.stringify(data) }),
@@ -134,6 +138,10 @@ export const api = {
       request(`/api/student/workspace/${id}`, { method: "DELETE" }),
     submitFeedback: (data: { type: string; message: string; resource_name?: string }) =>
       request("/api/student/feedback", { method: "POST", body: JSON.stringify(data) }),
+    getResumeEnhancer: () => request("/api/student/resume-enhancer"),
+    track: (type: string, resource_name?: string) =>
+      request("/api/student/track", { method: "POST", body: JSON.stringify({ type, resource_name }) }),
+    getLeaderboard: () => request("/api/student/leaderboard"),
   },
 
   events: {

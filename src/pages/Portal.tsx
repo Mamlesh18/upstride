@@ -15,7 +15,7 @@ import {
   Building2, Code2, LogOut, GraduationCap, Star, Database, Network,
   Cpu, MessageCircle, Lightbulb, Brain, Target, BookOpen, ArrowUpRight,
   Flame, Zap, Trophy, Eye, ShoppingCart, Server, Coffee,
-  PlayCircle, Lock, CheckSquare, X, Send,
+  PlayCircle, Lock, CheckSquare, X, Send, Sparkles, Copy, Check,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -32,7 +32,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "recommended" | "training" | "placement" | "sessions";
+type ViewType = "recommended" | "training" | "placement" | "sessions" | "resume" | "leaderboard";
 
 // ─── Resource Types ───────────────────────────────────────────────────────────
 interface Resource { id: string; section: string; category: string; name: string; tagline: string; url: string; company_type?: string; sub_type?: string; emoji?: string; badge_label?: string; badge_accent?: boolean; }
@@ -93,6 +93,12 @@ const Portal = () => {
   const [showFeedback, setShowFeedback]       = useState(false);
   const [feedbackForm, setFeedbackForm]       = useState({ type: "resource_request", message: "", resource_name: "" });
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [resumeCreds, setResumeCreds]         = useState<{ has_access: boolean; email: string; password: string } | null>(null);
+  const [copied, setCopied]                   = useState<"email" | "password" | null>(null);
+  interface LeaderboardEntry { rank: number; email: string; score: number; login_days: number; resource_opens: number; is_me: boolean; }
+  interface LeaderboardData { week_label: string; leaderboard: LeaderboardEntry[]; my_rank: number | null; my_stats: { email: string; score: number; login_days: number; resource_opens: number } | null; }
+  const [leaderboard, setLeaderboard]         = useState<LeaderboardData | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   useEffect(() => {
     api.resources.getAll().then((r: unknown) => {
@@ -110,6 +116,13 @@ const Portal = () => {
   }, []);
 
   useEffect(() => { loadSessions(); }, [loadSessions]);
+
+  useEffect(() => {
+    api.student.getResumeEnhancer().then((r: unknown) => {
+      const res = r as { data: { has_access: boolean; email: string; password: string } };
+      setResumeCreds(res.data);
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     ["token", "userRole", "userEmail", "userName", "mustChangePassword"].forEach(k => localStorage.removeItem(k));
@@ -129,9 +142,27 @@ const Portal = () => {
     finally { setFeedbackLoading(false); }
   };
 
+  const track = (resourceName: string) => {
+    api.student.track("resource_view", resourceName).catch(() => {});
+  };
+
   const switchView = (view: ViewType) => {
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: "smooth" });
+    if (view === "leaderboard" && !leaderboard) {
+      setLeaderboardLoading(true);
+      api.student.getLeaderboard().then((r: unknown) => {
+        const res = r as { data: LeaderboardData };
+        setLeaderboard(res.data);
+      }).catch(() => {}).finally(() => setLeaderboardLoading(false));
+    }
+  };
+
+  const copyToClipboard = (text: string, type: "email" | "password") => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
+    });
   };
 
   const tabs: { view: ViewType; label: string; icon: typeof Star; count: string }[] = [
@@ -139,6 +170,8 @@ const Portal = () => {
     { view: "training",    label: "Training",    icon: GraduationCap, count: `${resourcesData ? resourcesData.training.reduce((a, c) => a + c.resources.length, 0) : "—"}` },
     { view: "placement",   label: "Placement",   icon: Building2,     count: `${resourcesData ? resourcesData.placement.service.length + resourcesData.placement.product.length : "—"}` },
     { view: "sessions",    label: "Sessions",    icon: PlayCircle,    count: "11" },
+    ...(resumeCreds?.has_access ? [{ view: "resume" as ViewType, label: "Resume AI", icon: Sparkles, count: "✦" }] : []),
+    { view: "leaderboard" as ViewType, label: "Leaderboard", icon: Trophy, count: "🏆" },
   ];
 
   const cardHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -250,7 +283,7 @@ const Portal = () => {
               {(resourcesData?.recommended ?? []).map((doc) => {
                 const DocIcon = getIcon(doc.name);
                 return (
-                  <div key={doc.id} style={card} onClick={() => window.open(doc.url, "_blank")} onMouseEnter={e => cardHover(e, true)} onMouseLeave={e => cardHover(e, false)}>
+                  <div key={doc.id} style={card} onClick={() => { track(doc.name); window.open(doc.url, "_blank"); }} onMouseEnter={e => cardHover(e, true)} onMouseLeave={e => cardHover(e, false)}>
                     <div style={{ padding: "20px 20px 14px", borderBottom: `1px solid ${BORD}` }}>
                       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "12px" }}>
                         <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -312,7 +345,7 @@ const Portal = () => {
                     {cat.resources.map((res) => {
                       const ResIcon = getIcon(res.name);
                       return (
-                        <div key={res.id} style={card} onClick={() => window.open(res.url, "_blank")} onMouseEnter={e => cardHover(e, true)} onMouseLeave={e => cardHover(e, false)}>
+                        <div key={res.id} style={card} onClick={() => { track(res.name); window.open(res.url, "_blank"); }} onMouseEnter={e => cardHover(e, true)} onMouseLeave={e => cardHover(e, false)}>
                           <div style={{ padding: "14px 16px 12px", borderBottom: `1px solid ${BORD}`, display: "flex", alignItems: "center", gap: "10px" }}>
                             <div style={{ width: "30px", height: "30px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                               <ResIcon size={14} color={B} />
@@ -385,7 +418,7 @@ const Portal = () => {
                         <div
                           key={qt.type}
                           style={card}
-                          onClick={() => window.open(res.url, "_blank")}
+                          onClick={() => { track(qt.type); window.open(res.url, "_blank"); }}
                           onMouseEnter={e => cardHover(e, true)}
                           onMouseLeave={e => cardHover(e, false)}
                         >
@@ -429,7 +462,7 @@ const Portal = () => {
                   <div
                     key={company.id}
                     style={card}
-                    onClick={() => window.open(company.url, "_blank")}
+                    onClick={() => { track(company.name); window.open(company.url, "_blank"); }}
                     onMouseEnter={e => cardHover(e, true)}
                     onMouseLeave={e => cardHover(e, false)}
                   >
@@ -511,6 +544,194 @@ const Portal = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* ── RESUME ENHANCER VIEW ────────────────────────────────────── */}
+        {currentView === "resume" && resumeCreds?.has_access && (
+          <div style={{ maxWidth: "680px", margin: "0 auto", padding: isMobile ? "20px 0" : "40px 24px" }}>
+            {/* Hero card */}
+            <div style={{ background: B, borderRadius: "12px", padding: "32px", marginBottom: "20px", border: `3px solid ${Y}`, boxShadow: `4px 4px 0 ${Y}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                <div style={{ background: Y, borderRadius: "8px", padding: "10px", display: "flex", alignItems: "center" }}>
+                  <Sparkles size={22} color={B} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "26px", color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>RESUME ENHANCER</div>
+                  <div style={{ fontSize: "11px", color: "#ffffff80", marginTop: "3px" }}>AI-powered resume builder — exclusive access</div>
+                </div>
+              </div>
+
+              <p style={{ fontSize: "13px", color: "#ffffffcc", lineHeight: 1.7, marginBottom: "28px" }}>
+                Use these credentials to log in to the Resume Enhancer platform. Build an ATS-optimised resume, get AI feedback, and stand out from the crowd.
+              </p>
+
+              {/* Credentials */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
+                {/* Email */}
+                <div style={{ background: "#ffffff10", border: "1px solid #ffffff20", borderRadius: "8px", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#ffffff60", letterSpacing: "0.1em", marginBottom: "4px" }}>LOGIN EMAIL</div>
+                    <div style={{ fontSize: "14px", color: "#fff", fontWeight: 600, ...MONO }}>{resumeCreds.email}</div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(resumeCreds.email, "email")}
+                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", background: copied === "email" ? "#16A34A" : Y, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 700, color: B, cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.2s", ...MONO }}
+                  >
+                    {copied === "email" ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
+                  </button>
+                </div>
+
+                {/* Password */}
+                <div style={{ background: "#ffffff10", border: "1px solid #ffffff20", borderRadius: "8px", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#ffffff60", letterSpacing: "0.1em", marginBottom: "4px" }}>PASSWORD</div>
+                    <div style={{ fontSize: "14px", color: "#fff", fontWeight: 600, ...MONO }}>{resumeCreds.password}</div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(resumeCreds.password, "password")}
+                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", background: copied === "password" ? "#16A34A" : Y, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 700, color: B, cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.2s", ...MONO }}
+                  >
+                    {copied === "password" ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
+                  </button>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <a
+                href="https://upstride-students-portal-frontend.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px 28px", background: Y, color: B, borderRadius: "8px", textDecoration: "none", fontWeight: 700, fontSize: "14px", letterSpacing: "0.08em", ...MONO }}
+              >
+                <Sparkles size={16} /> OPEN RESUME ENHANCER →
+              </a>
+            </div>
+
+            {/* Tips */}
+            <div style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "10px", padding: "20px 22px" }}>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "12px" }}>💡 HOW TO USE IT</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  "Copy the email and password above",
+                  "Click 'Open Resume Enhancer' to go to the platform",
+                  "Log in using the credentials shown",
+                  "Upload your resume and let AI enhance it",
+                  "Download your ATS-optimised version",
+                ].map((tip, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                    <div style={{ minWidth: "20px", height: "20px", background: Y, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: 700, color: B, flexShrink: 0 }}>{i + 1}</div>
+                    <div style={{ fontSize: "12px", color: MUTE, lineHeight: 1.6 }}>{tip}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+        {/* ── LEADERBOARD VIEW ─────────────────────────────────────────── */}
+        {currentView === "leaderboard" && (
+          <div style={{ maxWidth: "700px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
+
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: "28px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "40px" : "56px", color: B, lineHeight: 0.9, letterSpacing: "0.02em" }}>
+                WEEKLY<br /><span style={{ borderBottom: `4px solid ${Y}` }}>LEADERBOARD</span>
+              </div>
+              {leaderboard && (
+                <div style={{ marginTop: "10px", fontSize: "12px", color: MUTE }}>
+                  📅 {leaderboard.week_label} &nbsp;·&nbsp; Resets every Monday
+                </div>
+              )}
+              <div style={{ marginTop: "10px", display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "11px", color: MUTE }}>🔑 Login day = <strong style={{ color: B }}>3 pts</strong></span>
+                <span style={{ fontSize: "11px", color: MUTE }}>📚 Resource open = <strong style={{ color: B }}>1 pt</strong></span>
+              </div>
+            </div>
+
+            {leaderboardLoading ? (
+              <div style={{ textAlign: "center", padding: "60px", color: MUTE }}>Loading leaderboard...</div>
+            ) : !leaderboard || leaderboard.leaderboard.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 24px", border: `2px solid ${BORD}`, borderRadius: "12px", background: W }}>
+                <div style={{ fontSize: "40px", marginBottom: "12px" }}>🏁</div>
+                <div style={{ fontWeight: 700, color: B, marginBottom: "6px" }}>No activity yet this week</div>
+                <div style={{ fontSize: "12px", color: MUTE }}>Open resources to earn points and appear here!</div>
+              </div>
+            ) : (
+              <>
+                {/* Top 3 podium */}
+                {leaderboard.leaderboard.length >= 1 && (
+                  <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "8px", marginBottom: "24px" }}>
+                    {[1, 0, 2].map(idx => {
+                      const entry = leaderboard.leaderboard[idx];
+                      if (!entry) return null;
+                      const podiumH = idx === 0 ? "100px" : idx === 1 ? "130px" : "80px";
+                      const medals = ["🥇", "🥈", "🥉"];
+                      const medal = medals[idx === 0 ? 1 : idx === 1 ? 0 : 2];
+                      const rank = idx === 0 ? 2 : idx === 1 ? 1 : 3;
+                      const bg = rank === 1 ? Y : rank === 2 ? "#e8e8e8" : "#f0d9c0";
+                      return (
+                        <div key={entry.rank} style={{ flex: 1, maxWidth: "200px", textAlign: "center" }}>
+                          <div style={{ fontSize: "11px", color: entry.is_me ? "#7C3AED" : MUTE, fontWeight: entry.is_me ? 700 : 400, marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {entry.is_me ? "👤 YOU" : entry.email.split("@")[0]}
+                          </div>
+                          <div style={{ fontSize: "18px", fontWeight: 700, color: B, marginBottom: "6px" }}>{entry.score} pts</div>
+                          <div style={{ height: podiumH, background: bg, border: `2px solid ${B}`, borderRadius: "6px 6px 0 0", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "4px" }}>
+                            <div style={{ fontSize: "28px" }}>{medal}</div>
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "20px", color: B }}>#{rank}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Full list */}
+                <div style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
+                  {leaderboard.leaderboard.map((entry, i) => {
+                    const rankEmoji = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${entry.rank}`;
+                    return (
+                      <div key={entry.rank} style={{
+                        display: "flex", alignItems: "center", gap: "14px", padding: "13px 18px",
+                        borderBottom: i < leaderboard.leaderboard.length - 1 ? `1px solid ${BORD}` : "none",
+                        background: entry.is_me ? `${Y}30` : i % 2 === 0 ? W : `${B}02`,
+                      }}>
+                        <div style={{ minWidth: "32px", textAlign: "center", fontFamily: "'Bebas Neue', cursive", fontSize: i < 3 ? "20px" : "15px", color: B }}>
+                          {rankEmoji}
+                        </div>
+                        <div style={{ flex: 1, overflow: "hidden" }}>
+                          <div style={{ fontSize: "13px", fontWeight: entry.is_me ? 700 : 600, color: entry.is_me ? "#7C3AED" : B, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {entry.email} {entry.is_me && <span style={{ fontSize: "10px", background: "#7C3AED", color: W, padding: "1px 6px", borderRadius: "8px", marginLeft: "4px" }}>YOU</span>}
+                          </div>
+                          <div style={{ display: "flex", gap: "12px", marginTop: "3px" }}>
+                            <span style={{ fontSize: "10px", color: MUTE }}>🔑 {entry.login_days} login day{entry.login_days !== 1 ? "s" : ""}</span>
+                            <span style={{ fontSize: "10px", color: MUTE }}>📚 {entry.resource_opens} resource{entry.resource_opens !== 1 ? "s" : ""}</span>
+                          </div>
+                        </div>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "22px", color: B, minWidth: "60px", textAlign: "right" }}>
+                          {entry.score} <span style={{ fontSize: "11px", fontWeight: 400, color: MUTE }}>pts</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* My stats if not in top 20 */}
+                {leaderboard.my_rank === null && leaderboard.my_stats && (
+                  <div style={{ marginTop: "16px", padding: "14px 18px", background: `${Y}20`, border: `2px solid ${Y}`, borderRadius: "10px", display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ fontSize: "20px" }}>👤</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: B }}>YOUR STATS THIS WEEK</div>
+                      <div style={{ fontSize: "11px", color: MUTE, marginTop: "2px" }}>
+                        🔑 {leaderboard.my_stats.login_days} login days &nbsp;·&nbsp; 📚 {leaderboard.my_stats.resource_opens} resource opens
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "22px", color: B }}>{leaderboard.my_stats.score} pts</div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

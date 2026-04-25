@@ -103,6 +103,11 @@ export default function Admin() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Resume Enhancer
+  const [showResumeCreds, setShowResumeCreds] = useState(false);
+  const [resumeCredsForm, setResumeCredsForm] = useState({ email: "upstride1@gmail.com", password: "Upstride" });
+  const [resumeCredsLoading, setResumeCredsLoading] = useState(false);
+
   // Modals
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showAddManager, setShowAddManager] = useState(false);
@@ -225,6 +230,20 @@ export default function Admin() {
   }, []);
 
   useEffect(() => { if (tab === "resources") loadAdminResources(); }, [tab, loadAdminResources]);
+
+  const handleBulkSetResumeCreds = async () => {
+    if (!resumeCredsForm.email.trim() || !resumeCredsForm.password.trim()) {
+      toast({ title: "Email and password required", variant: "destructive" }); return;
+    }
+    setResumeCredsLoading(true);
+    try {
+      const r = await api.admin.bulkSetResumeEnhancer(resumeCredsForm.email.trim(), resumeCredsForm.password.trim()) as { data: { count: number } };
+      toast({ title: `Resume Enhancer creds set for ${r.data.count} students` });
+      setShowResumeCreds(false);
+    } catch (e: unknown) {
+      toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
+    } finally { setResumeCredsLoading(false); }
+  };
 
   const handleAddStudent = async () => {
     const emails = studentForm.emails.split(/[\n,]+/).map(e => e.trim()).filter(Boolean);
@@ -580,6 +599,7 @@ export default function Admin() {
                 style={{ padding: "8px 14px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", minWidth: "260px" }} />
               <div style={{ display: "flex", gap: "8px" }}>
                 <Btn onClick={() => loadStudents(1)} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
+                <Btn onClick={() => setShowResumeCreds(true)} small style={{ background: "#7C3AED", color: W }}>🔑 Resume Tool Creds</Btn>
                 <Btn onClick={() => setShowAddStudent(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Add Student</Btn>
               </div>
             </div>
@@ -1154,6 +1174,38 @@ export default function Admin() {
           </div>
         )}
       </div>
+
+      {/* Resume Enhancer Credentials Modal */}
+      {showResumeCreds && (
+        <Modal title="Set Resume Enhancer Credentials" onClose={() => setShowResumeCreds(false)}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <p style={{ fontSize: "12px", color: MUTE, lineHeight: 1.7, margin: 0 }}>
+              Set the login credentials that students will see in their portal under <strong>Resume AI</strong>. This will apply to <strong>all existing students</strong>.
+            </p>
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.08em", display: "block", marginBottom: "5px" }}>RESUME TOOL EMAIL</label>
+              <input
+                type="email"
+                value={resumeCredsForm.email}
+                onChange={e => setResumeCredsForm(f => ({ ...f, email: e.target.value }))}
+                style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" as const }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.08em", display: "block", marginBottom: "5px" }}>RESUME TOOL PASSWORD</label>
+              <input
+                type="text"
+                value={resumeCredsForm.password}
+                onChange={e => setResumeCredsForm(f => ({ ...f, password: e.target.value }))}
+                style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" as const }}
+              />
+            </div>
+            <Btn onClick={handleBulkSetResumeCreds} disabled={resumeCredsLoading} style={{ background: "#7C3AED" }}>
+              {resumeCredsLoading ? "Setting..." : "Apply to All Students"}
+            </Btn>
+          </div>
+        </Modal>
+      )}
 
       {/* Add Student Modal */}
       {showAddStudent && (
