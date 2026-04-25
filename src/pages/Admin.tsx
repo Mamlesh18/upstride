@@ -15,7 +15,7 @@ interface Student { id: string; name: string; email: string; is_active: boolean;
 interface Manager { id: string; name: string; email: string; is_active: boolean; }
 interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string; manager_name: string; }
 interface Salesperson { id: string; name: string; email: string; is_active: boolean; }
-interface Contact { id: string; name: string; phone: string; email: string; status: ContactStatus; notes: string; assigned_to: string | null; assigned_to_name: string | null; created_at?: string; assigned_at?: string; }
+interface Contact { id: string; name: string; phone: string; email: string; status: ContactStatus; notes: string; assigned_to: string | null; assigned_to_name: string | null; created_at?: string; assigned_at?: string; source?: string; }
 interface Stats {
   total_students: number; active_students: number; pending_password_change: number;
   total_managers: number; total_projects: number; live_projects: number; completed_projects: number;
@@ -1031,7 +1031,14 @@ export default function Admin() {
                                 <td style={{ padding: "9px 14px", fontSize: "13px", fontWeight: 600, color: B }}>{c.name}</td>
                                 <td style={{ padding: "9px 14px", fontSize: "12px", color: B }}>{c.phone}</td>
                                 <td style={{ padding: "9px 14px", fontSize: "11px", color: MUTE }}>{c.email || "—"}</td>
-                                <td style={{ padding: "9px 14px", fontSize: "12px", color: c.assigned_to_name ? B : MUTE }}>{c.assigned_to_name || <em>Unassigned</em>}</td>
+                                <td style={{ padding: "9px 14px", fontSize: "12px", color: c.assigned_to_name ? B : MUTE }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                                    {c.assigned_to_name || <em>Unassigned</em>}
+                                    {c.source === "salesperson" && (
+                                      <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 6px", borderRadius: "8px", backgroundColor: "#E0F2FE", color: "#0369A1", letterSpacing: "0.06em" }}>SP ADDED</span>
+                                    )}
+                                  </div>
+                                </td>
                                 <td style={{ padding: "9px 14px" }}>
                                   <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "10px", backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
                                 </td>

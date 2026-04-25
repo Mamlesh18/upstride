@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, LogOut, RefreshCw, ChevronDown, StickyNote } from "lucide-react";
+import { Phone, LogOut, RefreshCw, StickyNote, UserPlus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -41,6 +41,9 @@ export default function SalesPerson() {
   const [openNotes, setOpenNotes] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", phone: "", email: "" });
+  const [addingContact, setAddingContact] = useState(false);
 
   const name = localStorage.getItem("userName") || "Sales";
   const email = localStorage.getItem("userEmail") || "";
@@ -67,6 +70,24 @@ export default function SalesPerson() {
     } catch (e: unknown) {
       toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
     } finally { setUpdatingId(null); }
+  };
+
+  const handleAddContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.name.trim() || !addForm.phone.trim()) {
+      toast({ title: "Name and phone are required", variant: "destructive" });
+      return;
+    }
+    setAddingContact(true);
+    try {
+      await api.sales.addContact({ name: addForm.name.trim(), phone: addForm.phone.trim(), email: addForm.email.trim() || undefined });
+      toast({ title: "Contact added!" });
+      setAddForm({ name: "", phone: "", email: "" });
+      setShowAddModal(false);
+      load();
+    } catch (e: unknown) {
+      toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
+    } finally { setAddingContact(false); }
   };
 
   const logout = () => {
@@ -116,8 +137,13 @@ export default function SalesPerson() {
           <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em" }}>UPSTRIDE</div>
           <span style={{ color: W, fontSize: "13px", fontWeight: 600 }}>Sales — {name}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ color: `${W}80`, fontSize: "12px" }}>{email}</span>
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: Y, border: "none", borderRadius: "6px", padding: "7px 14px", color: B, fontSize: "12px", fontWeight: 700, cursor: "pointer", ...MONO }}>
+            <UserPlus size={13} /> Add Contact
+          </button>
           <button onClick={logout} style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "transparent", border: `1px solid ${W}40`, borderRadius: "6px", padding: "6px 12px", color: W, fontSize: "12px", cursor: "pointer", ...MONO }}>
             <LogOut size={13} /> Logout
           </button>
@@ -286,6 +312,72 @@ export default function SalesPerson() {
           Showing {filtered.length} of {contacts.length} contacts
         </p>
       </div>
+
+      {/* Add Contact Modal */}
+      {showAddModal && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+          <div style={{ backgroundColor: W, borderRadius: "12px", padding: "28px 28px 24px", width: "100%", maxWidth: "420px", border: `3px solid ${B}`, boxShadow: `6px 6px 0 ${Y}`, ...MONO }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: B }}>Add New Contact</div>
+                <div style={{ fontSize: "11px", color: MUTE, marginTop: "2px" }}>Visible to admin instantly</div>
+              </div>
+              <button onClick={() => setShowAddModal(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px" }}>
+                <X size={18} color={MUTE} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddContact} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.08em", display: "block", marginBottom: "5px" }}>NAME *</label>
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  value={addForm.name}
+                  onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
+                  required
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.08em", display: "block", marginBottom: "5px" }}>PHONE *</label>
+                <input
+                  type="tel"
+                  placeholder="Phone number"
+                  value={addForm.phone}
+                  onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))}
+                  required
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.08em", display: "block", marginBottom: "5px" }}>EMAIL <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={addForm.email}
+                  onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
+                  style={{ width: "100%", padding: "9px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
+                <button
+                  type="submit"
+                  disabled={addingContact}
+                  style={{ flex: 1, padding: "11px", backgroundColor: B, color: Y, border: "none", borderRadius: "6px", fontSize: "13px", fontWeight: 700, cursor: addingContact ? "not-allowed" : "pointer", opacity: addingContact ? 0.7 : 1, ...MONO }}>
+                  {addingContact ? "Adding..." : "Add Contact"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  style={{ padding: "11px 18px", backgroundColor: W, color: MUTE, border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", cursor: "pointer", ...MONO }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

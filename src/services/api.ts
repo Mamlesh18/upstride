@@ -119,6 +119,8 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify({ status, notes }),
       }),
+    addContact: (data: { name: string; phone: string; email?: string }) =>
+      request("/api/sales/contacts", { method: "POST", body: JSON.stringify(data) }),
   },
 
   student: {
