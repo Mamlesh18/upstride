@@ -13,7 +13,8 @@
       "Bash(del skeleton.tsx slider.tsx switch.tsx table.tsx tabs.tsx toggle-group.tsx toggle.tsx)",
       "Bash(del use-mobile.tsx)",
       "Bash(npx tsc:*)",
-      "Read(//c/Users/mamle/visualstudiocode/Upstride/**)"
+      "Read(//c/Users/mamle/visualstudiocode/Upstride/**)",
+      "Bash(python3 *)"
     ],
     "deny": [],
     "ask": []
