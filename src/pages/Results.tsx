@@ -35,7 +35,7 @@ function useInView(threshold = 0.15) {
 
 const STUDENTS = [
   {
-    name: "SRI HARSHA",
+    name: "SRI",
     image: "/sri-image.jpg",
     achievement: "From clueless to confident — built a project that changed everything",
     quote: "Before Upstride I knew nothing and had no direction. After joining I got clarity and gained real confidence. The project I built felt like my first step toward something bigger — and I felt that so hard.",
