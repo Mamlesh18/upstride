@@ -628,25 +628,39 @@ const Portal = () => {
             </div>
           </div>
         )}
-      </div>
 
         {/* ── LEADERBOARD VIEW ─────────────────────────────────────────── */}
         {currentView === "leaderboard" && (
           <div style={{ maxWidth: "700px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
 
             {/* Header */}
-            <div style={{ textAlign: "center", marginBottom: "28px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "40px" : "56px", color: B, lineHeight: 0.9, letterSpacing: "0.02em" }}>
+            <div style={{ marginBottom: "28px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "40px" : "56px", color: B, lineHeight: 0.9, letterSpacing: "0.02em", textAlign: "center" }}>
                 WEEKLY<br /><span style={{ borderBottom: `4px solid ${Y}` }}>LEADERBOARD</span>
               </div>
-              {leaderboard && (
-                <div style={{ marginTop: "10px", fontSize: "12px", color: MUTE }}>
-                  📅 {leaderboard.week_label} &nbsp;·&nbsp; Resets every Monday
+
+              {/* Week pill + scoring chips */}
+              <div style={{ marginTop: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                {leaderboard && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: B, color: W, borderRadius: "999px", padding: "5px 14px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.04em" }}>
+                    <span style={{ opacity: 0.6 }}>📅</span>
+                    {leaderboard.week_label}
+                    <span style={{ opacity: 0.4, margin: "0 2px" }}>·</span>
+                    <span style={{ opacity: 0.6 }}>resets Monday</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", background: `${Y}30`, border: `1.5px solid ${Y}`, borderRadius: "8px", padding: "6px 14px" }}>
+                    <span style={{ fontSize: "14px" }}>🔑</span>
+                    <span style={{ fontSize: "11px", color: B, fontWeight: 600 }}>Login day</span>
+                    <span style={{ fontSize: "13px", fontWeight: 800, color: B, fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.05em" }}>+3 pts</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", background: `${B}08`, border: `1.5px solid ${BORD}`, borderRadius: "8px", padding: "6px 14px" }}>
+                    <span style={{ fontSize: "14px" }}>📚</span>
+                    <span style={{ fontSize: "11px", color: B, fontWeight: 600 }}>Resource open</span>
+                    <span style={{ fontSize: "13px", fontWeight: 800, color: B, fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.05em" }}>+1 pt</span>
+                  </div>
                 </div>
-              )}
-              <div style={{ marginTop: "10px", display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "11px", color: MUTE }}>🔑 Login day = <strong style={{ color: B }}>3 pts</strong></span>
-                <span style={{ fontSize: "11px", color: MUTE }}>📚 Resource open = <strong style={{ color: B }}>1 pt</strong></span>
               </div>
             </div>
 

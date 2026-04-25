@@ -14,7 +14,9 @@
       "Bash(del use-mobile.tsx)",
       "Bash(npx tsc:*)",
       "Read(//c/Users/mamle/visualstudiocode/Upstride/**)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "deny": [],
     "ask": []
