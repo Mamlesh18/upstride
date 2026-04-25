@@ -152,6 +152,25 @@ export default function SalesPerson() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "28px 24px" }}>
 
+        {/* Script banner */}
+        <a
+          href="https://docs.google.com/document/d/1l3lKqJaXuC9W9X1KIYwYfhdzWZWlk0_x9QY1NvJRDto/edit?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "12px 18px", backgroundColor: Y, border: `2px solid ${B}`, borderRadius: "8px", marginBottom: "18px", textDecoration: "none", boxShadow: `3px 3px 0 ${B}` }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "18px" }}>📋</span>
+            <div>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.08em" }}>FOLLOW THE SCRIPT</div>
+              <div style={{ fontSize: "11px", color: `${B}99`, marginTop: "1px" }}>Open the sales call script before you dial</div>
+            </div>
+          </div>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: B, whiteSpace: "nowrap", padding: "5px 12px", border: `2px solid ${B}`, borderRadius: "5px" }}>
+            OPEN →
+          </div>
+        </a>
+
         {/* Summary bar */}
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "20px" }}>
           <button onClick={() => setFilter("all")}

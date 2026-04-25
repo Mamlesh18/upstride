@@ -51,6 +51,28 @@ export default function ProjectManager() {
       </div>
 
       <div style={{ maxWidth: "960px", margin: "0 auto", padding: "40px 24px" }}>
+
+        {/* Secret keys doc banner */}
+        <a
+          href="https://docs.google.com/document/d/14_Krx7K9ewXhhkUqx4x3kXTcFbZuda6sbypqleI8xe0/edit?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 18px", backgroundColor: B, border: `2px solid ${Y}`, borderRadius: "8px", marginBottom: "28px", textDecoration: "none", boxShadow: `3px 3px 0 ${Y}` }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "20px" }}>🔑</span>
+            <div>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: Y, letterSpacing: "0.08em" }}>SECRET KEYS — FOR PROJECT USE ONLY</div>
+              <div style={{ fontSize: "11px", color: `${W}70`, marginTop: "2px" }}>
+                Use <strong style={{ color: W }}>gpt-4o-mini</strong> for LLM &nbsp;·&nbsp; <strong style={{ color: W }}>text-embedding-3-small</strong> for embeddings
+              </div>
+            </div>
+          </div>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: B, backgroundColor: Y, whiteSpace: "nowrap", padding: "6px 14px", borderRadius: "5px" }}>
+            OPEN DOC →
+          </div>
+        </a>
+
         <div style={{ marginBottom: "32px" }}>
           <h1 style={{ fontSize: "28px", fontWeight: 700, color: B, marginBottom: "4px" }}>
             Welcome, <span style={{ color: B, borderBottom: `3px solid ${Y}` }}>{name}</span>
