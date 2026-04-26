@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen } from "lucide-react";
+import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen, Layers } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -8,10 +8,11 @@ const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFA
 const BORD = "#E5E5E5"; const MUTE = "#6B7280"; const RED = "#EF4444"; const GREEN = "#22C55E";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources";
+type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources" | "batches";
 type ContactStatus = "pending" | "picked" | "rejected" | "missed" | "joining" | "will_discuss";
 
 interface Student { id: string; name: string; email: string; is_active: boolean; must_change_password: boolean; }
+interface Batch { id: string; name: string; resume_enhancer_email?: string; resume_enhancer_password?: string; common_calendar_url?: string; calendar_url_1?: string; calendar_url_2?: string; }
 interface Manager { id: string; name: string; email: string; is_active: boolean; }
 interface Project { id: string; title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string; manager_name: string; }
 interface Salesperson { id: string; name: string; email: string; is_active: boolean; }
@@ -109,6 +110,11 @@ export default function Admin() {
   const [resumeCredsLoading, setResumeCredsLoading] = useState(false);
 
   // Modals
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [showAddBatch, setShowAddBatch] = useState(false);
+  const [batchForm, setBatchForm] = useState({ name: "", resumeEmail: "", resumePassword: "", commonUrl: "", url1: "", url2: "" });
+  const [editBatch, setEditBatch] = useState<Batch | null>(null);
+
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showAddManager, setShowAddManager] = useState(false);
   const [showAddProject, setShowAddProject] = useState(false);
@@ -118,7 +124,7 @@ export default function Admin() {
   const [resetTarget, setResetTarget] = useState<Student | null>(null);
 
   // Forms
-  const [studentForm, setStudentForm] = useState({ emails: "", password: "" });
+  const [studentForm, setStudentForm] = useState({ emails: "", password: "", batchId: "", resumeEmail: "", resumePassword: "" });
   const [managerForm, setManagerForm] = useState({ email: "", name: "", password: "" });
   const [projectForm, setProjectForm] = useState({ title: "", description: "", project_link: "", meeting_link: "", github_link: "", day: "", time: "", manager_id: "" });
   const [spForm, setSpForm] = useState({ email: "", name: "", password: "" });
@@ -149,6 +155,13 @@ export default function Admin() {
       toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
     } finally { setLoading(false); }
   }, [search]);
+
+  const loadBatches = useCallback(async () => {
+    try {
+      const r = await api.batches.list() as { data: { batches: Batch[] } };
+      setBatches(r.data.batches);
+    } catch { /* silent */ }
+  }, []);
 
   const loadManagers = useCallback(async () => {
     try {
@@ -230,6 +243,8 @@ export default function Admin() {
   }, []);
 
   useEffect(() => { if (tab === "resources") loadAdminResources(); }, [tab, loadAdminResources]);
+  useEffect(() => { if (tab === "batches") loadBatches(); }, [tab, loadBatches]);
+  useEffect(() => { loadBatches(); }, [loadBatches]); // load once for student add dropdown
 
   const handleBulkSetResumeCreds = async () => {
     if (!resumeCredsForm.email.trim() || !resumeCredsForm.password.trim()) {
@@ -250,11 +265,11 @@ export default function Admin() {
     if (!emails.length) { toast({ title: "No emails entered", variant: "destructive" }); return; }
     if (studentForm.password.length < 8) { toast({ title: "Password too short", description: "Min 8 characters", variant: "destructive" }); return; }
     try {
-      const r = await api.admin.bulkAddStudents(emails, studentForm.password) as { data: { added: string[]; skipped: string[] } };
+      const r = await api.admin.bulkAddStudents(emails, studentForm.password, studentForm.batchId || undefined, studentForm.resumeEmail.trim() || undefined, studentForm.resumePassword.trim() || undefined) as { data: { added: string[]; skipped: string[] } };
       const { added, skipped } = r.data;
       toast({ title: `${added.length} student(s) added`, description: skipped.length ? `${skipped.length} already existed (skipped)` : undefined });
       setShowAddStudent(false);
-      setStudentForm({ emails: "", password: "" });
+      setStudentForm({ emails: "", password: "", batchId: "", resumeEmail: "", resumePassword: "" });
       loadStudents(1); loadStats();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
@@ -266,6 +281,70 @@ export default function Admin() {
       setShowAddManager(false);
       setManagerForm({ email: "", name: "", password: "" });
       loadManagers(); loadStats();
+    } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const emptyBatchForm = { name: "", resumeEmail: "", resumePassword: "", commonUrl: "", url1: "", url2: "" };
+
+  const extractCalendarUrl = (raw: string): string => {
+    const trimmed = raw.trim();
+    // If they pasted a full <iframe> tag, pull out the src attribute value
+    const match = trimmed.match(/src=["']([^"']+)/);
+    if (match) return match[1];
+    return trimmed;
+  };
+
+  const calendarInput = (label: string, field: "commonUrl" | "url1" | "url2") => (
+    <div>
+      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>{label}</label>
+      <input
+        type="text"
+        placeholder="Paste the full embed code or just the URL"
+        value={batchForm[field]}
+        onChange={e => setBatchForm(f => ({ ...f, [field]: e.target.value }))}
+        onBlur={e => setBatchForm(f => ({ ...f, [field]: extractCalendarUrl(e.target.value) }))}
+        onPaste={e => {
+          e.preventDefault();
+          const pasted = e.clipboardData.getData("text");
+          setBatchForm(f => ({ ...f, [field]: extractCalendarUrl(pasted) }));
+        }}
+        style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", boxSizing: "border-box" as const }}
+      />
+    </div>
+  );
+
+  const handleSaveBatch = async () => {
+    const isEdit = !!editBatch;
+    const payload = {
+      name: batchForm.name.trim(),
+      resume_enhancer_email: batchForm.resumeEmail.trim() || undefined,
+      resume_enhancer_password: batchForm.resumePassword.trim() || undefined,
+      common_calendar_url: batchForm.commonUrl.trim() || undefined,
+      calendar_url_1: batchForm.url1.trim() || undefined,
+      calendar_url_2: batchForm.url2.trim() || undefined,
+    };
+    console.log("[Batch] payload:", JSON.stringify(payload));
+    try {
+      if (isEdit) {
+        await api.batches.update(editBatch!.id, payload);
+        toast({ title: "Batch updated" });
+        setEditBatch(null);
+      } else {
+        await api.batches.create(payload);
+        toast({ title: "Batch created" });
+        setShowAddBatch(false);
+      }
+      setBatchForm(emptyBatchForm);
+      loadBatches();
+    } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const handleDeleteBatch = async (id: string) => {
+    if (!confirm("Delete this batch? Students linked to it will lose their schedule.")) return;
+    try {
+      await api.batches.delete(id);
+      toast({ title: "Batch deleted" });
+      loadBatches();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -457,6 +536,7 @@ export default function Admin() {
     { key: "feedback", label: "Feedback", icon: <MessageSquare size={15} /> },
     { key: "events", label: "Events", icon: <CalendarDays size={15} /> },
     { key: "resources", label: "Resources", icon: <BookOpen size={15} /> },
+    { key: "batches", label: "Batches", icon: <Layers size={15} /> },
   ];
 
   return (
@@ -1173,6 +1253,52 @@ export default function Admin() {
             </p>
           </div>
         )}
+
+        {/* ── Batches Tab ─────────────────────────────────────────── */}
+        {tab === "batches" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, color: B }}>Batches</h2>
+                <p style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>Each batch holds shared credentials and calendar links for a group of students.</p>
+              </div>
+              <Btn onClick={() => { setShowAddBatch(true); setBatchForm(emptyBatchForm); }} small><Plus size={13} /> New Batch</Btn>
+            </div>
+
+            {batches.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", border: `2px dashed ${BORD}`, borderRadius: "12px", color: MUTE }}>
+                <Layers size={32} style={{ marginBottom: "12px", opacity: 0.3 }} />
+                <p style={{ fontWeight: 600, marginBottom: "4px" }}>No batches yet</p>
+                <p style={{ fontSize: "12px" }}>Create a batch to group students with shared credentials and calendars.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                {batches.map(b => (
+                  <div key={b.id} style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "10px", padding: "20px 22px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                          <div style={{ background: Y, border: `2px solid ${B}`, borderRadius: "6px", padding: "4px 10px", fontSize: "12px", fontWeight: 700, color: B }}>{b.name}</div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "8px", fontSize: "11px", color: MUTE }}>
+                          {b.resume_enhancer_email && <div><span style={{ color: B, fontWeight: 600 }}>Resume Email:</span> {b.resume_enhancer_email}</div>}
+                          {b.resume_enhancer_password && <div><span style={{ color: B, fontWeight: 600 }}>Resume Pwd:</span> {b.resume_enhancer_password}</div>}
+                          {b.common_calendar_url && <div><span style={{ color: "#16A34A", fontWeight: 600 }}>📅 Program Cal:</span> linked</div>}
+                          {b.calendar_url_1 && <div><span style={{ color: "#0369A1", fontWeight: 600 }}>📅 Standup Cal:</span> linked</div>}
+                          {b.calendar_url_2 && <div><span style={{ color: "#7C3AED", fontWeight: 600 }}>📅 Extra Cal:</span> linked</div>}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <Btn small color={MUTE} onClick={() => { setEditBatch(b); setBatchForm({ name: b.name, resumeEmail: b.resume_enhancer_email || "", resumePassword: b.resume_enhancer_password || "", commonUrl: b.common_calendar_url || "", url1: b.calendar_url_1 || "", url2: b.calendar_url_2 || "" }); }}>Edit</Btn>
+                        <Btn small color={RED} onClick={() => handleDeleteBatch(b.id)}><Trash2 size={12} /></Btn>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Resume Enhancer Credentials Modal */}
@@ -1222,8 +1348,28 @@ export default function Admin() {
               />
               <p style={{ fontSize: "11px", color: MUTE, marginTop: "4px" }}>One email per line, or comma-separated. Email is used as the student name.</p>
             </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>BATCH</label>
+              <select value={studentForm.batchId} onChange={e => {
+                const b = batches.find(x => x.id === e.target.value);
+                setStudentForm(f => ({ ...f, batchId: e.target.value, resumeEmail: b?.resume_enhancer_email || f.resumeEmail, resumePassword: b?.resume_enhancer_password || f.resumePassword }));
+              }} style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" as const }}>
+                <option value="">— No batch (manual entry) —</option>
+                {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+              {studentForm.batchId && <p style={{ fontSize: "11px", color: "#16A34A", marginTop: "4px" }}>✓ Resume credentials will be auto-filled from batch.</p>}
+            </div>
             <Input label="SHARED PASSWORD" type="text" placeholder="Min 8 characters — same for all" value={studentForm.password} onChange={e => setStudentForm(f => ({ ...f, password: e.target.value }))} />
             <p style={{ fontSize: "11px", color: MUTE }}>Each student must change this password on first login.</p>
+            {!studentForm.batchId && (
+              <div style={{ borderTop: `1px solid ${BORD}`, paddingTop: "14px" }}>
+                <p style={{ fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.08em", marginBottom: "10px" }}>RESUME ENHANCER ACCESS (optional)</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <Input label="RESUME TOOL EMAIL" type="text" placeholder="e.g. student123@gmail.com" value={studentForm.resumeEmail} onChange={e => setStudentForm(f => ({ ...f, resumeEmail: e.target.value }))} />
+                  <Input label="RESUME TOOL PASSWORD" type="text" placeholder="Leave blank if not assigning" value={studentForm.resumePassword} onChange={e => setStudentForm(f => ({ ...f, resumePassword: e.target.value }))} />
+                </div>
+              </div>
+            )}
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
               <Btn onClick={() => setShowAddStudent(false)} color={MUTE} small>Cancel</Btn>
               <Btn onClick={handleAddStudent} small>Add Students</Btn>
@@ -1421,6 +1567,35 @@ export default function Admin() {
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
               <Btn onClick={() => setShowAddResource(false)} color={MUTE} small>Cancel</Btn>
               <Btn onClick={handleAddResource} small>Add Resource</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Add / Edit Batch Modal */}
+      {(showAddBatch || editBatch) && (
+        <Modal title={editBatch ? `Edit — ${editBatch.name}` : "New Batch"} onClose={() => { setShowAddBatch(false); setEditBatch(null); setBatchForm(emptyBatchForm); }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxHeight: "75vh", overflowY: "auto" }}>
+            <Input label="BATCH NAME" type="text" placeholder="e.g. Batch April 2026" value={batchForm.name} onChange={e => setBatchForm(f => ({ ...f, name: e.target.value }))} />
+            <div style={{ borderTop: `1px solid ${BORD}`, paddingTop: "12px" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.08em", marginBottom: "10px" }}>RESUME ENHANCER CREDENTIALS</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <Input label="RESUME TOOL EMAIL" type="text" placeholder="e.g. batch1@gmail.com" value={batchForm.resumeEmail} onChange={e => setBatchForm(f => ({ ...f, resumeEmail: e.target.value }))} />
+                <Input label="RESUME TOOL PASSWORD" type="text" placeholder="Leave blank if not assigning" value={batchForm.resumePassword} onChange={e => setBatchForm(f => ({ ...f, resumePassword: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ borderTop: `1px solid ${BORD}`, paddingTop: "12px" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.08em", marginBottom: "4px" }}>📅 CALENDAR EMBED URLS</p>
+              <p style={{ fontSize: "11px", color: MUTE, marginBottom: "10px" }}>Paste the full embed code Google gives you — the URL will be extracted automatically.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {calendarInput("UPSTRIDE PROGRAM CALENDAR (shared by all batches)", "commonUrl")}
+                {calendarInput("STANDUP CALLS CALENDAR (batch-specific)", "url1")}
+                {calendarInput("EXTRA SESSIONS CALENDAR (batch-specific)", "url2")}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
+              <Btn onClick={() => { setShowAddBatch(false); setEditBatch(null); setBatchForm(emptyBatchForm); }} color={MUTE} small>Cancel</Btn>
+              <Btn onClick={handleSaveBatch} small>{editBatch ? "Save Changes" : "Create Batch"}</Btn>
             </div>
           </div>
         </Modal>

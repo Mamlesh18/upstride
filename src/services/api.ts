@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -17,7 +17,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || data.message || "Request failed");
+  if (!res.ok) {
+    const detail = Array.isArray(data.detail)
+      ? data.detail.map((e: { loc: string[]; msg: string }) => `${e.loc.join(".")}: ${e.msg}`).join("; ")
+      : (data.detail || data.message || "Request failed");
+    console.error("[API error]", res.status, detail, data);
+    throw new Error(detail);
+  }
   return data;
 }
 
@@ -53,8 +59,8 @@ export const api = {
 
     addStudent: (data: { email: string; name: string; password: string }) =>
       request("/api/admin/students", { method: "POST", body: JSON.stringify(data) }),
-    bulkAddStudents: (emails: string[], password: string) =>
-      request("/api/admin/students/bulk", { method: "POST", body: JSON.stringify({ emails, password }) }),
+    bulkAddStudents: (emails: string[], password: string, batchId?: string, resumeEmail?: string, resumePassword?: string) =>
+      request("/api/admin/students/bulk", { method: "POST", body: JSON.stringify({ emails, password, ...(batchId ? { batch_id: batchId } : {}), ...(resumeEmail ? { resume_enhancer_email: resumeEmail, resume_enhancer_password: resumePassword } : {}) }) }),
     listStudents: (page = 1, search = "") =>
       request(`/api/admin/students?page=${page}&search=${search}`),
     updateStudent: (id: string, data: Record<string, unknown>) =>
@@ -142,6 +148,8 @@ export const api = {
     track: (type: string, resource_name?: string) =>
       request("/api/student/track", { method: "POST", body: JSON.stringify({ type, resource_name }) }),
     getLeaderboard: () => request("/api/student/leaderboard"),
+    getSchedule: () => request("/api/student/schedule"),
+    getUpcomingEvents: () => request("/api/student/events"),
   },
 
   events: {
@@ -161,6 +169,15 @@ export const api = {
       badge_label?: string; badge_accent?: boolean;
     }) => request("/api/admin/resources", { method: "POST", body: JSON.stringify(data) }),
     delete: (id: string) => request(`/api/admin/resources/${id}`, { method: "DELETE" }),
+  },
+
+  batches: {
+    list: () => request("/api/admin/batches"),
+    create: (data: { name: string; resume_enhancer_email?: string; resume_enhancer_password?: string; common_calendar_url?: string; calendar_url_1?: string; calendar_url_2?: string }) =>
+      request("/api/admin/batches", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: string, data: Record<string, unknown>) =>
+      request(`/api/admin/batches/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    delete: (id: string) => request(`/api/admin/batches/${id}`, { method: "DELETE" }),
   },
 
   adminExtra: {

@@ -15,7 +15,7 @@ import {
   Building2, Code2, LogOut, GraduationCap, Star, Database, Network,
   Cpu, MessageCircle, Lightbulb, Brain, Target, BookOpen, ArrowUpRight,
   Flame, Zap, Trophy, Eye, ShoppingCart, Server, Coffee,
-  PlayCircle, Lock, CheckSquare, X, Send, Sparkles, Copy, Check,
+  PlayCircle, Lock, CheckSquare, X, Send, Sparkles, Copy, Check, CalendarDays,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -32,7 +32,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "recommended" | "training" | "placement" | "sessions" | "resume" | "leaderboard";
+type ViewType = "recommended" | "training" | "placement" | "sessions" | "resume" | "leaderboard" | "schedule";
 
 // ─── Resource Types ───────────────────────────────────────────────────────────
 interface Resource { id: string; section: string; category: string; name: string; tagline: string; url: string; company_type?: string; sub_type?: string; emoji?: string; badge_label?: string; badge_accent?: boolean; }
@@ -99,6 +99,12 @@ const Portal = () => {
   interface LeaderboardData { week_label: string; leaderboard: LeaderboardEntry[]; my_rank: number | null; my_stats: { email: string; score: number; login_days: number; resource_opens: number } | null; }
   const [leaderboard, setLeaderboard]         = useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  interface CalendarEntry { label: string; url: string; }
+  interface ScheduleData { batch: string | null; calendars: CalendarEntry[]; }
+  const [schedule, setSchedule]               = useState<ScheduleData | null>(null);
+  const [activeCalendar, setActiveCalendar]   = useState(0);
+  interface UpcomingEvent { title: string; description: string; start: string; all_day: boolean; countdown: string; urgency: "now" | "today" | "soon" | "week" | "later"; }
+  const [upcomingEvents, setUpcomingEvents]   = useState<UpcomingEvent[]>([]);
 
   useEffect(() => {
     api.resources.getAll().then((r: unknown) => {
@@ -122,6 +128,14 @@ const Portal = () => {
       const res = r as { data: { has_access: boolean; email: string; password: string } };
       setResumeCreds(res.data);
     }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    api.student.getUpcomingEvents().then((r: unknown) => {
+      const res = r as { data: { events: UpcomingEvent[] } };
+      setUpcomingEvents(res.data.events);
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLogout = () => {
@@ -156,6 +170,13 @@ const Portal = () => {
         setLeaderboard(res.data);
       }).catch(() => {}).finally(() => setLeaderboardLoading(false));
     }
+    if (view === "schedule" && !schedule) {
+      api.student.getSchedule().then((r: unknown) => {
+        const res = r as { data: ScheduleData };
+        setSchedule(res.data);
+        setActiveCalendar(0);
+      }).catch(() => {});
+    }
   };
 
   const copyToClipboard = (text: string, type: "email" | "password") => {
@@ -165,6 +186,28 @@ const Portal = () => {
     });
   };
 
+  const formatEventDate = (isoStr: string, allDay: boolean): string => {
+    const dt = new Date(isoStr);
+    if (allDay) return dt.toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" });
+    return dt.toLocaleString("en-IN", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
+  };
+
+  const urgencyBg = (u: string) => (({ now: "#EF4444", today: "#F97316", soon: Y, week: "#3B82F6", later: "#9CA3AF" } as Record<string, string>)[u] ?? "#9CA3AF");
+  const urgencyFg = (u: string) => u === "soon" ? B : W;
+  const urgencyLabel = (u: string) => (({ now: "HAPPENING NOW", today: "TODAY", soon: "TOMORROW", week: "THIS WEEK", later: "UPCOMING" } as Record<string, string>)[u] ?? "UPCOMING");
+
+  const extractMeetLink = (desc: string): string | null => {
+    const m = desc.match(/https?:\/\/meet\.google\.com\/[\w-]+/);
+    return m ? m[0] : null;
+  };
+  const cleanDescription = (desc: string): string =>
+    desc
+      .replace(/Join with Google Meet:?\s*https?:\/\/meet\.google\.com\/[\w-]+/gi, "")
+      .replace(/Learn more about Meet at:?\s*https?:\/\/\S+/gi, "")
+      .replace(/https?:\/\/meet\.google\.com\/[\w-]+/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
   const tabs: { view: ViewType; label: string; icon: typeof Star; count: string }[] = [
     { view: "recommended", label: "Recommended", icon: Star,          count: `${resourcesData?.recommended.length ?? "—"}` },
     { view: "training",    label: "Training",    icon: GraduationCap, count: `${resourcesData ? resourcesData.training.reduce((a, c) => a + c.resources.length, 0) : "—"}` },
@@ -172,6 +215,7 @@ const Portal = () => {
     { view: "sessions",    label: "Sessions",    icon: PlayCircle,    count: "11" },
     ...(resumeCreds?.has_access ? [{ view: "resume" as ViewType, label: "Resume AI", icon: Sparkles, count: "✦" }] : []),
     { view: "leaderboard" as ViewType, label: "Leaderboard", icon: Trophy, count: "🏆" },
+    { view: "schedule" as ViewType, label: "Schedule", icon: CalendarDays, count: "📅" },
   ];
 
   const cardHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -267,6 +311,147 @@ const Portal = () => {
         {/* ══ RECOMMENDED ════════════════════════════════════════════════ */}
         {currentView === "recommended" && (
           <div>
+
+            {/* ── UPCOMING EVENTS ─────────────────────────────────────── */}
+            {upcomingEvents.length > 0 && (
+              <>
+                <style>{`
+                  @keyframes up-slide { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+                  @keyframes up-scan { 0%{top:-80px;opacity:.07} 100%{top:110%;opacity:0} }
+                  @keyframes up-blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+                  @keyframes up-pulse { 0%{box-shadow:0 0 0 0 rgba(255,229,0,.5)} 70%{box-shadow:0 0 0 14px rgba(255,229,0,0)} 100%{box-shadow:0 0 0 0 rgba(255,229,0,0)} }
+                `}</style>
+
+                <div style={{ marginBottom: "48px", animation: "up-slide .45s cubic-bezier(.22,1,.36,1) both" }}>
+
+                  {/* ── Hero card ───────────────────────────── */}
+                  <div style={{ position: "relative", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto", background: B, border: `2px solid ${Y}`, overflow: "hidden", marginBottom: "8px" }}>
+
+                    {/* dot-grid texture */}
+                    <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(${Y}18 1.2px, transparent 1.2px)`, backgroundSize: "22px 22px", pointerEvents: "none" }} />
+
+                    {/* scan-line sweep */}
+                    <div style={{ position: "absolute", left: 0, right: 0, height: "70px", background: `linear-gradient(transparent, ${Y}09, transparent)`, animation: "up-scan 4s linear infinite", pointerEvents: "none" }} />
+
+                    {/* left: event info */}
+                    <div style={{ padding: isMobile ? "22px 18px" : "32px 36px", position: "relative", zIndex: 1 }}>
+
+                      {/* status bar */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "22px" }}>
+                        <div style={{
+                          width: "9px", height: "9px", borderRadius: "50%",
+                          background: urgencyBg(upcomingEvents[0].urgency),
+                          animation: ["now","today"].includes(upcomingEvents[0].urgency) ? "up-blink 1.1s ease-in-out infinite" : "none",
+                          flexShrink: 0,
+                        }} />
+                        <span style={{ fontSize: "9px", color: urgencyBg(upcomingEvents[0].urgency), fontWeight: 700, letterSpacing: "0.18em" }}>
+                          {urgencyLabel(upcomingEvents[0].urgency)}
+                        </span>
+                        <div style={{ flex: 1, height: "1px", background: `${Y}18` }} />
+                        <span style={{ fontSize: "9px", color: "#ffffff25", letterSpacing: "0.1em" }}>SESSION BRIEF</span>
+                      </div>
+
+                      {/* title */}
+                      <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "clamp(28px, 8vw, 44px)" : "clamp(36px, 4vw, 58px)", color: W, lineHeight: .95, letterSpacing: "0.02em", marginBottom: "18px", maxWidth: "560px" }}>
+                        {upcomingEvents[0].title}
+                      </h2>
+
+                      {/* date */}
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#ffffff0d", border: "1px solid #ffffff14", padding: "6px 12px" }}>
+                        <CalendarDays size={12} color={Y} />
+                        <span style={{ fontSize: "11px", color: "#ffffff80", letterSpacing: "0.06em" }}>
+                          {formatEventDate(upcomingEvents[0].start, upcomingEvents[0].all_day)}
+                        </span>
+                      </div>
+
+                      {upcomingEvents[0].description && (() => {
+                        const meetLink = extractMeetLink(upcomingEvents[0].description);
+                        const cleanDesc = cleanDescription(upcomingEvents[0].description);
+                        return (
+                          <>
+                            {cleanDesc && (
+                              <p style={{ fontSize: "13px", color: "#ffffffa0", marginTop: "16px", lineHeight: 1.75, maxWidth: "480px" }}>
+                                {cleanDesc.slice(0, 220)}
+                              </p>
+                            )}
+                            {meetLink && (
+                              <a
+                                href={meetLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: "inline-flex", alignItems: "center", gap: "10px",
+                                  marginTop: "22px",
+                                  background: Y, color: B,
+                                  padding: "14px 28px",
+                                  fontSize: "14px", fontWeight: 700, letterSpacing: "0.1em",
+                                  textDecoration: "none",
+                                  border: `2px solid ${Y}`,
+                                  fontFamily: "'IBM Plex Mono', monospace",
+                                  transition: "all 0.15s",
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = W; (e.currentTarget as HTMLAnchorElement).style.borderColor = W; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = Y; (e.currentTarget as HTMLAnchorElement).style.borderColor = Y; }}
+                              >
+                                <span style={{ fontSize: "16px" }}>🎥</span>
+                                JOIN SESSION
+                                <span style={{ fontSize: "18px", lineHeight: 1 }}>→</span>
+                              </a>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* right: countdown block */}
+                    <div style={{
+                      background: urgencyBg(upcomingEvents[0].urgency),
+                      minWidth: isMobile ? "auto" : "176px",
+                      padding: isMobile ? "16px 18px" : "0 40px",
+                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                      gap: "4px",
+                      animation: ["now","today"].includes(upcomingEvents[0].urgency) ? "up-pulse 2.2s ease-out infinite" : "none",
+                      position: "relative", zIndex: 1,
+                    }}>
+                      <div style={{ fontSize: "9px", color: urgencyFg(upcomingEvents[0].urgency), opacity: .65, letterSpacing: "0.16em", marginBottom: "4px" }}>STARTS</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "52px" : "76px", color: urgencyFg(upcomingEvents[0].urgency), lineHeight: 1, letterSpacing: "0.02em", textAlign: "center" }}>
+                        {upcomingEvents[0].countdown}
+                      </div>
+                      <div style={{ fontSize: "8px", color: urgencyFg(upcomingEvents[0].urgency), opacity: .55, letterSpacing: "0.14em" }}>FROM NOW</div>
+                    </div>
+                  </div>
+
+                  {/* ── Queue strip ─────────────────────────── */}
+                  {upcomingEvents.slice(1, 4).length > 0 && (
+                    <div style={{ display: "flex", gap: "0", alignItems: "stretch" }}>
+
+                      {/* vertical label */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 10px", background: B, border: `2px solid ${Y}`, borderRight: "none", flexShrink: 0 }}>
+                        <span style={{ fontSize: "8px", color: Y, letterSpacing: "0.2em", fontWeight: 700, writingMode: "vertical-rl" as const, transform: "rotate(180deg)" }}>NEXT UP</span>
+                      </div>
+
+                      {/* event chips */}
+                      <div style={{ flex: 1, display: "flex", gap: "2px", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+                        {upcomingEvents.slice(1, 4).map((evt, i) => (
+                          <div key={i} style={{ flex: "1 1 150px", display: "flex", alignItems: "stretch", border: `2px solid ${BORD}`, borderLeft: `4px solid ${urgencyBg(evt.urgency)}`, background: W, overflow: "hidden" }}>
+                            <div style={{ flex: 1, padding: "10px 14px" }}>
+                              <div style={{ fontSize: "11px", fontWeight: 700, color: B, marginBottom: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{evt.title}</div>
+                              <div style={{ fontSize: "10px", color: MUTE }}>{evt.countdown}</div>
+                            </div>
+                            <div style={{ background: urgencyBg(evt.urgency), width: "28px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <span style={{ fontSize: "7px", fontWeight: 700, color: urgencyFg(evt.urgency), letterSpacing: "0.12em", writingMode: "vertical-rl" as const, transform: "rotate(180deg)", opacity: .85 }}>
+                                {evt.urgency.toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             <div style={{ marginBottom: "36px" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", marginBottom: "16px" }}>
                 <Flame size={13} /> HANDPICKED FOR MAXIMUM IMPACT
@@ -744,6 +929,66 @@ const Portal = () => {
                     <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "22px", color: B }}>{leaderboard.my_stats.score} pts</div>
                   </div>
                 )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── SCHEDULE VIEW ────────────────────────────────────────────── */}
+        {currentView === "schedule" && (
+          <div style={{ maxWidth: "900px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
+            {/* Header */}
+            <div style={{ marginBottom: "24px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "36px" : "52px", color: B, lineHeight: 0.9, letterSpacing: "0.02em" }}>
+                YOUR<br /><span style={{ borderBottom: `4px solid ${Y}` }}>SCHEDULE</span>
+              </div>
+              {schedule?.batch && (
+                <div style={{ marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "6px", background: B, color: W, borderRadius: "999px", padding: "5px 14px", fontSize: "11px", fontWeight: 600 }}>
+                  <CalendarDays size={12} /> {schedule.batch}
+                </div>
+              )}
+            </div>
+
+            {!schedule ? (
+              <div style={{ textAlign: "center", padding: "60px", color: MUTE }}>Loading...</div>
+            ) : schedule.calendars.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 24px", border: `2px dashed ${BORD}`, borderRadius: "12px" }}>
+                <CalendarDays size={36} style={{ marginBottom: "12px", opacity: 0.3 }} />
+                <div style={{ fontWeight: 700, color: B, marginBottom: "6px" }}>No schedule set up yet</div>
+                <div style={{ fontSize: "12px", color: MUTE }}>Your admin will add your batch calendar soon.</div>
+              </div>
+            ) : (
+              <>
+                {/* Calendar selector tabs */}
+                {schedule.calendars.length > 1 && (
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+                    {schedule.calendars.map((cal, i) => (
+                      <button key={i} onClick={() => setActiveCalendar(i)}
+                        style={{ padding: "8px 18px", borderRadius: "8px", border: `2px solid ${activeCalendar === i ? B : BORD}`, background: activeCalendar === i ? B : W, color: activeCalendar === i ? Y : B, fontSize: "12px", fontWeight: 700, cursor: "pointer", ...MONO, transition: "all 0.15s" }}>
+                        📅 {cal.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Calendar iframe */}
+                <div style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "12px", overflow: "hidden", boxShadow: `4px 4px 0 ${Y}` }}>
+                  <div style={{ background: B, padding: "12px 18px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <CalendarDays size={16} color={Y} />
+                    <span style={{ color: W, fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", ...MONO }}>
+                      {schedule.calendars[activeCalendar]?.label?.toUpperCase()}
+                    </span>
+                  </div>
+                  <iframe
+                    src={schedule.calendars[activeCalendar]?.url}
+                    style={{ width: "100%", height: isMobile ? "500px" : "680px", border: "none", display: "block" }}
+                    title={schedule.calendars[activeCalendar]?.label}
+                  />
+                </div>
+
+                <p style={{ fontSize: "11px", color: MUTE, marginTop: "10px", textAlign: "center" }}>
+                  Events are managed by your admin. Add to your own calendar by clicking any event inside the calendar above.
+                </p>
               </>
             )}
           </div>
