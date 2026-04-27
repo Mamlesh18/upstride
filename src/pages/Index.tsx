@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronUp, Phone, CalendarDays } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -77,38 +77,38 @@ const HOW_IT_WORKS = [
   {
     num: "01",
     title: "AI-first structured curriculum",
-    sub: "Not retrofitted. Rebuilt.",
-    body: "Every module reflects how the best engineering and data teams work today — with AI-assisted workflows, current interview standards, and the roles companies are actually hiring for now.",
+    sub: "Built for today, not five years ago.",
+    body: "You won't sit through outdated theory. Every module is built around how teams actually work right now — AI tools, real interview patterns, and the skills companies are genuinely hiring for. You learn what matters, when it matters.",
   },
   {
     num: "02",
     title: "1:1 mentor support",
-    sub: "The people who guide you are also building the industry.",
-    body: "Your mentors are active industry professionals — currently employed, currently hiring, currently solving the same problems you will face. They review your work, unblock you in real time, and bring the kind of judgment that only comes from being inside the teams you want to join.",
+    sub: "Someone who's been where you want to go.",
+    body: "Your mentor isn't just a teacher — they're someone working in the industry right now. They'll review your work, answer your real questions, and tell you the honest stuff that most advice columns skip. You won't feel stuck alone.",
   },
   {
     num: "03",
     title: "Projects, AI labs & evaluated practice",
-    sub: "You learn it. You use it. You get evaluated on it.",
-    body: "Projects land module by module, tied to real business cases and interview-ready builds. The distance between learning and application is zero.",
+    sub: "Build things. Get feedback. Repeat.",
+    body: "You don't just watch and move on. Every module comes with a project that pushes you to actually apply what you learned. You get evaluated, you get feedback, and you get better — the way real work makes you better.",
   },
   {
     num: "04",
-    title: "Scaler-built preparation products",
-    sub: "Built to match the hiring environment.",
-    body: "Scaler's own coding platform, terminal-based judges, and AI mock interviews are built in-house — designed around exactly the way technical hiring works today. Nothing about the real thing should feel unfamiliar.",
+    title: "Upstride-built preparation tools",
+    sub: "Practice like it's the real thing.",
+    body: "From coding practice to AI mock interviews, the tools we use are built to replicate exactly what hiring looks like today. Nothing about the actual interview should feel new or scary. You've already done it.",
   },
   {
     num: "05",
-    title: "Backed by a strong tech community",
-    sub: "Your professional network for the next decade.",
-    body: "Structured check-ins, career support, and exclusive access to 1,00,000+ Scaler alumni keep you moving long after the program ends. The community outlasts the curriculum.",
+    title: "A community that actually shows up",
+    sub: "100+ students who get what you're going through.",
+    body: "Regular check-ins, group sessions, and a network of 100+ students who are all building towards the same goal. The program ends — but the WhatsApp group, the referrals, and the friendships don't.",
   },
   {
     num: "06",
     title: "Learning never ends",
-    sub: "The program ends. The access does not.",
-    body: "Live sessions, regular curriculum updates, and lifetime access to recorded content mean you remain current as the industry moves. Not caught up. Ahead of it.",
+    sub: "You keep access. The industry keeps moving. You stay ahead.",
+    body: "After the program, you still get live sessions, curriculum updates, and lifetime access to everything recorded. The world of AI moves fast — you won't get left behind just because the batch ended.",
   },
 ];
 
@@ -172,10 +172,10 @@ const colleges = [
 ];
 
 const achievements = [
-  { stat: "250+", label: "Students Trained" },
-  { stat: "30+",  label: "Internships & Full-Time Offers" },
-  { stat: "5+",   label: "Hackathons Won" },
-  { stat: "6+",   label: "Colleges Visited" },
+  { stat: "118",  label: "Students Trained" },
+  { stat: "43",   label: "Internships & Full-Time Offers" },
+  { stat: "2",    label: "Hackathons Won" },
+  { stat: "8+",   label: "Colleges Visited" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -197,13 +197,38 @@ const Index = () => {
   };
 
   // UI state
-  const [mobileMenuOpen,   setMobileMenuOpen]   = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen]  = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq,    setOpenFaq]    = useState<number | null>(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
-  const [phoneNumber,   setPhoneNumber]   = useState("");
-  const [isSubmitting,  setIsSubmitting]  = useState(false);
+
+  // Apply modal
+  const [applyOpen, setApplyOpen]   = useState(false);
+  const [applyForm, setApplyForm]   = useState({ name: "", email: "", phone: "" });
+  const [applySubmitting, setApplySubmitting] = useState(false);
+  const [applyDone, setApplyDone]   = useState(false);
+
+  const openApply = () => setApplyOpen(true);
+  const closeApply = () => {
+    setApplyOpen(false);
+    sessionStorage.setItem("apply_modal_dismissed", "1");
+  };
+
+  const handleApplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applyForm.name.trim() || !applyForm.phone.trim()) {
+      toast({ title: "Name and phone are required", variant: "destructive" });
+      return;
+    }
+    setApplySubmitting(true);
+    try {
+      await api.public.apply({ name: applyForm.name, email: applyForm.email, phone: applyForm.phone });
+      setApplyDone(true);
+    } catch {
+      toast({ title: "Submission failed. Please try again.", variant: "destructive" });
+    } finally {
+      setApplySubmitting(false);
+    }
+  };
 
   // Events
   interface LiveEvent { id: string; title: string; location: string; date: string; description: string; image_data: string | null; image_type: string | null; }
@@ -241,13 +266,13 @@ const Index = () => {
     return () => clearTimeout(t);
   }, []);
 
+  // Auto-open apply modal after 20s (once per session)
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node))
-        setUserDropdownOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    if (sessionStorage.getItem("apply_modal_dismissed")) return;
+    const t = setTimeout(() => {
+      if (!sessionStorage.getItem("apply_modal_dismissed")) setApplyOpen(true);
+    }, 20000);
+    return () => clearTimeout(t);
   }, []);
 
   // HOW IT WORKS
@@ -293,40 +318,6 @@ const Index = () => {
     return () => observers.forEach(o => o?.disconnect());
   }, []);
 
-  // Phone submit
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!/^[0-9]{10}$/.test(phoneNumber)) {
-      toast({ title: "Invalid number", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const dateTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "long" });
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: "f4edb229-9419-4f5c-a18f-8f67c1ec3082",
-          subject: "🔥 New Call Request - Upstrides Homepage",
-          from_name: "Upstrides Website",
-          to: "mamlesh@upstrides.in",
-          phone: phoneNumber,
-          message: `📞 NEW CALL REQUEST\nPhone: ${phoneNumber}\nDate: ${dateTime}\nSource: Homepage Hero`,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast({ title: "You're on the list!", description: "WE WILL CALL YOU PERSONALLY within 24 hours." });
-        setPhoneNumber("");
-      } else throw new Error();
-    } catch {
-      toast({ title: "Failed", description: "Please try again or email mamlesh@upstrides.in", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const visibleCount = nodeVisible.filter(Boolean).length;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -343,54 +334,50 @@ const Index = () => {
             style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 24px", cursor: "pointer", borderRight: `3px solid ${B}` }}
             onClick={() => navigate("/")}
           >
-            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "36px", width: "36px", objectFit: "contain" }} />
-            <span style={{ ...BEBAS, fontSize: "28px", letterSpacing: "0.1em", color: B }}>Upstrides</span>
+            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "36px", width: "36px", objectFit: "contain" }} />
+            <span style={{ ...BEBAS, fontSize: "28px", letterSpacing: "0.1em", color: B }}>UPSTRIDE</span>
           </div>
 
-          {/* Desktop nav — PLACEMENTS + LOGIN only (no portal button) */}
+          {/* Desktop nav — section anchors */}
           <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
+            {[
+              { label: "Trust",            id: "trust" },
+              { label: "Events",           id: "events" },
+              { label: "What is Upstride?",id: "how" },
+              { label: "Recognized by",    id: "recognized" },
+            ].map(({ label, id }) => (
+              <button key={id}
+                onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
+                style={{ padding: "16px 20px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO, whiteSpace: "nowrap" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+              >{label}</button>
+            ))}
             <button
-              onClick={() => navigate("/placements")}
-              style={{ padding: "16px 28px", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
-            >PLACEMENTS</button>
-
+              onClick={openApply}
+              style={{ padding: "16px 28px", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", borderLeft: `3px solid ${B}`, background: B, color: Y, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = W; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+            >APPLY NOW →</button>
             {isLoggedIn ? (
-              <div ref={dropdownRef} style={{ position: "relative", display: "flex", alignItems: "center", borderLeft: `3px solid ${B}` }}>
+              <>
+                <div style={{ display: "flex", alignItems: "center", padding: "0 16px", borderLeft: `3px solid ${B}`, ...MONO, fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+                  {displayName.toUpperCase()}
+                </div>
                 <button
-                  onClick={() => setUserDropdownOpen(o => !o)}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 18px", height: "100%", background: "transparent", border: "none", cursor: "pointer" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${B}10`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-                >
-                  <div style={{ width: "30px", height: "30px", background: B, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 700, color: Y, ...MONO }}>{displayName.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <span style={{ fontSize: "10px", color: B, ...MONO }}>{userDropdownOpen ? "▲" : "▼"}</span>
-                </button>
-                {userDropdownOpen && (
-                  <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, background: W, border: `2px solid ${B}`, borderRadius: "8px", boxShadow: `4px 4px 0 ${B}`, minWidth: "180px", zIndex: 2000, overflow: "hidden" }}>
-                    <div style={{ padding: "14px 16px", borderBottom: `1px solid ${B}14`, background: `${B}04` }}>
-                      <div style={{ fontSize: "9px", fontWeight: 700, color: "#6B7280", letterSpacing: "0.14em", marginBottom: "3px" }}>SIGNED IN AS</div>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: B, ...MONO }}>{displayName}</div>
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 700, color: "#EF4444", textAlign: "left", ...MONO }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#FEF2F2"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "none"; }}
-                    >↩ Logout</button>
-                  </div>
-                )}
-              </div>
+                  onClick={handleLogout}
+                  style={{ padding: "16px 20px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+                >LOGOUT</button>
+              </>
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                style={{ padding: "16px 28px", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", borderLeft: `3px solid ${B}`, background: B, color: Y, cursor: "pointer", transition: "all 0.15s", ...MONO }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = W; (e.currentTarget as HTMLButtonElement).style.color = B; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
-              >LOGIN →</button>
+                style={{ padding: "16px 20px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+              >LOGIN</button>
             )}
           </div>
 
@@ -406,40 +393,38 @@ const Index = () => {
 
         {mobileMenuOpen && (
           <div style={{ borderTop: `3px solid ${B}` }}>
+            {[
+              { label: "Trust",            id: "trust" },
+              { label: "Events",           id: "events" },
+              { label: "What is Upstride?",id: "how" },
+              { label: "Recognized by",    id: "recognized" },
+            ].map(({ label, id }) => (
+              <button key={id}
+                onClick={() => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); }}
+                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderBottom: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
+              >{label}</button>
+            ))}
+            <button
+              onClick={() => { openApply(); setMobileMenuOpen(false); }}
+              style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", background: B, color: Y, cursor: "pointer", ...MONO }}
+            >APPLY NOW →</button>
             {isLoggedIn ? (
-              <>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", borderBottom: `1px solid ${B}18`, background: `${B}05` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: "30px", height: "30px", background: B, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color: Y, ...MONO }}>{displayName.charAt(0).toUpperCase()}</span>
-                    </div>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: B, ...MONO }}>{displayName}</span>
-                  </div>
-                  <button onClick={handleLogout} style={{ fontSize: "11px", fontWeight: 700, color: "#EF4444", background: "none", border: `1px solid #EF444440`, borderRadius: "4px", padding: "5px 12px", cursor: "pointer", ...MONO }}>Logout</button>
-                </div>
-                <button onClick={() => { navigate("/placements"); setMobileMenuOpen(false); }}
-                  style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", background: "transparent", color: B, cursor: "pointer", ...MONO }}>
-                  PLACEMENTS
-                </button>
-              </>
+              <button
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderBottom: `1px solid ${B}18`, borderTop: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
+              >LOGOUT ({displayName})</button>
             ) : (
-              <>
-                <button onClick={() => { navigate("/placements"); setMobileMenuOpen(false); }}
-                  style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", background: "transparent", color: B, borderBottom: `1px solid ${B}18`, cursor: "pointer", ...MONO }}>
-                  PLACEMENTS
-                </button>
-                <button onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
-                  style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", background: B, color: Y, cursor: "pointer", ...MONO }}>
-                  LOGIN →
-                </button>
-              </>
+              <button
+                onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
+                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderTop: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
+              >LOGIN</button>
             )}
           </div>
         )}
       </header>
 
       {/* ================================================================
-          HERO — two-column layout, everything above the fold
+          HERO — centered with floating yellow lights
           ================================================================ */}
       <section style={{
         height: "100vh",
@@ -449,26 +434,54 @@ const Index = () => {
         overflow: "hidden",
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
       }}>
         {/* Subtle grid */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${B}10 1px, transparent 1px), linear-gradient(90deg, ${B}10 1px, transparent 1px)`, backgroundSize: "60px 60px", pointerEvents: "none" }} />
-        {/* Top-right accent */}
-        <div style={{ position: "absolute", top: "5%", right: "-50px", width: "240px", height: "240px", backgroundColor: Y, border: `4px solid ${B}`, animation: "brutBounce 6s ease-in-out infinite", opacity: 0.3, zIndex: 0, pointerEvents: "none" }} />
+
+        {/* Floating yellow light orbs */}
+        {([
+          { w: 340, h: 340, top: "8%",  left: "-6%",  anim: "float-slow",   dur: "9s",  opacity: 0.28, blur: 80 },
+          { w: 200, h: 200, top: "60%", left: "2%",   anim: "float-fast",   dur: "6s",  opacity: 0.2,  blur: 55 },
+          { w: 280, h: 280, top: "5%",  right: "-4%", anim: "float-medium", dur: "11s", opacity: 0.22, blur: 70 },
+          { w: 160, h: 160, top: "55%", right: "3%",  anim: "float-slow",   dur: "13s", opacity: 0.32, blur: 45 },
+          { w: 120, h: 120, top: "30%", left: "10%",  anim: "float-fast",   dur: "7s",  opacity: 0.18, blur: 35 },
+          { w: 90,  h: 90,  top: "25%", right: "12%", anim: "float-medium", dur: "8s",  opacity: 0.25, blur: 25 },
+          { w: 60,  h: 60,  top: "80%", left: "30%",  anim: "float-fast",   dur: "5s",  opacity: 0.35, blur: 18 },
+          { w: 50,  h: 50,  top: "15%", left: "45%",  anim: "float-slow",   dur: "10s", opacity: 0.3,  blur: 14 },
+        ] as { w: number; h: number; top?: string; left?: string; right?: string; anim: string; dur: string; opacity: number; blur: number }[]).map((orb, i) => (
+          <div key={i} style={{
+            position: "absolute",
+            width: orb.w,
+            height: orb.h,
+            borderRadius: "50%",
+            backgroundColor: Y,
+            filter: `blur(${orb.blur}px)`,
+            opacity: orb.opacity,
+            top: orb.top,
+            left: orb.left,
+            right: orb.right,
+            animation: `${orb.anim} ${orb.dur} ease-in-out infinite`,
+            animationDelay: `${i * 0.8}s`,
+            pointerEvents: "none",
+            zIndex: 0,
+          }} />
+        ))}
 
         <div style={{
-          maxWidth: "1280px",
+          maxWidth: "1300px",
           margin: "0 auto",
-          padding: "0 24px",
+          padding: "0 32px",
           position: "relative",
           zIndex: 1,
           width: "100%",
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1.1fr 1fr",
-          gap: isMobile ? "28px" : "52px",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
         }}>
 
-          {/* ── LEFT: Badge + Headline + Tagline ── */}
+          {/* Badge + Headline + Tagline */}
           <div>
             <div style={{
               display: "inline-block",
@@ -484,34 +497,22 @@ const Index = () => {
               ★ THE MARKET HAS ALREADY CHANGED ★
             </div>
 
-            <h1 style={{ ...BEBAS, fontSize: "clamp(40px, 6.2vw, 90px)", lineHeight: 0.88, marginBottom: "18px", color: B }}>
-              {"BECOME THE".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0) rotate(0deg)" : "translateY(60px) rotate(-8deg)", transition: `all 0.45s ${i * 0.022}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? " " : ch}
+            <h1 style={{ ...BEBAS, fontSize: isMobile ? "clamp(40px, 11vw, 68px)" : "clamp(56px, 6.8vw, 100px)", lineHeight: 0.91, marginBottom: "28px", color: B, letterSpacing: "0.01em" }}>
+              {"BECOME THE PROFESSIONAL".split("").map((ch, i) => (
+                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0) rotate(0deg)" : "translateY(60px) rotate(-8deg)", transition: `all 0.45s ${i * 0.016}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
+                  {ch === " " ? "" : ch}
                 </span>
               ))}
               <br />
-              {"PROFESSIONAL".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(50px)", transition: `all 0.45s ${0.18 + i * 0.022}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch}
-                </span>
-              ))}
-              <br />
-              {"BUILT FOR THE".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(50px)", transition: `all 0.45s ${0.36 + i * 0.022}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? " " : ch}
-                </span>
-              ))}
-              <br />
-              {"NEXT DECADE".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", color: Y, WebkitTextStroke: `3px ${B}`, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "scale(1) rotate(0deg)" : "scale(0) rotate(20deg)", transition: `all 0.5s ${0.52 + i * 0.034}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? " " : ch}
+              {"BUILT FOR THE NEXT DECADE".split("").map((ch, i) => (
+                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, color: Y, WebkitTextStroke: `2px ${B}`, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(50px)", transition: `all 0.48s ${0.3 + i * 0.014}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
+                  {ch === " " ? "" : ch}
                 </span>
               ))}
               <br />
               {"IN AI.".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(40px)", transition: `all 0.45s ${0.72 + i * 0.06}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? " " : ch}
+                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(40px)", transition: `all 0.45s ${0.64 + i * 0.06}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
+                  {ch === " " ? "" : ch}
                 </span>
               ))}
             </h1>
@@ -520,76 +521,18 @@ const Index = () => {
               ...MONO,
               fontSize: "13px",
               fontWeight: 700,
-              maxWidth: "500px",
+              maxWidth: "540px",
               lineHeight: 1.75,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               color: B,
               opacity: heroLoaded ? 1 : 0,
               transition: "all 0.4s 1.0s ease",
+              textAlign: "center",
+              margin: "0 auto",
             }}>
               Join us to figure out what you want early. Learn AI in everything and everywhere. Build 10x faster.
             </p>
-          </div>
-
-          {/* ── RIGHT: Buttons + Phone CTA ── */}
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "18px",
-            opacity: heroLoaded ? 1 : 0,
-            transition: "all 0.5s 1.1s ease",
-          }}>
-            {/* CTA buttons */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              {[
-                { label: "EXPLORE PROGRAMS →", bg: B, fg: Y, sh: SHADOW_Y, to: "/programs" },
-                { label: "APPLY NOW →",         bg: Y, fg: B, sh: SHADOW,   to: "/apply" },
-              ].map(({ label, bg, fg, sh, to }) => (
-                <button key={label} onClick={() => navigate(to)}
-                  style={{ backgroundColor: bg, color: fg, padding: "15px 26px", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", border: `3px solid ${B}`, ...sh, cursor: "pointer", transition: "all 0.15s", ...MONO, whiteSpace: "nowrap" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `8px 8px 0 ${bg === B ? Y : B}`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = sh.boxShadow as string; }}
-                >{label}</button>
-              ))}
-            </div>
-
-            {/* Phone CTA card */}
-            <div style={{ backgroundColor: Y, border: `3px solid ${B}`, ...SHADOW, padding: "20px 22px" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "8px" }}>
-                <Phone size={15} color={B} style={{ marginTop: "1px", flexShrink: 0 }} />
-                <span style={{ ...MONO, fontSize: "10px", fontWeight: 700, color: B, letterSpacing: "0.12em", lineHeight: 1.4 }}>
-                  REQUEST A CALL BACK — WE WILL CALL YOU PERSONALLY
-                </span>
-              </div>
-              <p style={{ ...SANS, fontSize: "14px", color: `${B}cc`, lineHeight: 1.6, marginBottom: "14px" }}>
-                Drop your number and we will call you. No scripts. No sales pitch. Just a real conversation about your next move.
-              </p>
-              <form onSubmit={handlePhoneSubmit} style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <input
-                  type="tel"
-                  placeholder="Your 10-digit number"
-                  value={phoneNumber}
-                  onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  disabled={isSubmitting}
-                  style={{ flex: 1, minWidth: "150px", padding: "10px 13px", border: `2px solid ${B}`, backgroundColor: W, fontSize: "13px", ...MONO, outline: "none", color: B }}
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting || phoneNumber.length !== 10}
-                  style={{ padding: "10px 18px", backgroundColor: B, color: Y, border: `2px solid ${B}`, fontWeight: 700, fontSize: "12px", letterSpacing: "0.1em", ...MONO, cursor: phoneNumber.length === 10 && !isSubmitting ? "pointer" : "not-allowed", opacity: phoneNumber.length === 10 && !isSubmitting ? 1 : 0.6, transition: "all 0.15s", whiteSpace: "nowrap" }}
-                >
-                  {isSubmitting ? "SENDING..." : "GET MY CALL →"}
-                </button>
-              </form>
-              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "10px" }}>
-                {["We call personally", "Zero spam", "Within 24 hours"].map(t => (
-                  <span key={t} style={{ ...MONO, fontSize: "10px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ fontWeight: 700 }}>✓</span> {t}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
 
         </div>
@@ -613,7 +556,7 @@ const Index = () => {
       {/* ================================================================
           FEATURED STUDENTS — Praneeth, Divya, Vamsi
           ================================================================ */}
-      <section ref={studentSec.ref} style={{ backgroundColor: B, padding: "100px 24px", borderTop: `4px solid ${Y}` }}>
+      <section id="trust" ref={studentSec.ref} style={{ backgroundColor: B, padding: "100px 24px", borderTop: `4px solid ${Y}` }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ marginBottom: "60px", opacity: studentSec.inView ? 1 : 0, transform: studentSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
             <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>
@@ -662,7 +605,7 @@ const Index = () => {
         const dateStr = (() => { try { return new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }); } catch { return ev.date; } })();
         const isFirst = i === 0;
         return (
-          <section key={ev.id} ref={isFirst ? eventSec.ref : undefined} style={{ backgroundColor: W, padding: "100px 24px", overflow: "hidden", borderTop: `4px solid ${B}` }}>
+          <section key={ev.id} id={isFirst ? "events" : undefined} ref={isFirst ? eventSec.ref : undefined} style={{ backgroundColor: W, padding: "100px 24px", overflow: "hidden", borderTop: `4px solid ${B}` }}>
             <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "32px" : "60px", alignItems: "center" }}>
               <div>
                 <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "6px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "24px", ...MONO }}>UPCOMING EVENT</div>
@@ -749,6 +692,7 @@ const Index = () => {
           extra black tail.
           ================================================================ */}
       <section
+        id="how"
         ref={howSectionRef}
         style={{
           backgroundColor: Y,
@@ -968,7 +912,7 @@ const Index = () => {
       {/* ================================================================
           COLLEGES REACHED
           ================================================================ */}
-      <section ref={achSec.ref} style={{ backgroundColor: W, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
+      <section id="recognized" ref={achSec.ref} style={{ backgroundColor: W, padding: "80px 24px", borderBottom: `4px solid ${B}` }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "48px", opacity: achSec.inView ? 1 : 0, transform: achSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
             <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "16px", ...MONO }}>COLLEGES WE'VE REACHED</div>
@@ -1057,12 +1001,12 @@ const Index = () => {
           </div>
         </div>
         <div style={{ padding: "32px 24px", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
-          <button onClick={() => navigate("/programs")}
+          <button onClick={() => document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })}
             style={{ backgroundColor: Y, color: B, padding: "18px 40px", fontWeight: 700, fontSize: "14px", letterSpacing: "0.12em", border: `3px solid ${Y}`, ...SHADOW_Y, cursor: "pointer", transition: "all 0.15s", ...MONO }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-3px,-3px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `8px 8px 0 ${Y}`; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `5px 5px 0 ${Y}`; }}
           >EXPLORE PROGRAMS →</button>
-          <button onClick={() => navigate("/apply")}
+          <button onClick={openApply}
             style={{ backgroundColor: W, color: B, padding: "18px 40px", fontWeight: 700, fontSize: "14px", letterSpacing: "0.12em", border: `3px solid ${W}`, boxShadow: `5px 5px 0 ${W}`, cursor: "pointer", transition: "all 0.15s", ...MONO }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-3px,-3px)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; }}
@@ -1096,7 +1040,7 @@ const Index = () => {
               {[
                 { label: "Programs",   action: () => navigate("/programs") },
                 { label: "Placements", action: () => navigate("/placements") },
-                { label: "Apply Now",  action: () => navigate("/apply") },
+                { label: "Apply Now",  action: () => openApply() },
                 { label: "Contact Us", action: () => navigate("/contact") },
               ].map(({ label, action }) => (
                 <button key={label} onClick={action}
@@ -1181,7 +1125,7 @@ const Index = () => {
             Need help? Talk to us at 7358580180
           </a>
           <button
-            onClick={() => navigate("/apply")}
+            onClick={openApply}
             style={{
               ...MONO,
               backgroundColor: "transparent",
@@ -1200,6 +1144,145 @@ const Index = () => {
           </button>
         </div>
       </div>
+
+      {/* ── Apply Now Modal ───────────────────────────────────────────────── */}
+      {applyOpen && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            backgroundColor: "rgba(10,10,10,0.75)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "16px",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) closeApply(); }}
+        >
+          <div
+            style={{
+              backgroundColor: W,
+              border: `3px solid ${B}`,
+              boxShadow: `8px 8px 0 ${Y}`,
+              width: "100%",
+              maxWidth: "440px",
+              padding: "36px 32px",
+              position: "relative",
+            }}
+          >
+            {/* Close */}
+            <button
+              onClick={closeApply}
+              style={{
+                position: "absolute", top: "14px", right: "14px",
+                background: "transparent", border: "none",
+                cursor: "pointer", padding: 0, lineHeight: 1,
+              }}
+              aria-label="Close"
+            >
+              <X size={22} color={B} strokeWidth={2.5} />
+            </button>
+
+            {!applyDone ? (
+              <>
+                <p style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: B, opacity: 0.5, marginBottom: "6px" }}>
+                  START YOUR JOURNEY
+                </p>
+                <h2 style={{ ...BEBAS, fontSize: "36px", color: B, lineHeight: 1, marginBottom: "24px" }}>
+                  APPLY NOW
+                </h2>
+
+                <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div>
+                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
+                      FULL NAME *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Your name"
+                      value={applyForm.name}
+                      onChange={(e) => setApplyForm(f => ({ ...f, name: e.target.value }))}
+                      required
+                      style={{
+                        ...MONO, width: "100%", padding: "10px 12px",
+                        border: `2px solid ${B}`, backgroundColor: W,
+                        fontSize: "14px", outline: "none", boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
+                      PHONE NUMBER *
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={applyForm.phone}
+                      onChange={(e) => setApplyForm(f => ({ ...f, phone: e.target.value }))}
+                      required
+                      style={{
+                        ...MONO, width: "100%", padding: "10px 12px",
+                        border: `2px solid ${B}`, backgroundColor: W,
+                        fontSize: "14px", outline: "none", boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
+                      EMAIL (OPTIONAL)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={applyForm.email}
+                      onChange={(e) => setApplyForm(f => ({ ...f, email: e.target.value }))}
+                      style={{
+                        ...MONO, width: "100%", padding: "10px 12px",
+                        border: `2px solid ${B}`, backgroundColor: W,
+                        fontSize: "14px", outline: "none", boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={applySubmitting}
+                    style={{
+                      ...MONO, marginTop: "8px",
+                      backgroundColor: applySubmitting ? "#ccc" : Y,
+                      color: B, border: `2px solid ${B}`,
+                      padding: "13px 0", fontSize: "14px", fontWeight: 800,
+                      letterSpacing: "0.08em", cursor: applySubmitting ? "not-allowed" : "pointer",
+                      boxShadow: applySubmitting ? "none" : `4px 4px 0 ${B}`,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {applySubmitting ? "SUBMITTING..." : "SUBMIT APPLICATION →"}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>&#10003;</div>
+                <h2 style={{ ...BEBAS, fontSize: "36px", color: B, marginBottom: "10px" }}>YOU'RE IN!</h2>
+                <p style={{ ...MONO, fontSize: "13px", color: B, opacity: 0.7, lineHeight: 1.6, marginBottom: "24px" }}>
+                  We've received your application. Our team will reach out to you shortly.
+                </p>
+                <button
+                  onClick={closeApply}
+                  style={{
+                    ...MONO, backgroundColor: Y, color: B,
+                    border: `2px solid ${B}`, padding: "12px 32px",
+                    fontSize: "13px", fontWeight: 800, letterSpacing: "0.08em",
+                    cursor: "pointer", boxShadow: `4px 4px 0 ${B}`,
+                  }}
+                >
+                  CLOSE
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

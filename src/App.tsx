@@ -22,8 +22,6 @@ const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Results = lazy(() => import("./pages/Results"));
-const Placements = lazy(() => import("./pages/Placements"));
-const Apply = lazy(() => import("./pages/Apply"));
 
 const queryClient = new QueryClient();
 
@@ -83,12 +81,6 @@ const App = () => (
             <Route path="/terms" element={<TermsOfAgreement />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/results" element={<Results />} />
-            <Route path="/placements" element={
-              <ProtectedRoute>
-                <Placements />
-              </ProtectedRoute>
-            } />
-            <Route path="/apply" element={<Apply />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
