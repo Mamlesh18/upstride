@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen, Layers } from "lucide-react";
+import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen, Layers, Briefcase, UserPlus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -8,7 +8,7 @@ const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFA
 const BORD = "#E5E5E5"; const MUTE = "#6B7280"; const RED = "#EF4444"; const GREEN = "#22C55E";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources" | "batches";
+type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources" | "batches" | "placements" | "leads";
 type ContactStatus = "pending" | "picked" | "rejected" | "missed" | "joining" | "will_discuss";
 
 interface Student { id: string; name: string; email: string; is_active: boolean; must_change_password: boolean; }
@@ -98,6 +98,19 @@ export default function Admin() {
   const [showAddResource, setShowAddResource] = useState(false);
   const [resourceSection, setResourceSection] = useState("recommended");
   const [resourceForm, setResourceForm] = useState({ section: "recommended", category: "", name: "", tagline: "", url: "", company_type: "service", sub_type: "", emoji: "", badge_label: "", badge_accent: false });
+
+  // Placements (Jobs)
+  interface Job { id: string; role: string; company: string; description: string; apply_link: string; category: string; is_active: boolean; created_at?: string; }
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [showAddJob, setShowAddJob] = useState(false);
+  const [editJob, setEditJob] = useState<Job | null>(null);
+  const [jobForm, setJobForm] = useState({ role: "", company: "", description: "", apply_link: "", category: "internship" });
+
+  // Leads & Signups
+  interface Lead { id: string; name: string; email: string; phone: string; created_at: string; }
+  interface PublicUser { id: string; name: string; email: string; phone?: string; created_at: string; }
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [publicUsers, setPublicUsers] = useState<PublicUser[]>([]);
   const [eventForm, setEventForm] = useState({ title: "", location: "", date: "", description: "", is_active: true });
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventImagePreview, setEventImagePreview] = useState<string | null>(null);
@@ -244,6 +257,30 @@ export default function Admin() {
 
   useEffect(() => { if (tab === "resources") loadAdminResources(); }, [tab, loadAdminResources]);
   useEffect(() => { if (tab === "batches") loadBatches(); }, [tab, loadBatches]);
+
+  const loadJobs = useCallback(async () => {
+    try {
+      const r = await api.admin.listJobs() as { data: { jobs: Job[] } };
+      setJobs(r.data.jobs);
+    } catch { /* silent */ }
+  }, []);
+
+  const loadLeads = useCallback(async () => {
+    try {
+      const r = await api.admin.listLeads() as { data: { leads: Lead[] } };
+      setLeads(r.data.leads);
+    } catch { /* silent */ }
+  }, []);
+
+  const loadPublicUsers = useCallback(async () => {
+    try {
+      const r = await api.admin.listPublicUsers() as { data: { users: PublicUser[] } };
+      setPublicUsers(r.data.users);
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { if (tab === "placements") loadJobs(); }, [tab, loadJobs]);
+  useEffect(() => { if (tab === "leads") { loadLeads(); loadPublicUsers(); } }, [tab, loadLeads, loadPublicUsers]);
   useEffect(() => { loadBatches(); }, [loadBatches]); // load once for student add dropdown
 
   const handleBulkSetResumeCreds = async () => {
@@ -536,26 +573,67 @@ export default function Admin() {
     { key: "feedback", label: "Feedback", icon: <MessageSquare size={15} /> },
     { key: "events", label: "Events", icon: <CalendarDays size={15} /> },
     { key: "resources", label: "Resources", icon: <BookOpen size={15} /> },
-    { key: "batches", label: "Batches", icon: <Layers size={15} /> },
+    { key: "batches",     label: "Batches",       icon: <Layers size={15} /> },
+    { key: "placements",  label: "Placements",    icon: <Briefcase size={15} /> },
+    { key: "leads",       label: "Leads & Signups", icon: <UserPlus size={15} /> },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: BG, ...MONO }}>
-      {/* Header */}
-      <div style={{ backgroundColor: B, padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px", borderBottom: `3px solid ${Y}` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em" }}>UPSTRIDE</div>
-          <span style={{ color: W, fontSize: "13px", fontWeight: 600 }}>Admin Dashboard</span>
+    <div style={{ minHeight: "100vh", backgroundColor: BG, ...MONO, display: "flex" }}>
+
+      {/* ── SIDEBAR ─────────────────────────────────────────────────── */}
+      <div style={{
+        width: "220px", flexShrink: 0, backgroundColor: B,
+        position: "fixed", top: 0, left: 0, height: "100vh",
+        display: "flex", flexDirection: "column", zIndex: 100,
+        borderRight: `3px solid ${Y}`,
+      }}>
+        {/* Brand */}
+        <div style={{ padding: "20px 18px", borderBottom: `1px solid ${W}15` }}>
+          <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "3px 10px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", marginBottom: "6px" }}>UPSTRIDE</div>
+          <div style={{ color: `${W}70`, fontSize: "11px", letterSpacing: "0.06em" }}>Admin Dashboard</div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span style={{ color: `${W}80`, fontSize: "12px" }}>{localStorage.getItem("userEmail")}</span>
-          <button onClick={logout} style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "transparent", border: `1px solid ${W}40`, borderRadius: "6px", padding: "6px 12px", color: W, fontSize: "12px", cursor: "pointer", ...MONO }}>
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "10px 10px", overflowY: "auto" }}>
+          {tabs.map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{
+                display: "flex", alignItems: "center", gap: "10px",
+                width: "100%", padding: "10px 12px", border: "none",
+                borderRadius: "6px", marginBottom: "2px",
+                background: tab === t.key ? Y : "transparent",
+                color: tab === t.key ? B : `${W}70`,
+                fontSize: "12px", fontWeight: 700, cursor: "pointer",
+                textAlign: "left", letterSpacing: "0.06em", ...MONO,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { if (tab !== t.key) (e.currentTarget as HTMLButtonElement).style.background = `${W}10`; }}
+              onMouseLeave={e => { if (tab !== t.key) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            >
+              {t.icon}
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* User + Logout */}
+        <div style={{ padding: "14px 14px", borderTop: `1px solid ${W}15` }}>
+          <div style={{ color: `${W}55`, fontSize: "10px", letterSpacing: "0.08em", marginBottom: "10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {localStorage.getItem("userEmail")}
+          </div>
+          <button onClick={logout}
+            style={{ display: "flex", alignItems: "center", gap: "6px", width: "100%", backgroundColor: "transparent", border: `1px solid ${W}25`, borderRadius: "6px", padding: "8px 12px", color: `${W}80`, fontSize: "11px", cursor: "pointer", ...MONO }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = RED; (e.currentTarget as HTMLButtonElement).style.color = RED; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = `${W}25`; (e.currentTarget as HTMLButtonElement).style.color = `${W}80`; }}
+          >
             <LogOut size={13} /> Logout
           </button>
         </div>
       </div>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
+      {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
+      <div style={{ marginLeft: "220px", flex: 1, minWidth: 0, padding: "32px 32px" }}>
         {/* -- Dashboard Overview ----------------------------------- */}
         {stats && (
           <div style={{ marginBottom: "32px" }}>
@@ -589,8 +667,8 @@ export default function Admin() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
                   {[
                     { label: "Total", value: stats.total_projects, color: B },
-                    { label: "?? Live", value: stats.live_projects, color: GREEN },
-                    { label: "? Done", value: stats.completed_projects, color: MUTE },
+                    { label: "Live", value: stats.live_projects, color: GREEN },
+                    { label: "Done", value: stats.completed_projects, color: MUTE },
                   ].map(({ label, value, color }) => (
                     <div key={label} style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "32px", fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
@@ -615,17 +693,16 @@ export default function Admin() {
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "10px" }}>
                 {[
-                  { label: "Pending",      value: stats.contacts_pending,      color: MUTE,      bg: "#F3F4F6", icon: "?" },
-                  { label: "Picked Call",  value: stats.contacts_picked,       color: "#16A34A", bg: "#DCFCE7", icon: "??" },
-                  { label: "Missed",       value: stats.contacts_missed,       color: "#D97706", bg: "#FEF3C7", icon: "??" },
-                  { label: "Will Discuss", value: stats.contacts_will_discuss, color: "#0369A1", bg: "#E0F2FE", icon: "??" },
-                  { label: "Rejected",     value: stats.contacts_rejected,     color: RED,       bg: "#FEE2E2", icon: "?" },
-                  { label: "Joining",      value: stats.contacts_joining,      color: "#7C3AED", bg: "#EDE9FE", icon: "??" },
-                ].map(({ label, value, color, bg, icon }) => {
+                  { label: "Pending",      value: stats.contacts_pending,      color: MUTE,      bg: "#F3F4F6" },
+                  { label: "Picked Call",  value: stats.contacts_picked,       color: "#16A34A", bg: "#DCFCE7" },
+                  { label: "Missed",       value: stats.contacts_missed,       color: "#D97706", bg: "#FEF3C7" },
+                  { label: "Will Discuss", value: stats.contacts_will_discuss, color: "#0369A1", bg: "#E0F2FE" },
+                  { label: "Rejected",     value: stats.contacts_rejected,     color: RED,       bg: "#FEE2E2" },
+                  { label: "Joining",      value: stats.contacts_joining,      color: "#7C3AED", bg: "#EDE9FE" },
+                ].map(({ label, value, color, bg }) => {
                   const pct = stats.total_contacts ? Math.round((value / stats.total_contacts) * 100) : 0;
                   return (
                     <div key={label} style={{ backgroundColor: bg, borderRadius: "10px", padding: "16px 12px", textAlign: "center" }}>
-                      <div style={{ fontSize: "20px", marginBottom: "4px" }}>{icon}</div>
                       <div style={{ fontSize: "26px", fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
                       <div style={{ fontSize: "9px", fontWeight: 700, color, letterSpacing: "0.1em", marginTop: "4px" }}>{label.toUpperCase()}</div>
                       <div style={{ fontSize: "11px", color, marginTop: "4px", opacity: 0.7 }}>{pct}%</div>
@@ -660,14 +737,9 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: "4px", borderBottom: `2px solid ${BORD}`, marginBottom: "24px" }}>
-          {tabs.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ display: "flex", alignItems: "center", gap: "6px", padding: "10px 20px", border: "none", background: tab === t.key ? B : "transparent", color: tab === t.key ? Y : MUTE, fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", cursor: "pointer", borderRadius: "6px 6px 0 0", ...MONO }}>
-              {t.icon} {t.label.toUpperCase()}
-            </button>
-          ))}
+        {/* Current tab label */}
+        <div style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.15em", marginBottom: "24px", paddingBottom: "16px", borderBottom: `2px solid ${BORD}` }}>
+          {tabs.find(t => t.key === tab)?.label.toUpperCase()}
         </div>
 
         {/* Students Tab */}
@@ -679,7 +751,7 @@ export default function Admin() {
                 style={{ padding: "8px 14px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", minWidth: "260px" }} />
               <div style={{ display: "flex", gap: "8px" }}>
                 <Btn onClick={() => loadStudents(1)} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
-                <Btn onClick={() => setShowResumeCreds(true)} small style={{ background: "#7C3AED", color: W }}>?? Resume Tool Creds</Btn>
+                <Btn onClick={() => setShowResumeCreds(true)} small style={{ background: "#7C3AED", color: W }}>Resume Tool Creds</Btn>
                 <Btn onClick={() => setShowAddStudent(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Add Student</Btn>
               </div>
             </div>
@@ -746,7 +818,7 @@ export default function Admin() {
                     disabled={studentPage === 1}
                     onClick={() => loadStudents(studentPage - 1)}
                     style={{ padding: "6px 14px", border: `2px solid ${studentPage === 1 ? BORD : B}`, borderRadius: "6px", background: studentPage === 1 ? BG : B, color: studentPage === 1 ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: studentPage === 1 ? "not-allowed" : "pointer", ...MONO }}>
-                    ? Prev
+                    &larr; Prev
                   </button>
                   <span style={{ fontSize: "12px", color: B, fontWeight: 700, padding: "0 8px" }}>
                     Page {studentPage} of {Math.ceil(studentTotal / 20)}
@@ -755,7 +827,7 @@ export default function Admin() {
                     disabled={studentPage * 20 >= studentTotal}
                     onClick={() => loadStudents(studentPage + 1)}
                     style={{ padding: "6px 14px", border: `2px solid ${studentPage * 20 >= studentTotal ? BORD : B}`, borderRadius: "6px", background: studentPage * 20 >= studentTotal ? BG : B, color: studentPage * 20 >= studentTotal ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: studentPage * 20 >= studentTotal ? "not-allowed" : "pointer", ...MONO }}>
-                    Next ?
+                    Next &rarr;
                   </button>
                 </div>
               </div>
@@ -816,15 +888,15 @@ export default function Admin() {
                     <div style={{ fontSize: "12px", color: MUTE, marginBottom: "6px" }}>Manager: <strong style={{ color: B }}>{p.manager_name}</strong></div>
                     {(p.day || p.time) && (
                       <div style={{ display: "flex", gap: "12px", marginBottom: "6px" }}>
-                        {p.day && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: Y, color: B, padding: "2px 8px", border: `1px solid ${B}`, borderRadius: "4px" }}>?? {p.day}</span>}
-                        {p.time && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${B}10`, color: B, padding: "2px 8px", border: `1px solid ${BORD}`, borderRadius: "4px" }}>?? {p.time}</span>}
+                        {p.day && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: Y, color: B, padding: "2px 8px", border: `1px solid ${B}`, borderRadius: "4px" }}>{p.day}</span>}
+                        {p.time && <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${B}10`, color: B, padding: "2px 8px", border: `1px solid ${BORD}`, borderRadius: "4px" }}>{p.time}</span>}
                       </div>
                     )}
                     {p.description && <div style={{ fontSize: "12px", color: MUTE, marginBottom: "8px" }}>{p.description}</div>}
                     <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                      {p.project_link && <a href={p.project_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Project Link ?</a>}
-                      {p.meeting_link && <a href={p.meeting_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#0EA5E9", fontWeight: 700 }}>Meeting Link ?</a>}
-                      {p.github_link && <a href={p.github_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#111827", fontWeight: 700 }}>GitHub ?</a>}
+                      {p.project_link && <a href={p.project_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Project Link &rarr;</a>}
+                      {p.meeting_link && <a href={p.meeting_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#0EA5E9", fontWeight: 700 }}>Meeting Link &rarr;</a>}
+                      {p.github_link && <a href={p.github_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#111827", fontWeight: 700 }}>GitHub &rarr;</a>}
                     </div>
                   </div>
                   <button onClick={() => deleteProject(p.id)} style={{ background: "none", border: "none", cursor: "pointer", color: RED, flexShrink: 0 }}><Trash2 size={16} /></button>
@@ -947,8 +1019,8 @@ export default function Admin() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                       <div>
                         <div style={{ fontSize: "14px", fontWeight: 700, color: B }}>{ev.title}</div>
-                        <div style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>?? {ev.location}</div>
-                        <div style={{ fontSize: "12px", color: MUTE }}>?? {new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
+                        <div style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>{ev.location}</div>
+                        <div style={{ fontSize: "12px", color: MUTE }}>{new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
                       </div>
                       <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px", backgroundColor: ev.is_active ? "#DCFCE7" : "#F3F4F6", color: ev.is_active ? "#16A34A" : MUTE, whiteSpace: "nowrap" }}>
                         {ev.is_active ? "LIVE" : "HIDDEN"}
@@ -1027,7 +1099,7 @@ export default function Admin() {
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px", alignItems: "center" }}>
                   <span style={{ fontSize: "11px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginRight: "4px" }}>DATE:</span>
                   {[
-                    { label: "?? Today", value: today },
+                    { label: "Today", value: today },
                     { label: "Yesterday", value: yesterday },
                     { label: "All Time", value: "" },
                   ].map(({ label, value }) => (
@@ -1105,7 +1177,7 @@ export default function Admin() {
                 return (
                   <div key={dateKey} style={{ marginBottom: "20px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: B, borderRadius: "8px 8px 0 0", flexWrap: "wrap" }}>
-                      <span style={{ fontSize: "13px", fontWeight: 700, color: Y }}>?? {formatAdminDay(dateKey)}</span>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: Y }}>{formatAdminDay(dateKey)}</span>
                       <span style={{ fontSize: "11px", color: `${W}70` }}>{dayContacts.length} contacts</span>
                       <div style={{ display: "flex", gap: "6px", marginLeft: "auto", flexWrap: "wrap" }}>
                         {byCfg.map(({ key, label, color, bg, n }) => (
@@ -1169,7 +1241,7 @@ export default function Admin() {
                     disabled={contactPage === 1}
                     onClick={() => loadContacts(contactPage - 1)}
                     style={{ padding: "6px 14px", border: `2px solid ${contactPage === 1 ? BORD : B}`, borderRadius: "6px", background: contactPage === 1 ? BG : B, color: contactPage === 1 ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: contactPage === 1 ? "not-allowed" : "pointer", ...MONO }}>
-                    ? Prev
+                    &larr; Prev
                   </button>
                   <span style={{ fontSize: "12px", color: B, fontWeight: 700, padding: "0 8px" }}>
                     Page {contactPage} of {Math.ceil(contactTotal / 50)}
@@ -1178,7 +1250,7 @@ export default function Admin() {
                     disabled={contactPage * 50 >= contactTotal}
                     onClick={() => loadContacts(contactPage + 1)}
                     style={{ padding: "6px 14px", border: `2px solid ${contactPage * 50 >= contactTotal ? BORD : B}`, borderRadius: "6px", background: contactPage * 50 >= contactTotal ? BG : B, color: contactPage * 50 >= contactTotal ? MUTE : Y, fontSize: "11px", fontWeight: 700, cursor: contactPage * 50 >= contactTotal ? "not-allowed" : "pointer", ...MONO }}>
-                    Next ?
+                    Next &rarr;
                   </button>
                 </div>
               )}
@@ -1236,7 +1308,7 @@ export default function Admin() {
                         </td>
                         <td style={{ padding: "10px 14px" }}>
                           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Open ?</a>
+                            <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Open &rarr;</a>
                             <button onClick={() => handleDeleteResource(r.id, r.name)} style={{ background: "none", border: "none", cursor: "pointer", color: RED }}><Trash2 size={14} /></button>
                           </div>
                         </td>
@@ -1283,9 +1355,9 @@ export default function Admin() {
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "8px", fontSize: "11px", color: MUTE }}>
                           {b.resume_enhancer_email && <div><span style={{ color: B, fontWeight: 600 }}>Resume Email:</span> {b.resume_enhancer_email}</div>}
                           {b.resume_enhancer_password && <div><span style={{ color: B, fontWeight: 600 }}>Resume Pwd:</span> {b.resume_enhancer_password}</div>}
-                          {b.common_calendar_url && <div><span style={{ color: "#16A34A", fontWeight: 600 }}>?? Program Cal:</span> linked</div>}
-                          {b.calendar_url_1 && <div><span style={{ color: "#0369A1", fontWeight: 600 }}>?? Standup Cal:</span> linked</div>}
-                          {b.calendar_url_2 && <div><span style={{ color: "#7C3AED", fontWeight: 600 }}>?? Extra Cal:</span> linked</div>}
+                          {b.common_calendar_url && <div><span style={{ color: "#16A34A", fontWeight: 600 }}>Program Cal:</span> linked</div>}
+                          {b.calendar_url_1 && <div><span style={{ color: "#0369A1", fontWeight: 600 }}>Standup Cal:</span> linked</div>}
+                          {b.calendar_url_2 && <div><span style={{ color: "#7C3AED", fontWeight: 600 }}>Extra Cal:</span> linked</div>}
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: "6px" }}>
@@ -1299,6 +1371,122 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {/* ── Placements Tab ─────────────────────────────────────────── */}
+        {tab === "placements" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, color: B }}>Placements</h2>
+                <p style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>Jobs and internships shown on the public Placements page.</p>
+              </div>
+              <Btn onClick={() => { setEditJob(null); setJobForm({ role: "", company: "", description: "", apply_link: "", category: "internship" }); setShowAddJob(true); }} small><Plus size={13} /> Add Job</Btn>
+            </div>
+
+            {jobs.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", border: `2px dashed ${BORD}`, borderRadius: "12px", color: MUTE }}>
+                <Briefcase size={32} style={{ marginBottom: "12px", opacity: 0.3 }} />
+                <p style={{ fontWeight: 600, marginBottom: "4px" }}>No jobs yet</p>
+                <p style={{ fontSize: "12px" }}>Add internships or full-time roles to show on the Placements page.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {jobs.map(job => (
+                  <div key={job.id} style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "10px", padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "15px", fontWeight: 700, color: B }}>{job.role}</span>
+                        <span style={{ fontSize: "12px", color: MUTE }}>@ {job.company}</span>
+                        <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", padding: "2px 8px", borderRadius: "4px", background: job.category === "internship" ? "#E0F2FE" : "#DCFCE7", color: job.category === "internship" ? "#0369A1" : "#16A34A" }}>{job.category.toUpperCase()}</span>
+                        {!job.is_active && <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px", background: "#F3F4F6", color: MUTE }}>HIDDEN</span>}
+                      </div>
+                      {job.description && <p style={{ fontSize: "12px", color: MUTE, marginBottom: "6px", lineHeight: 1.5 }}>{job.description}</p>}
+                      {job.apply_link && <a href={job.apply_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#2563EB", ...MONO }}>Apply Link →</a>}
+                    </div>
+                    <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                      <Btn small color={job.is_active ? MUTE : GREEN} onClick={async () => {
+                        try { await api.admin.updateJob(job.id, { is_active: !job.is_active }); loadJobs(); } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+                      }}>{job.is_active ? <ToggleLeft size={13} /> : <ToggleRight size={13} />} {job.is_active ? "Hide" : "Show"}</Btn>
+                      <Btn small color={MUTE} onClick={() => { setEditJob(job); setJobForm({ role: job.role, company: job.company, description: job.description, apply_link: job.apply_link, category: job.category }); setShowAddJob(true); }}>Edit</Btn>
+                      <Btn small color={RED} onClick={async () => {
+                        try { await api.admin.deleteJob(job.id); loadJobs(); toast({ title: "Job deleted" }); } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+                      }}><Trash2 size={12} /></Btn>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Leads & Signups Tab ─────────────────────────────────────── */}
+        {tab === "leads" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+
+            {/* Apply Now Leads */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <div>
+                  <h2 style={{ fontSize: "18px", fontWeight: 700, color: B }}>Apply Now Leads</h2>
+                  <p style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>People who submitted the Apply form on the website. Latest first.</p>
+                </div>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: MUTE, ...MONO }}>{leads.length} total</span>
+              </div>
+              {leads.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 20px", border: `2px dashed ${BORD}`, borderRadius: "12px", color: MUTE }}>
+                  <p style={{ fontWeight: 600 }}>No leads yet</p>
+                  <p style={{ fontSize: "12px" }}>Submissions from the Apply page will show here.</p>
+                </div>
+              ) : (
+                <div style={{ border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", background: B, padding: "10px 16px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: Y }}>
+                    <span>NAME</span><span>EMAIL</span><span>PHONE</span><span>DATE</span>
+                  </div>
+                  {leads.map((lead, i) => (
+                    <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", padding: "12px 16px", fontSize: "12px", background: i % 2 === 0 ? W : BG, borderTop: `1px solid ${BORD}`, alignItems: "center" }}>
+                      <span style={{ fontWeight: 600, color: B }}>{lead.name || "—"}</span>
+                      <span style={{ color: MUTE }}>{lead.email || "—"}</span>
+                      <span style={{ color: MUTE, ...MONO }}>{lead.phone || "—"}</span>
+                      <span style={{ color: MUTE, fontSize: "11px" }}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Public Signups */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <div>
+                  <h2 style={{ fontSize: "18px", fontWeight: 700, color: B }}>Public Sign-ups</h2>
+                  <p style={{ fontSize: "12px", color: MUTE, marginTop: "2px" }}>People who created an account on the website. Latest first.</p>
+                </div>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: MUTE, ...MONO }}>{publicUsers.length} total</span>
+              </div>
+              {publicUsers.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 20px", border: `2px dashed ${BORD}`, borderRadius: "12px", color: MUTE }}>
+                  <p style={{ fontWeight: 600 }}>No public sign-ups yet</p>
+                  <p style={{ fontSize: "12px" }}>Accounts created via the public signup page will show here.</p>
+                </div>
+              ) : (
+                <div style={{ border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", background: B, padding: "10px 16px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: Y }}>
+                    <span>NAME</span><span>EMAIL</span><span>PHONE</span><span>JOINED</span>
+                  </div>
+                  {publicUsers.map((u, i) => (
+                    <div key={u.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", padding: "12px 16px", fontSize: "12px", background: i % 2 === 0 ? W : BG, borderTop: `1px solid ${BORD}`, alignItems: "center" }}>
+                      <span style={{ fontWeight: 600, color: B }}>{u.name || "—"}</span>
+                      <span style={{ color: MUTE }}>{u.email}</span>
+                      <span style={{ color: MUTE, ...MONO }}>{u.phone || "—"}</span>
+                      <span style={{ color: MUTE, fontSize: "11px" }}>{u.created_at ? new Date(u.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Resume Enhancer Credentials Modal */}
@@ -1586,7 +1774,7 @@ export default function Admin() {
               </div>
             </div>
             <div style={{ borderTop: `1px solid ${BORD}`, paddingTop: "12px" }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.08em", marginBottom: "4px" }}>?? CALENDAR EMBED URLS</p>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.08em", marginBottom: "4px" }}>CALENDAR EMBED URLS</p>
               <p style={{ fontSize: "11px", color: MUTE, marginBottom: "10px" }}>Paste the full embed code Google gives you � the URL will be extracted automatically.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {calendarInput("UPSTRIDE PROGRAM CALENDAR (shared by all batches)", "commonUrl")}
@@ -1597,6 +1785,48 @@ export default function Admin() {
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
               <Btn onClick={() => { setShowAddBatch(false); setEditBatch(null); setBatchForm(emptyBatchForm); }} color={MUTE} small>Cancel</Btn>
               <Btn onClick={handleSaveBatch} small>{editBatch ? "Save Changes" : "Create Batch"}</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Add / Edit Job Modal */}
+      {showAddJob && (
+        <Modal title={editJob ? "Edit Job" : "Add Job"} onClose={() => { setShowAddJob(false); setEditJob(null); }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <Input label="ROLE / POSITION" type="text" placeholder="e.g. Software Developer Intern" value={jobForm.role} onChange={e => setJobForm(f => ({ ...f, role: e.target.value }))} />
+            <Input label="COMPANY" type="text" placeholder="e.g. TCS, Google" value={jobForm.company} onChange={e => setJobForm(f => ({ ...f, company: e.target.value }))} />
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>CATEGORY</label>
+              <select value={jobForm.category} onChange={e => setJobForm(f => ({ ...f, category: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                <option value="internship">Internship</option>
+                <option value="fulltime">Full-time</option>
+                <option value="parttime">Part-time</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>DESCRIPTION (optional)</label>
+              <textarea value={jobForm.description} onChange={e => setJobForm(f => ({ ...f, description: e.target.value }))} rows={3}
+                placeholder="Short description of the role"
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+            </div>
+            <Input label="APPLY LINK" type="url" placeholder="https://..." value={jobForm.apply_link} onChange={e => setJobForm(f => ({ ...f, apply_link: e.target.value }))} />
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Btn onClick={() => { setShowAddJob(false); setEditJob(null); }} color={MUTE} small>Cancel</Btn>
+              <Btn small onClick={async () => {
+                if (!jobForm.role.trim() || !jobForm.company.trim()) { toast({ title: "Role and company are required", variant: "destructive" }); return; }
+                try {
+                  if (editJob) {
+                    await api.admin.updateJob(editJob.id, jobForm);
+                    toast({ title: "Job updated" });
+                  } else {
+                    await api.admin.createJob(jobForm);
+                    toast({ title: "Job added" });
+                  }
+                  setShowAddJob(false); setEditJob(null); loadJobs();
+                } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+              }}>{editJob ? "Save Changes" : "Add Job"}</Btn>
             </div>
           </div>
         </Modal>
