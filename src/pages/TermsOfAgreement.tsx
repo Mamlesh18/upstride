@@ -12,8 +12,8 @@ const TermsOfAgreement = () => {
       <header className="fixed top-0 w-full backdrop-blur-sm z-50 border-b border-border/20">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
+            <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
+            <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" onClick={() => navigate("/")}>
@@ -48,7 +48,7 @@ const TermsOfAgreement = () => {
               </CardHeader>
               <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                  These Terms of Agreement ("Terms") govern your use of UPSTRIDE's website and educational services. By accessing and using our platform, you agree to be bound by these terms. If you do not agree, please do not use our services.
+                  These Terms of Agreement ("Terms") govern your use of Upstrides' website and educational services. By accessing and using our platform, you agree to be bound by these terms. If you do not agree, please do not use our services.
                 </p>
               </CardContent>
             </Card>
@@ -60,7 +60,7 @@ const TermsOfAgreement = () => {
               </CardHeader>
               <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                  Permission is granted to temporarily download one copy of the materials (information or software) on UPSTRIDE for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                  Permission is granted to temporarily download one copy of the materials (information or software) on Upstrides for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
                 </p>
                 <ul className="list-disc list-inside space-y-2">
                   <li>Modifying or copying the materials</li>
@@ -87,13 +87,13 @@ const TermsOfAgreement = () => {
                 <div>
                   <h4 className="font-bold text-foreground mb-2">Course Content</h4>
                   <p>
-                    All course materials, videos, documents, and resources are proprietary to UPSTRIDE and may not be reproduced, distributed, or shared without permission.
+                    All course materials, videos, documents, and resources are proprietary to Upstrides and may not be reproduced, distributed, or shared without permission.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground mb-2">Completion and Certificates</h4>
                   <p>
-                    Certificates are issued upon successful completion of course requirements. UPSTRIDE reserves the right to audit or revoke certificates if plagiarism or cheating is detected.
+                    Certificates are issued upon successful completion of course requirements. Upstrides reserves the right to audit or revoke certificates if plagiarism or cheating is detected.
                   </p>
                 </div>
               </CardContent>
@@ -147,7 +147,7 @@ const TermsOfAgreement = () => {
               </CardHeader>
               <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                  All course materials, curriculum, videos, and content are owned by UPSTRIDE or licensed to us. You may not reproduce, distribute, or use these materials outside of the course without explicit permission.
+                  All course materials, curriculum, videos, and content are owned by Upstrides or licensed to us. You may not reproduce, distribute, or use these materials outside of the course without explicit permission.
                 </p>
               </CardContent>
             </Card>
@@ -159,7 +159,7 @@ const TermsOfAgreement = () => {
               </CardHeader>
               <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                  UPSTRIDE is provided "as is" without warranties. We are not liable for any indirect, incidental, special, or consequential damages arising from your use of our services.
+                  Upstrides is provided "as is" without warranties. We are not liable for any indirect, incidental, special, or consequential damages arising from your use of our services.
                 </p>
               </CardContent>
             </Card>
@@ -171,7 +171,7 @@ const TermsOfAgreement = () => {
               </CardHeader>
               <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                  UPSTRIDE reserves the right to modify these terms at any time. Changes will be posted on this page with an updated "Last Updated" date.
+                  Upstrides reserves the right to modify these terms at any time. Changes will be posted on this page with an updated "Last Updated" date.
                 </p>
               </CardContent>
             </Card>
@@ -186,10 +186,10 @@ const TermsOfAgreement = () => {
                   For questions about these terms, please contact:
                 </p>
                 <a
-                  href="mailto:upstride.in@gmail.com"
+                  href="mailto:hello@upstrides.in"
                   className="text-primary hover:text-primary/80 font-bold transition-colors"
                 >
-                  upstride.in@gmail.com
+                  hello@upstrides.in
                 </a>
               </CardContent>
             </Card>
@@ -203,17 +203,17 @@ const TermsOfAgreement = () => {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" />
-                <h3 className="text-xl font-bold text-foreground">UPSTRIDE</h3>
+                <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-8 w-8 object-contain" />
+                <h3 className="text-xl font-bold text-foreground">Upstrides</h3>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
                 Transforming careers through world-class online education.
               </p>
               <a
-                href="mailto:upstride.in@gmail.com"
+                href="mailto:hello@upstrides.in"
                 className="text-primary hover:text-primary/80 font-semibold text-sm transition-colors"
               >
-                upstride.in@gmail.com
+                hello@upstrides.in
               </a>
             </div>
             <div>
@@ -263,7 +263,7 @@ const TermsOfAgreement = () => {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="mailto:upstride.in@gmail.com"
+                    href="mailto:hello@upstrides.in"
                     className="text-muted-foreground hover:text-primary text-sm transition-colors"
                   >
                     Email Support
@@ -275,7 +275,7 @@ const TermsOfAgreement = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2026 UPSTRIDE Learning. All rights reserved.
+                © 2026 Upstrides Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India

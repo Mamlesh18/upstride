@@ -39,7 +39,7 @@ export default function ProjectManager() {
       {/* Header */}
       <div style={{ backgroundColor: B, padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px", borderBottom: `3px solid ${Y}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em" }}>UPSTRIDE</div>
+          <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em" }}>Upstrides</div>
           <span style={{ color: W, fontSize: "13px", fontWeight: 600 }}>Project Manager</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>

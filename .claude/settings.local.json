@@ -16,7 +16,8 @@
       "Read(//c/Users/mamle/visualstudiocode/Upstride/**)",
       "Bash(python3 *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(grep -n \"Add Event Modal\\\\|Add Resource Modal\\\\|</div>\\\\s*$\\\\|{/\\\\* ── Resources Tab\" C:/Users/mamle/visualstudiocode/Upstride/upstride/src/pages/Admin.tsx)"
     ],
     "deny": [],
     "ask": []
