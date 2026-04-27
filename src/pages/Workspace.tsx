@@ -96,7 +96,7 @@ export default function Workspace() {
           <span style={{ color: `${W}40` }}>|</span>
           <span style={{ color: W, fontSize: "13px", fontWeight: 700 }}>My Workspace</span>
         </div>
-        <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em" }}>UPSTRIDE</div>
+        <div style={{ backgroundColor: Y, color: B, padding: "4px 10px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em" }}>Upstrides</div>
       </div>
 
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>

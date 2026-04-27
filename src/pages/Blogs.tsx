@@ -144,7 +144,7 @@ All the best! Feel free to reach out if you have questions. We're all in this to
 
 ---
 
-**Want structured guidance for your placement preparation?** Check out UPSTRIDE's Experience Selling Bootcamp where we teach you exactly these strategies with personalized mentorship.
+**Want structured guidance for your placement preparation?** Check out Upstrides' Experience Selling Bootcamp where we teach you exactly these strategies with personalized mentorship.
       `.trim(),
     },
     {
@@ -373,7 +373,7 @@ And please, stop judging people based on their first company. The guy joining TC
 
 ---
 
-**Want to prepare for both service and product-based companies?** UPSTRIDE's Experience Selling Bootcamp covers strategies for both paths with real interview experiences and placement guidance.
+**Want to prepare for both service and product-based companies?** Upstrides' Experience Selling Bootcamp covers strategies for both paths with real interview experiences and placement guidance.
 
 Sources consulted for this article:
 - [Product vs Service-Based Company Guide 2026](https://digitaldefynd.com/IQ/product-vs-service-based-company/)
@@ -737,7 +737,7 @@ Remember: Every expert was once a beginner who didn't quit.
 
 ---
 
-**Need structured guidance for this 8-week journey?** Join UPSTRIDE's Experience Selling Bootcamp where we provide personalized mentorship, mock interviews, and proven frameworks to ace your placements.
+**Need structured guidance for this 8-week journey?** Join Upstrides' Experience Selling Bootcamp where we provide personalized mentorship, mock interviews, and proven frameworks to ace your placements.
 
 Sources consulted for this article:
 - [How I Prepared for Coding Interviews in 3 Months - Medium](https://medium.com/swlh/how-i-prepared-for-coding-interviews-in-3-months-8d54ba3bf50)
@@ -750,7 +750,7 @@ Sources consulted for this article:
       id: 4,
       title: "Why Students Feel Lost: The Missing Piece That Changes Everything",
       excerpt: "Most students aren't confused because they can't learn. They're confused because no one tells them where to start. Here's what nobody talks about.",
-      author: "UPSTRIDE Team",
+      author: "Upstrides Team",
       date: "January 20, 2025",
       readTime: "6 min read",
       image: "/placeholder-blog-4.jpg",
@@ -890,9 +890,9 @@ If you're reading this and feeling lost, try this:
 
 That simple act of getting direction from someone who's been there — that's mentorship.
 
-## Why We Built UPSTRIDE
+## Why We Built Upstrides
 
-This is exactly why UPSTRIDE exists.
+This is exactly why Upstrides exists.
 
 We're not selling courses. We're selling experience and direction.
 
@@ -921,7 +921,7 @@ And sometimes, that direction is all you're really looking for.
 
 ---
 
-**Ready to get the direction you need?** Join UPSTRIDE's Experience Selling Bootcamp — where we don't just teach skills, we guide you personally through your career journey.
+**Ready to get the direction you need?** Join Upstrides' Experience Selling Bootcamp — where we don't just teach skills, we guide you personally through your career journey.
       `.trim(),
     },
     {
@@ -985,7 +985,7 @@ Human skills + AI tools = the new superpower.
 
 ---
 
-**UPSTRIDE exists to build exactly that.** We prepare you for the corporate world that AI is reshaping — so you become someone companies fight to keep.
+**Upstrides exists to build exactly that.** We prepare you for the corporate world that AI is reshaping — so you become someone companies fight to keep.
       `.trim(),
     },
     {
@@ -1049,7 +1049,7 @@ That only happens when you've done the work to understand the role — and then 
 
 ---
 
-**At UPSTRIDE, we review and rebuild resumes from scratch.** Because your career deserves more than a template.
+**At Upstrides, we review and rebuild resumes from scratch.** Because your career deserves more than a template.
       `.trim(),
     },
     {
@@ -1119,7 +1119,7 @@ They're showing up, sharing, connecting — building a reputation before they ne
 
 ---
 
-**UPSTRIDE's placement program includes LinkedIn profile optimization** — because your online presence is now part of your job application.
+**Upstrides' placement program includes LinkedIn profile optimization** — because your online presence is now part of your job application.
       `.trim(),
     },
     {
@@ -1189,7 +1189,7 @@ That beats 100 copy-paste templates every single time.
 
 ---
 
-**UPSTRIDE teaches you exactly this.** Because in the corporate world, reaching the right person is half the battle — and the email is your first impression.
+**Upstrides teaches you exactly this.** Because in the corporate world, reaching the right person is half the battle — and the email is your first impression.
       `.trim(),
     },
     {
@@ -1259,7 +1259,7 @@ The placed students found mentors, coaches, and communities. They didn't try to 
 
 ---
 
-**You don't have to figure this out alone.** UPSTRIDE was built to be the mentor, the community, and the guide that gets you from 0 to offer.
+**You don't have to figure this out alone.** Upstrides was built to be the mentor, the community, and the guide that gets you from 0 to offer.
       `.trim(),
     },
     {
@@ -1320,7 +1320,7 @@ Walk in curious, not desperate. The shift in energy is everything.
 
 ---
 
-**UPSTRIDE does live mock interviews** — not practice questions, but real simulated pressure so that the actual interview feels easy by comparison.
+**Upstrides does live mock interviews** — not practice questions, but real simulated pressure so that the actual interview feels easy by comparison.
       `.trim(),
     },
     {
@@ -1382,7 +1382,7 @@ That takes reflection. It takes honesty. And it takes practice.
 
 ---
 
-**UPSTRIDE helps you extract the value from every experience you already have** — and turn it into language that opens doors.
+**Upstrides helps you extract the value from every experience you already have** — and turn it into language that opens doors.
       `.trim(),
     },
     {
@@ -1443,7 +1443,7 @@ You're not being difficult. You're being professional.
 
 ---
 
-**UPSTRIDE covers salary negotiation as part of our placement prep** — because what you earn in your first job shapes your financial trajectory for years.
+**Upstrides covers salary negotiation as part of our placement prep** — because what you earn in your first job shapes your financial trajectory for years.
       `.trim(),
     },
     {
@@ -1509,7 +1509,7 @@ Start one conversation this week. That's the whole task.
 
 ---
 
-**UPSTRIDE connects you with a community of peers, mentors, and industry professionals** — because who you surround yourself with shapes who you become.
+**Upstrides connects you with a community of peers, mentors, and industry professionals** — because who you surround yourself with shapes who you become.
       `.trim(),
     },
     {
@@ -1576,7 +1576,7 @@ That's memorable. That's the kind of follow-up that makes people remember you.
 
 ---
 
-**UPSTRIDE teaches you the full arc of professional communication** — because the conversation doesn't end when you walk out the door.
+**Upstrides teaches you the full arc of professional communication** — because the conversation doesn't end when you walk out the door.
       `.trim(),
     },
     {
@@ -1644,7 +1644,7 @@ People trust the person who shares the journey, not just the destination.
 
 ---
 
-**UPSTRIDE helps you define and build your personal brand** as part of our placement program — because in today's market, being *known* is the new competitive advantage.
+**Upstrides helps you define and build your personal brand** as part of our placement program — because in today's market, being *known* is the new competitive advantage.
       `.trim(),
     },
     {
@@ -1706,7 +1706,7 @@ The GD is won in preparation, not in the room.
 
 ---
 
-**UPSTRIDE runs live Group Discussion simulations** — real rounds, real feedback, real improvement.
+**Upstrides runs live Group Discussion simulations** — real rounds, real feedback, real improvement.
       `.trim(),
     },
     {
@@ -1774,7 +1774,7 @@ Flip the ratio: **70% networking and direct outreach, 30% job portal application
 
 ---
 
-**UPSTRIDE's network gets you access to companies before positions are posted** — because the best opportunities go to the people who are already in the room.
+**Upstrides' network gets you access to companies before positions are posted** — because the best opportunities go to the people who are already in the room.
       `.trim(),
     },
     {
@@ -1842,7 +1842,7 @@ And unlike technical skills, it takes time to develop. Which means the person wh
 
 ---
 
-**UPSTRIDE builds this into our training** — because the skills that make you successful long-term are different from the ones that get you hired.
+**Upstrides builds this into our training** — because the skills that make you successful long-term are different from the ones that get you hired.
       `.trim(),
     },
     {
@@ -1909,7 +1909,7 @@ The person who knows how the whole machine works — and who everyone knows — 
 
 ---
 
-**UPSTRIDE prepares you not just to get the job — but to thrive once you're in it.** Because starting strong is a skill, and we teach it.
+**Upstrides prepares you not just to get the job — but to thrive once you're in it.** Because starting strong is a skill, and we teach it.
       `.trim(),
     },
     {
@@ -1972,7 +1972,7 @@ One month of focused preparation can take you from 50th percentile to 85th.
 
 ---
 
-**UPSTRIDE covers aptitude preparation as part of our complete placement readiness program** — because clearing the first round is the price of entry.
+**Upstrides covers aptitude preparation as part of our complete placement readiness program** — because clearing the first round is the price of entry.
       `.trim(),
     },
     {
@@ -2034,7 +2034,7 @@ The days you do it without wanting to are the days it actually counts.
 
 ---
 
-**UPSTRIDE gives you the structure, accountability, and support to stay consistent** — because showing up every day is easier when you're not doing it alone.
+**Upstrides gives you the structure, accountability, and support to stay consistent** — because showing up every day is easier when you're not doing it alone.
       `.trim(),
     },
     {
@@ -2103,7 +2103,7 @@ Then do it before the next application. And keep going.
 
 ---
 
-**UPSTRIDE walks with you through the full placement journey** — including the hard days. Because those days are part of the journey too.
+**Upstrides walks with you through the full placement journey** — including the hard days. Because those days are part of the journey too.
       `.trim(),
     },
     {
@@ -2173,7 +2173,7 @@ Start now. The best time was yesterday. The second best time is today.
 
 ---
 
-**UPSTRIDE helps you define your story and build your professional presence** — because in this market, visibility is leverage.
+**Upstrides helps you define your story and build your professional presence** — because in this market, visibility is leverage.
       `.trim(),
     },
     {
@@ -2250,7 +2250,7 @@ The mindset follows the action. Not the other way around.
 
 ---
 
-**UPSTRIDE was built for this exact mindset shift.** We give you the structure, the accountability, and the belief that you're someone worth betting on — because you are.
+**Upstrides was built for this exact mindset shift.** We give you the structure, the accountability, and the belief that you're someone worth betting on — because you are.
       `.trim(),
     },
   ];
@@ -2266,8 +2266,8 @@ The mindset follows the action. Not the other way around.
         <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
           <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-              <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-              <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
+              <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
+              <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
             </div>
             {/* Desktop Nav */}
             <div className="hidden md:flex gap-4">
@@ -2459,7 +2459,7 @@ The mindset follows the action. Not the other way around.
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2026 UPSTRIDE Learning. All rights reserved.
+                © 2026 Upstrides Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 MSME Certified | VIT & Saveetha Recognized
@@ -2478,8 +2478,8 @@ The mindset follows the action. Not the other way around.
       <header className="fixed top-0 w-full backdrop-blur-sm z-40 border-b border-border/20">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
+            <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
+            <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
           </div>
           {/* Desktop Nav */}
           <div className="hidden md:flex gap-4">
@@ -2527,7 +2527,7 @@ The mindset follows the action. Not the other way around.
           </Button>
 
           <h1 className="text-5xl md:text-6xl font-black mb-6 text-foreground">
-            UPSTRIDE Blog
+            Upstrides Blog
           </h1>
           <p className="text-xl text-muted-foreground">
             Real stories, honest advice, and practical tips from students who've been there
@@ -2606,7 +2606,7 @@ The mindset follows the action. Not the other way around.
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © 2026 UPSTRIDE Learning. All rights reserved.
+              © 2026 Upstrides Learning. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm">
               MSME Certified | VIT & Saveetha Recognized

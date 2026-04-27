@@ -46,8 +46,8 @@ const ContactUs = () => {
       <header className="fixed top-0 w-full backdrop-blur-sm z-50 border-b border-border/20">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">UPSTRIDE</h1>
+            <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
+            <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" onClick={() => navigate("/")}>
@@ -90,10 +90,10 @@ const ContactUs = () => {
                     <div>
                       <h4 className="font-bold text-foreground mb-1">Email</h4>
                       <a
-                        href="mailto:upstride.in@gmail.com"
+                        href="mailto:hello@upstrides.in"
                         className="text-primary hover:text-primary/80 transition-colors"
                       >
-                        upstride.in@gmail.com
+                        hello@upstrides.in
                       </a>
                     </div>
                   </div>
@@ -262,17 +262,17 @@ const ContactUs = () => {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="UPSTRIDE Logo" className="h-8 w-8 object-contain" />
-                <h3 className="text-xl font-bold text-foreground">UPSTRIDE</h3>
+                <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-8 w-8 object-contain" />
+                <h3 className="text-xl font-bold text-foreground">Upstrides</h3>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
                 Transforming careers through world-class online education.
               </p>
               <a
-                href="mailto:upstride.in@gmail.com"
+                href="mailto:hello@upstrides.in"
                 className="text-primary hover:text-primary/80 font-semibold text-sm transition-colors"
               >
-                upstride.in@gmail.com
+                hello@upstrides.in
               </a>
             </div>
             <div>
@@ -322,7 +322,7 @@ const ContactUs = () => {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="mailto:upstride.in@gmail.com"
+                    href="mailto:hello@upstrides.in"
                     className="text-muted-foreground hover:text-primary text-sm transition-colors"
                   >
                     Email Support
@@ -334,7 +334,7 @@ const ContactUs = () => {
           <div className="border-t border-border pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                © 2026 UPSTRIDE Learning. All rights reserved.
+                © 2026 Upstrides Learning. All rights reserved.
               </p>
               <p className="text-muted-foreground text-sm">
                 Recognized by MSME, Government of India

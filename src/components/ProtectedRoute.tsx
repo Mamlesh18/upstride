@@ -15,6 +15,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     if (role === "super_admin") return <Navigate to="/admin" replace />;
     if (role === "project_manager") return <Navigate to="/projects" replace />;
     if (role === "sales_person") return <Navigate to="/sales" replace />;
+    if (role === "public_user") return <Navigate to="/placements" replace />;
     return <Navigate to="/portal" replace />;
   }
 

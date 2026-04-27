@@ -242,8 +242,8 @@ const Portal = () => {
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", flexShrink: 0 }} onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "28px", objectFit: "contain" }} />
-            {!isMobile && <span style={{ fontSize: "16px", fontWeight: 700, color: B, letterSpacing: "0.05em" }}>UPSTRIDE</span>}
+            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px", objectFit: "contain" }} />
+            {!isMobile && <span style={{ fontSize: "16px", fontWeight: 700, color: B, letterSpacing: "0.05em" }}>Upstrides</span>}
             <span style={{ fontSize: "10px", backgroundColor: Y, color: B, padding: "2px 8px", borderRadius: "3px", fontWeight: 700, letterSpacing: "0.12em", border: `1px solid ${B}` }}>
               PORTAL
             </span>

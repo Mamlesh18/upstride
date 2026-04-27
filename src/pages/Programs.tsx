@@ -101,7 +101,7 @@ const roadmap = [
       "Offer received: what to do in the first 30 days",
       "Building your network so opportunities come to you",
       "Long-term career roadmap — where to go from here",
-      "Lifetime access to the Upstride portal and community",
+      "Lifetime access to the Upstrides portal and community",
     ],
   },
 ];
@@ -161,20 +161,20 @@ const Programs = () => {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: "f4edb229-9419-4f5c-a18f-8f67c1ec3082",
-          subject: "🔥 New Call Request - UPSTRIDE Programs Page",
-          from_name: "UPSTRIDE Website",
-          to: "mamlesh.va06@gmail.com",
+          subject: "🔥 New Call Request - Upstrides Programs Page",
+          from_name: "Upstrides Website",
+          to: "hello@upstrides.in",
           phone: phoneNumber,
           message: `📞 NEW CALL REQUEST\nPhone: ${phoneNumber}\nDate: ${dateTime}\nSource: Programs Page`,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: "You're on the list!", description: "Mamlesh will call you personally within 24 hours." });
+        toast({ title: "You're on the list!", description: "WE WILL CALL YOU PERSONALLY within 24 hours." });
         setPhoneNumber("");
       } else throw new Error();
     } catch {
-      toast({ title: "Failed", description: "Please try again or email mamlesh@upstrides.in", variant: "destructive" });
+      toast({ title: "Failed", description: "Please try again or email hello@upstrides.in", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -187,8 +187,8 @@ const Programs = () => {
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: Y, borderBottom: `4px solid ${B}` }}>
         <nav style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "stretch" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 0", cursor: "pointer" }} onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "32px", objectFit: "contain" }} />
-            <span style={{ ...BEBAS, fontSize: "24px", letterSpacing: "0.1em", color: B }}>UPSTRIDE</span>
+            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "32px", objectFit: "contain" }} />
+            <span style={{ ...BEBAS, fontSize: "24px", letterSpacing: "0.1em", color: B }}>Upstrides</span>
           </div>
           <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
             {[
@@ -218,7 +218,7 @@ const Programs = () => {
       <section style={{ paddingTop: "80px", backgroundColor: W, borderBottom: `4px solid ${B}` }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 24px 60px" }}>
           <div style={{ display: "inline-block", backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px" }}>
-            UPSTRIDE PRESENTS
+            Upstrides PRESENTS
           </div>
           <h1 style={{ ...BEBAS, fontSize: "clamp(60px, 12vw, 140px)", lineHeight: 0.88, color: B, marginBottom: "20px" }}>
             THE CAREER<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>LAUNCHPAD</span>
@@ -234,10 +234,10 @@ const Programs = () => {
           <div style={{ backgroundColor: Y, border: `3px solid ${B}`, boxShadow: `5px 5px 0 ${B}`, padding: "28px 32px", maxWidth: "560px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
               <Phone size={18} color={B} />
-              <span style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.12em" }}>MAMLESH WILL CALL YOU PERSONALLY</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.12em" }}>WE WILL CALL YOU PERSONALLY</span>
             </div>
             <p style={{ fontSize: "13px", color: `${B}bb`, lineHeight: 1.6, marginBottom: "18px" }}>
-              You're not just a lead — you're somebody, and you matter to Upstride. Drop your number and Mamlesh calls you himself. No scripts. No sales pitch. Just an honest conversation about your next move.
+              You're not just a lead — you're somebody, and you matter to Upstrides. Drop your number and we will call you. No scripts. No sales pitch. Just an honest conversation about your next move.
             </p>
             <form onSubmit={handlePhoneSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <input
@@ -257,7 +257,7 @@ const Programs = () => {
               </button>
             </form>
             <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginTop: "12px" }}>
-              {["Founder calls personally", "Zero spam", "Within 24 hours"].map(t => (
+              {["We call personally", "Zero spam", "Within 24 hours"].map(t => (
                 <span key={t} style={{ fontSize: "11px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
                   <span style={{ color: B, fontWeight: 700 }}>✓</span> {t}
                 </span>
@@ -401,7 +401,7 @@ const Programs = () => {
             ONE CALL CAN<br /><span style={{ color: Y, WebkitTextStroke: `3px ${B}` }}>CHANGE</span><br />EVERYTHING.
           </h2>
           <p style={{ fontSize: "15px", color: MUTE, lineHeight: 1.8, marginBottom: "40px", maxWidth: "520px", margin: "0 auto 40px" }}>
-            Drop your number. Mamlesh will call you personally — no scripts, no pressure, no sales pitch. Just a real conversation about where you are and what the next 8 weeks could look like for you.
+            Drop your number. WE WILL CALL YOU PERSONALLY — no scripts, no pressure, no sales pitch. Just a real conversation about where you are and what the next 8 weeks could look like for you.
           </p>
 
           <div style={{ backgroundColor: Y, border: `3px solid ${B}`, boxShadow: `5px 5px 0 ${B}`, padding: "32px", maxWidth: "500px", margin: "0 auto" }}>
@@ -423,7 +423,7 @@ const Programs = () => {
               </button>
             </form>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
-              {["Founder calls personally", "Zero spam", "Within 24 hours"].map(t => (
+              {["We call personally", "Zero spam", "Within 24 hours"].map(t => (
                 <span key={t} style={{ fontSize: "11px", color: `${B}99`, display: "flex", alignItems: "center", gap: "4px" }}>
                   <span style={{ fontWeight: 700, color: B }}>✓</span> {t}
                 </span>
@@ -437,12 +437,12 @@ const Programs = () => {
       <footer style={{ backgroundColor: B, borderTop: `4px solid ${Y}`, padding: "40px 24px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <img src="/upstride-logo.png" alt="Upstride" style={{ height: "28px", filter: "brightness(0) invert(1)" }} />
-            <span style={{ ...BEBAS, fontSize: "22px", color: W, letterSpacing: "0.1em" }}>UPSTRIDE</span>
+            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px", filter: "brightness(0) invert(1)" }} />
+            <span style={{ ...BEBAS, fontSize: "22px", color: W, letterSpacing: "0.1em" }}>Upstrides</span>
           </div>
           <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-            <a href="mailto:mamlesh@upstrides.in" style={{ ...MONO, fontSize: "12px", color: Y, textDecoration: "none" }}>mamlesh@upstrides.in</a>
-            <span style={{ ...MONO, fontSize: "12px", color: `${W}55` }}>© 2026 UPSTRIDE</span>
+            <a href="mailto:hello@upstrides.in" style={{ ...MONO, fontSize: "12px", color: Y, textDecoration: "none" }}>hello@upstrides.in</a>
+            <span style={{ ...MONO, fontSize: "12px", color: `${W}55` }}>© 2026 Upstrides</span>
           </div>
         </div>
       </footer>

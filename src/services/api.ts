@@ -46,6 +46,11 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ email, password }),
       }),
+    signup: (data: { name: string; email: string; phone: string; password: string }) =>
+      request<{ access_token: string; user: Record<string, unknown> }>("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     changePassword: (current_password: string, new_password: string) =>
       request("/api/auth/change-password", {
         method: "POST",
@@ -115,6 +120,18 @@ export const api = {
     contactStats: () => request("/api/admin/contacts/stats"),
     deleteContact: (id: string) => request(`/api/admin/contacts/${id}`, { method: "DELETE" }),
     clearUnassigned: () => request("/api/admin/contacts/clear-unassigned", { method: "DELETE" }),
+
+    // Jobs
+    listJobs: () => request("/api/admin/jobs"),
+    createJob: (data: { role: string; company: string; description: string; apply_link: string; category: string }) =>
+      request("/api/admin/jobs", { method: "POST", body: JSON.stringify(data) }),
+    updateJob: (id: string, data: Record<string, unknown>) =>
+      request(`/api/admin/jobs/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    deleteJob: (id: string) => request(`/api/admin/jobs/${id}`, { method: "DELETE" }),
+
+    // Public users & leads
+    listPublicUsers: () => request("/api/admin/public-users"),
+    listLeads: () => request("/api/admin/leads"),
   },
 
   projects: {
@@ -150,6 +167,18 @@ export const api = {
     getLeaderboard: () => request("/api/student/leaderboard"),
     getSchedule: () => request("/api/student/schedule"),
     getUpcomingEvents: () => request("/api/student/events"),
+  },
+
+  public: {
+    jobs: (params: { category?: string; search?: string; page?: number }) => {
+      const q = new URLSearchParams();
+      if (params.category) q.set("category", params.category);
+      if (params.search) q.set("search", params.search);
+      if (params.page) q.set("page", String(params.page));
+      return request(`/api/public/jobs?${q}`);
+    },
+    apply: (data: { name: string; email: string; phone: string }) =>
+      request("/api/public/apply", { method: "POST", body: JSON.stringify(data) }),
   },
 
   events: {

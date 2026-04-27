@@ -9,6 +9,7 @@ const LB2 = "#EEEEEE";  // alternate section bg
 const TEXT = "#0A0A0A";
 const MUTE = "#666666";
 const BORDER = "#DDDDDD";
+const SANS: React.CSSProperties = { fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" };
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -38,7 +39,7 @@ const STUDENTS = [
     name: "SRI",
     image: "/sri-image.jpg",
     achievement: "From clueless to confident — built a project that changed everything",
-    quote: "Before Upstride I knew nothing and had no direction. After joining I got clarity and gained real confidence. The project I built felt like my first step toward something bigger — and I felt that so hard.",
+    quote: "Before Upstrides I knew nothing and had no direction. After joining I got clarity and gained real confidence. The project I built felt like my first step toward something bigger — and I felt that so hard.",
     highlight: "CLARITY GAINED",
   },
   {
@@ -52,49 +53,49 @@ const STUDENTS = [
     name: "DIVYA",
     image: "/divya.jpg",
     achievement: "Placed in Central Government — AICTE",
-    quote: "Landing a central government role straight out of college wasn't something I imagined. Upstride helped me build the confidence and skills to actually get there.",
+    quote: "Landing a central government role straight out of college wasn't something I imagined. Upstrides helped me build the confidence and skills to actually get there.",
     highlight: "GOVT. PLACED",
   },
   {
     name: "ANMOL",
     image: "/anmol.jpg",
     achievement: "AIR 734 in GATE DA",
-    quote: "Cracking GATE with a rank of 734 in Data Analytics took serious focus and the right guidance. Upstride helped me build that discipline.",
+    quote: "Cracking GATE with a rank of 734 in Data Analytics took serious focus and the right guidance. Upstrides helped me build that discipline.",
     highlight: "GATE AIR 734",
   },
   {
     name: "UWAIS",
     image: "/uwais.jpg",
     achievement: "Was clueless — now competing and winning hackathons",
-    quote: "I had no idea what I was doing when I joined. Upstride gave me direction. Now I'm going to hackathons and actually winning them. The turnaround is real.",
+    quote: "I had no idea what I was doing when I joined. Upstrides gave me direction. Now I'm going to hackathons and actually winning them. The turnaround is real.",
     highlight: "HACKATHON WINNER",
   },
   {
     name: "VAMSI",
     image: "/vamsi-image.jpeg",
     achievement: "Summer internship at Accenture",
-    quote: "Getting into Accenture as a summer intern felt like a big deal. The preparation and project work from Upstride made it possible.",
+    quote: "Getting into Accenture as a summer intern felt like a big deal. The preparation and project work from Upstrides made it possible.",
     highlight: "ACCENTURE INTERN",
   },
   {
     name: "RAJESH S",
     image: "/rajeshs.jpeg",
     achievement: "Placed at Altruist",
-    quote: "Getting placed at Altruist was the goal. Upstride kept me focused, pushed me to build real things, and prepared me for how actual teams work.",
+    quote: "Getting placed at Altruist was the goal. Upstrides kept me focused, pushed me to build real things, and prepared me for how actual teams work.",
     highlight: "PLACED @ ALTRUIST",
   },
   {
     name: "KABIL",
     image: "/Kabil.jpeg",
     achievement: "Building his own startup",
-    quote: "Most people talk about starting something. I'm actually doing it. Upstride taught me how to think like a founder, not just an engineer.",
+    quote: "Most people talk about starting something. I'm actually doing it. Upstrides taught me how to think like a founder, not just an engineer.",
     highlight: "BUILDING STARTUP",
   },
   {
     name: "PRANEETH S",
     image: "/praneeths.jpeg",
     achievement: "Placed to work on a funded project",
-    quote: "Working on a funded project right out of college is something most students only dream about. Upstride helped me get there faster than I expected.",
+    quote: "Working on a funded project right out of college is something most students only dream about. Upstrides helped me get there faster than I expected.",
     highlight: "FUNDED PROJECT",
   },
 ];
@@ -184,7 +185,7 @@ export default function Results() {
         background: "#fff",
       }}>
         <a href="/" style={{ textDecoration: "none" }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "22px" : "28px", color: B, letterSpacing: "0.08em" }}>UPSTRIDE</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "22px" : "28px", color: B, letterSpacing: "0.08em" }}>Upstrides</span>
         </a>
         <a href="/" style={{
           textDecoration: "none", color: "#fff", background: B,
@@ -259,7 +260,7 @@ export default function Results() {
                   UPCOMING EVENT
                 </div>
                 <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "40px" : "64px", color: "#fff", lineHeight: 0.92, marginBottom: "20px" }}>
-                  UPSTRIDE IS<br />
+                  Upstrides IS<br />
                   <span style={{ color: Y }}>COMING TO</span><br />
                   {ev.location.toUpperCase()}
                 </h2>
@@ -363,26 +364,26 @@ export default function Results() {
                 />
               </div>
 
-              {/* Right: where Upstride went + Mamlesh as chief guest */}
+              {/* Right: where Upstrides went + Upstrides team at the event */}
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ border: `3px solid ${B}`, overflow: "hidden", background: "#000", flex: 1 }}>
                   <img
                     src="/kongunadu-hackathon.jpeg"
-                    alt="Where Upstride went"
+                    alt="Where Upstrides went"
                     style={{ width: "100%", height: "100%", minHeight: "180px", objectFit: "cover", objectPosition: "center", display: "block" }}
                   />
                   <div style={{ background: B, color: Y, fontFamily: "'Bebas Neue', cursive", fontSize: "11px", letterSpacing: "0.12em", padding: "5px 12px" }}>
-                    WHERE UPSTRIDE WENT
+                    WHERE Upstrides WENT
                   </div>
                 </div>
                 <div style={{ border: `3px solid ${B}`, overflow: "hidden", background: "#000", flex: 1 }}>
                   <img
                     src="/srm-event.jpeg"
-                    alt="Mamlesh as chief guest"
+                    alt="Upstrides team at the event"
                     style={{ width: "100%", height: "100%", minHeight: "180px", objectFit: "cover", objectPosition: "center", display: "block" }}
                   />
                   <div style={{ background: B, color: Y, fontFamily: "'Bebas Neue', cursive", fontSize: "11px", letterSpacing: "0.12em", padding: "5px 12px" }}>
-                    MAMLESH — CHIEF GUEST
+                    UPSTRIDES TEAM
                   </div>
                 </div>
               </div>
@@ -432,7 +433,7 @@ export default function Results() {
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "36px" : "52px", letterSpacing: "0.04em", color: TEXT }}>
               COLLEGES WE'VE <span style={{ borderBottom: `4px solid ${Y}` }}>REACHED</span>
             </div>
-            <p style={{ color: MUTE, fontSize: "13px", marginTop: "8px" }}>Students from these institutions have trained and shipped at Upstride</p>
+            <p style={{ color: MUTE, fontSize: "13px", marginTop: "8px" }}>Students from these institutions have trained and shipped at Upstrides</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: "12px" }}>
             {COLLEGES.map((c) => (
@@ -465,7 +466,7 @@ export default function Results() {
             BUILD YOUR<br />OWN MACHINE.
           </h2>
           <p style={{ fontSize: "15px", lineHeight: 1.8, maxWidth: "660px", marginBottom: "20px" }}>
-            BYOM is not a catchy acronym. It's a discipline. Every student at Upstride is here to build something — their own product, their own portfolio, their own career. We don't hand you a roadmap and wish you luck. We sit next to you until the thing is shipped.
+            BYOM is not a catchy acronym. It's a discipline. Every student at Upstrides is here to build something — their own product, their own portfolio, their own career. We don't hand you a roadmap and wish you luck. We sit next to you until the thing is shipped.
           </p>
           <p style={{ fontSize: "14px", lineHeight: 1.8, maxWidth: "600px", color: "#444" }}>
             The engineers who stand out aren't the ones who completed the most tutorials. They're the ones who built messy, real things — broke them, fixed them, and shipped them anyway. That's what we train for.
@@ -563,8 +564,8 @@ export default function Results() {
         display: "flex", flexDirection: isMobile ? "column" : "row",
         alignItems: "center", justifyContent: "space-between", gap: "12px",
       }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "18px", color: B }}>UPSTRIDE</span>
-        <span style={{ fontSize: "11px", color: MUTE }}>© 2024 Upstride. All results are real.</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "18px", color: B }}>Upstrides</span>
+        <span style={{ fontSize: "11px", color: MUTE }}>© 2024 Upstrides. All results are real.</span>
         <div style={{ display: "flex", gap: "20px" }}>
           <a href="/privacy-policy" style={{ color: MUTE, fontSize: "11px", textDecoration: "none" }}>Privacy</a>
           <a href="/terms" style={{ color: MUTE, fontSize: "11px", textDecoration: "none" }}>Terms</a>
@@ -621,7 +622,7 @@ function StudentCard({ student, delay }: { student: typeof STUDENTS[0]; delay: n
         }}>
           {student.achievement}
         </div>
-        <p style={{ fontSize: "12px", color: MUTE, lineHeight: 1.8, margin: 0, fontStyle: "italic" }}>
+        <p style={{ ...SANS, fontSize: "14px", color: MUTE, lineHeight: 1.75, margin: 0 }}>
           "{student.quote}"
         </p>
       </div>
