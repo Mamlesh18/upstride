@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import MockInterview from "./MockInterview";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -15,7 +16,7 @@ import {
   Building2, Code2, LogOut, GraduationCap, Star, Database, Network,
   Cpu, MessageCircle, Lightbulb, Brain, Target, BookOpen, ArrowUpRight,
   Flame, Zap, Trophy, Eye, ShoppingCart, Server, Coffee,
-  PlayCircle, Lock, CheckSquare, X, Send, Sparkles, Copy, Check, CalendarDays,
+  PlayCircle, Lock, CheckSquare, X, Send, Sparkles, Copy, Check, CalendarDays, Menu,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -32,7 +33,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "recommended" | "training" | "placement" | "sessions" | "resume" | "leaderboard" | "schedule";
+type ViewType = "recommended" | "training" | "placement" | "sessions" | "resume" | "leaderboard" | "schedule" | "mockinterview";
 
 // ─── Resource Types ───────────────────────────────────────────────────────────
 interface Resource { id: string; section: string; category: string; name: string; tagline: string; url: string; company_type?: string; sub_type?: string; emoji?: string; badge_label?: string; badge_accent?: boolean; }
@@ -87,6 +88,9 @@ const Portal = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView]         = useState<ViewType>("recommended");
+  const [sidebarOpen, setSidebarOpen]         = useState(!isMobile);
+  const userName  = localStorage.getItem("userName")  ?? "";
+  const userEmail = localStorage.getItem("userEmail") ?? "";
   const [sessions, setSessions]               = useState<Session[]>([]);
   const [sessionsInfo, setSessionsInfo]       = useState<{ weeks_completed: number; unlocked_count: number; days_enrolled: number } | null>(null);
   const [resourcesData, setResourcesData]     = useState<ResourcesData | null>(null);
@@ -213,9 +217,9 @@ const Portal = () => {
     { view: "training",    label: "Training",    icon: GraduationCap, count: `${resourcesData ? resourcesData.training.reduce((a, c) => a + c.resources.length, 0) : "—"}` },
     { view: "placement",   label: "Placement",   icon: Building2,     count: `${resourcesData ? resourcesData.placement.service.length + resourcesData.placement.product.length : "—"}` },
     { view: "sessions",    label: "Sessions",    icon: PlayCircle,    count: "11" },
-    ...(resumeCreds?.has_access ? [{ view: "resume" as ViewType, label: "Resume AI", icon: Sparkles, count: "✦" }] : []),
     { view: "leaderboard" as ViewType, label: "Leaderboard", icon: Trophy, count: "🏆" },
     { view: "schedule" as ViewType, label: "Schedule", icon: CalendarDays, count: "📅" },
+    { view: "mockinterview" as ViewType, label: "Mock Interview", icon: MessageCircle, count: "🎤" },
   ];
 
   const cardHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -239,28 +243,33 @@ const Portal = () => {
     <div style={{ minHeight: "100vh", backgroundColor: BG, color: B, ...MONO }}>
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
-      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", flexShrink: 0 }} onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px", objectFit: "contain" }} />
-            {!isMobile && <span style={{ fontSize: "16px", fontWeight: 700, color: B, letterSpacing: "0.05em" }}>Upstrides</span>}
-            <span style={{ fontSize: "10px", backgroundColor: Y, color: B, padding: "2px 8px", borderRadius: "3px", fontWeight: 700, letterSpacing: "0.12em", border: `1px solid ${B}` }}>
-              PORTAL
-            </span>
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
+        <div style={{ padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" }}>
+          {/* Left: toggle + logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={() => setSidebarOpen(s => !s)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = B; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORD; }}
+            >
+              {sidebarOpen ? <X size={16} color={B} /> : <Menu size={16} color={B} />}
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }} onClick={() => navigate("/")}>
+              <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px", objectFit: "contain" }} />
+              {!isMobile && <span style={{ fontSize: "15px", fontWeight: 700, color: B, letterSpacing: "0.05em", ...MONO }}>Upstrides</span>}
+              <span style={{ fontSize: "10px", backgroundColor: Y, color: B, padding: "2px 8px", fontWeight: 700, letterSpacing: "0.12em", border: `1px solid ${B}`, ...MONO }}>
+                PORTAL
+              </span>
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <button onClick={() => navigate("/workspace")}
-              style={{ display: "flex", alignItems: "center", gap: "6px", color: B, background: Y, border: `2px solid ${B}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", fontWeight: 700, ...MONO }}>
-              <CheckSquare size={14} />
-              {!isMobile && "My Workspace"}
-            </button>
-            <button onClick={() => setShowFeedback(true)}
-              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO }}>
-              <MessageSquare size={14} />
-              {!isMobile && "Request Resource"}
-            </button>
+          {/* Right: current view label + sign out */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ ...MONO, fontSize: "10px", color: MUTE, letterSpacing: "0.12em", display: isMobile ? "none" : "block" }}>
+              {tabs.find(t => t.view === currentView)?.label?.toUpperCase() ?? ""}
+            </span>
             <button onClick={handleLogout}
-              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: isMobile ? "8px" : "7px 14px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
+              style={{ display: "flex", alignItems: "center", gap: "6px", color: MUTE, background: "none", border: `2px solid ${BORD}`, borderRadius: "6px", padding: "7px 12px", cursor: "pointer", fontSize: "12px", ...MONO, transition: "all 0.15s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#EF4444"; (e.currentTarget as HTMLButtonElement).style.color = "#EF4444"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORD; (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}>
               <LogOut size={14} />
@@ -270,43 +279,103 @@ const Portal = () => {
         </div>
       </header>
 
-      {/* ── TAB BAR ─────────────────────────────────────────────────────── */}
-      <div style={{ position: "fixed", top: "60px", left: 0, right: 0, zIndex: 99, backgroundColor: W, borderBottom: `2px solid ${BORD}` }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 8px", display: "flex", gap: "0", overflowX: "auto", scrollbarWidth: "none" }}>
-          {tabs.map(({ view, label, icon: Icon, count }) => (
-            <button
-              key={view}
-              onClick={() => switchView(view)}
-              style={{
-                display: "flex", alignItems: "center", gap: isMobile ? "5px" : "8px",
-                padding: isMobile ? "12px 10px" : "14px 20px",
-                fontSize: isMobile ? "11px" : "12px", fontWeight: 600, letterSpacing: "0.05em",
-                ...MONO,
-                background: "none", border: "none", cursor: "pointer",
-                color: currentView === view ? B : MUTE,
-                borderBottom: `3px solid ${currentView === view ? Y : "transparent"}`,
-                transition: "all 0.15s",
-                whiteSpace: "nowrap" as const,
-                flex: isMobile ? "1 1 0" : undefined,
-                justifyContent: isMobile ? "center" : undefined,
-              }}
-              onMouseEnter={e => { if (currentView !== view) (e.currentTarget as HTMLButtonElement).style.color = B; }}
-              onMouseLeave={e => { if (currentView !== view) (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}
+      {/* ── MOBILE BACKDROP ─────────────────────────────────────────────── */}
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", zIndex: 149, top: "60px" }}
+        />
+      )}
+
+      {/* ── LEFT SIDEBAR ────────────────────────────────────────────────── */}
+      <div style={{
+        position: "fixed", top: "60px", left: 0, bottom: 0,
+        width: sidebarOpen ? "240px" : "0px",
+        overflow: "hidden",
+        transition: "width 0.25s cubic-bezier(0.4,0,0.2,1)",
+        backgroundColor: W,
+        borderRight: sidebarOpen ? `2px solid ${BORD}` : "none",
+        zIndex: 150,
+        display: "flex", flexDirection: "column",
+        flexShrink: 0,
+      }}>
+        <div style={{ width: "240px", display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
+
+          {/* User info */}
+          <div style={{ padding: "20px 16px 16px", borderBottom: `1px solid ${BORD}`, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: B, color: Y, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800, flexShrink: 0, ...MONO }}>
+                {(userName || userEmail).charAt(0).toUpperCase() || "S"}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ ...MONO, fontSize: "12px", fontWeight: 700, color: B, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {userName || "Student"}
+                </div>
+                <div style={{ ...MONO, fontSize: "10px", color: MUTE, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {userEmail}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Nav items */}
+          <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
+            {tabs.map(({ view, label, icon: Icon, count }) => {
+              const active = currentView === view;
+              return (
+                <button
+                  key={view}
+                  onClick={() => { switchView(view); if (isMobile) setSidebarOpen(false); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "10px",
+                    width: "100%", padding: "11px 16px",
+                    background: active ? Y : "transparent",
+                    border: "none",
+                    borderLeft: `3px solid ${active ? B : "transparent"}`,
+                    cursor: "pointer", textAlign: "left",
+                    transition: "all 0.12s",
+                    ...MONO,
+                  }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = `${B}07`; }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+                >
+                  <Icon size={15} color={active ? B : MUTE} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", fontWeight: active ? 700 : 500, color: active ? B : MUTE, letterSpacing: "0.04em", flex: 1, whiteSpace: "nowrap" }}>
+                    {label}
+                  </span>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: active ? B : MUTE, backgroundColor: active ? `${B}15` : `${B}08`, padding: "1px 6px", flexShrink: 0, ...MONO }}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Bottom actions */}
+          <div style={{ borderTop: `1px solid ${BORD}`, padding: "8px 0", flexShrink: 0 }}>
+          
+            <button onClick={() => { setShowFeedback(true); if (isMobile) setSidebarOpen(false); }}
+              style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "11px 16px", background: "transparent", border: "none", cursor: "pointer", ...MONO, transition: "all 0.12s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${B}07`; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
-              <Icon size={15} />
-              {label}
-              {!isMobile && (
-                <span style={{ backgroundColor: currentView === view ? Y : `${B}10`, color: B, borderRadius: "4px", padding: "1px 7px", fontSize: "10px", fontWeight: 700, border: `1px solid ${currentView === view ? B : BORD}` }}>
-                  {count}
-                </span>
-              )}
+              <MessageSquare size={15} color={MUTE} />
+              <span style={{ fontSize: "12px", color: MUTE, fontWeight: 500 }}>Request Resource</span>
             </button>
-          ))}
+          </div>
         </div>
       </div>
 
       {/* ── CONTENT ─────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: `${isMobile ? "112px" : "120px"} ${isMobile ? "12px" : "24px"} 60px` }}>
+      <div style={{
+        marginLeft: sidebarOpen && !isMobile ? "240px" : "0",
+        transition: "margin-left 0.25s cubic-bezier(0.4,0,0.2,1)",
+        paddingTop: "76px",
+        paddingBottom: "60px",
+        paddingLeft: isMobile ? "12px" : "32px",
+        paddingRight: isMobile ? "12px" : "32px",
+        minHeight: "100vh",
+      }}>
 
         {/* ══ RECOMMENDED ════════════════════════════════════════════════ */}
         {currentView === "recommended" && (
@@ -732,87 +801,6 @@ const Portal = () => {
           </div>
         )}
 
-        {/* ── RESUME ENHANCER VIEW ────────────────────────────────────── */}
-        {currentView === "resume" && resumeCreds?.has_access && (
-          <div style={{ maxWidth: "680px", margin: "0 auto", padding: isMobile ? "20px 0" : "40px 24px" }}>
-            {/* Hero card */}
-            <div style={{ background: B, borderRadius: "12px", padding: "32px", marginBottom: "20px", border: `3px solid ${Y}`, boxShadow: `4px 4px 0 ${Y}` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                <div style={{ background: Y, borderRadius: "8px", padding: "10px", display: "flex", alignItems: "center" }}>
-                  <Sparkles size={22} color={B} />
-                </div>
-                <div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "26px", color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>RESUME ENHANCER</div>
-                  <div style={{ fontSize: "11px", color: "#ffffff80", marginTop: "3px" }}>AI-powered resume builder — exclusive access</div>
-                </div>
-              </div>
-
-              <p style={{ fontSize: "13px", color: "#ffffffcc", lineHeight: 1.7, marginBottom: "28px" }}>
-                Use these credentials to log in to the Resume Enhancer platform. Build an ATS-optimised resume, get AI feedback, and stand out from the crowd.
-              </p>
-
-              {/* Credentials */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-                {/* Email */}
-                <div style={{ background: "#ffffff10", border: "1px solid #ffffff20", borderRadius: "8px", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#ffffff60", letterSpacing: "0.1em", marginBottom: "4px" }}>LOGIN EMAIL</div>
-                    <div style={{ fontSize: "14px", color: "#fff", fontWeight: 600, ...MONO }}>{resumeCreds.email}</div>
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(resumeCreds.email, "email")}
-                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", background: copied === "email" ? "#16A34A" : Y, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 700, color: B, cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.2s", ...MONO }}
-                  >
-                    {copied === "email" ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
-                  </button>
-                </div>
-
-                {/* Password */}
-                <div style={{ background: "#ffffff10", border: "1px solid #ffffff20", borderRadius: "8px", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#ffffff60", letterSpacing: "0.1em", marginBottom: "4px" }}>PASSWORD</div>
-                    <div style={{ fontSize: "14px", color: "#fff", fontWeight: 600, ...MONO }}>{resumeCreds.password}</div>
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(resumeCreds.password, "password")}
-                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", background: copied === "password" ? "#16A34A" : Y, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 700, color: B, cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.2s", ...MONO }}
-                  >
-                    {copied === "password" ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
-                  </button>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <a
-                href="https://upstride-students-portal-frontend.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px 28px", background: Y, color: B, borderRadius: "8px", textDecoration: "none", fontWeight: 700, fontSize: "14px", letterSpacing: "0.08em", ...MONO }}
-              >
-                <Sparkles size={16} /> OPEN RESUME ENHANCER →
-              </a>
-            </div>
-
-            {/* Tips */}
-            <div style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "10px", padding: "20px 22px" }}>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "12px" }}>💡 HOW TO USE IT</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {[
-                  "Copy the email and password above",
-                  "Click 'Open Resume Enhancer' to go to the platform",
-                  "Log in using the credentials shown",
-                  "Upload your resume and let AI enhance it",
-                  "Download your ATS-optimised version",
-                ].map((tip, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <div style={{ minWidth: "20px", height: "20px", background: Y, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: 700, color: B, flexShrink: 0 }}>{i + 1}</div>
-                    <div style={{ fontSize: "12px", color: MUTE, lineHeight: 1.6 }}>{tip}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── LEADERBOARD VIEW ─────────────────────────────────────────── */}
         {currentView === "leaderboard" && (
@@ -936,61 +924,149 @@ const Portal = () => {
 
         {/* ── SCHEDULE VIEW ────────────────────────────────────────────── */}
         {currentView === "schedule" && (
-          <div style={{ maxWidth: "900px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
+          <div style={{ maxWidth: "780px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
             {/* Header */}
-            <div style={{ marginBottom: "24px" }}>
+            <div style={{ marginBottom: "32px" }}>
               <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "36px" : "52px", color: B, lineHeight: 0.9, letterSpacing: "0.02em" }}>
-                YOUR<br /><span style={{ borderBottom: `4px solid ${Y}` }}>SCHEDULE</span>
+                UPCOMING<br /><span style={{ borderBottom: `4px solid ${Y}` }}>EVENTS</span>
               </div>
               {schedule?.batch && (
-                <div style={{ marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "6px", background: B, color: W, borderRadius: "999px", padding: "5px 14px", fontSize: "11px", fontWeight: 600 }}>
+                <div style={{ marginTop: "12px", display: "inline-flex", alignItems: "center", gap: "6px", background: B, color: W, borderRadius: "999px", padding: "5px 14px", fontSize: "11px", fontWeight: 600 }}>
                   <CalendarDays size={12} /> {schedule.batch}
                 </div>
               )}
             </div>
 
-            {!schedule ? (
-              <div style={{ textAlign: "center", padding: "60px", color: MUTE }}>Loading...</div>
-            ) : schedule.calendars.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "48px 24px", border: `2px dashed ${BORD}`, borderRadius: "12px" }}>
-                <CalendarDays size={36} style={{ marginBottom: "12px", opacity: 0.3 }} />
-                <div style={{ fontWeight: 700, color: B, marginBottom: "6px" }}>No schedule set up yet</div>
-                <div style={{ fontSize: "12px", color: MUTE }}>Your admin will add your batch calendar soon.</div>
+            {upcomingEvents.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "64px 24px", border: `2px dashed ${BORD}` }}>
+                <CalendarDays size={40} style={{ marginBottom: "14px", opacity: 0.25 }} />
+                <div style={{ fontWeight: 700, color: B, marginBottom: "6px", ...MONO }}>No upcoming events</div>
+                <div style={{ fontSize: "12px", color: MUTE }}>Check back soon — your admin will add events here.</div>
               </div>
             ) : (
-              <>
-                {/* Calendar selector tabs */}
-                {schedule.calendars.length > 1 && (
-                  <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-                    {schedule.calendars.map((cal, i) => (
-                      <button key={i} onClick={() => setActiveCalendar(i)}
-                        style={{ padding: "8px 18px", borderRadius: "8px", border: `2px solid ${activeCalendar === i ? B : BORD}`, background: activeCalendar === i ? B : W, color: activeCalendar === i ? Y : B, fontSize: "12px", fontWeight: 700, cursor: "pointer", ...MONO, transition: "all 0.15s" }}>
-                        📅 {cal.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+                {upcomingEvents.map((evt, idx) => {
+                  const meetLink = evt.description ? extractMeetLink(evt.description) : null;
+                  const cleanDesc = evt.description ? cleanDescription(evt.description) : "";
+                  const accentColor = urgencyBg(evt.urgency);
+                  const isFirst = idx === 0;
+                  return (
+                    <div key={idx} style={{ display: "flex", gap: "0", position: "relative" }}>
+                      {/* Timeline spine */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "40px", flexShrink: 0 }}>
+                        <div style={{
+                          width: "14px", height: "14px", borderRadius: "50%",
+                          background: accentColor,
+                          border: `3px solid ${isFirst ? B : BORD}`,
+                          marginTop: "28px",
+                          flexShrink: 0,
+                          zIndex: 1,
+                          boxShadow: isFirst ? `0 0 0 4px ${accentColor}33` : "none",
+                          animation: ["now","today"].includes(evt.urgency) ? "up-blink 1.1s ease-in-out infinite" : "none",
+                        }} />
+                        {idx < upcomingEvents.length - 1 && (
+                          <div style={{ flex: 1, width: "2px", background: BORD, marginTop: "4px", marginBottom: "-8px" }} />
+                        )}
+                      </div>
 
-                {/* Calendar iframe */}
-                <div style={{ background: W, border: `2px solid ${BORD}`, borderRadius: "12px", overflow: "hidden", boxShadow: `4px 4px 0 ${Y}` }}>
-                  <div style={{ background: B, padding: "12px 18px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <CalendarDays size={16} color={Y} />
-                    <span style={{ color: W, fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", ...MONO }}>
-                      {schedule.calendars[activeCalendar]?.label?.toUpperCase()}
-                    </span>
-                  </div>
-                  <iframe
-                    src={schedule.calendars[activeCalendar]?.url}
-                    style={{ width: "100%", height: isMobile ? "500px" : "680px", border: "none", display: "block" }}
-                    title={schedule.calendars[activeCalendar]?.label}
-                  />
-                </div>
+                      {/* Event card */}
+                      <div style={{
+                        flex: 1,
+                        marginLeft: "16px",
+                        marginBottom: "20px",
+                        border: `2px solid ${isFirst ? B : BORD}`,
+                        borderLeft: `4px solid ${accentColor}`,
+                        background: isFirst ? B : W,
+                        overflow: "hidden",
+                        transition: "box-shadow 0.15s",
+                      }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = `4px 4px 0 ${accentColor}`; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+                      >
+                        <div style={{ padding: isMobile ? "16px" : "20px 24px" }}>
+                          {/* Urgency + date row */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
+                            <span style={{
+                              fontSize: "9px", fontWeight: 700, letterSpacing: "0.18em",
+                              color: isFirst ? accentColor : accentColor,
+                              background: isFirst ? `${accentColor}22` : `${accentColor}15`,
+                              padding: "3px 8px",
+                              ...MONO,
+                            }}>
+                              {urgencyLabel(evt.urgency)}
+                            </span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <CalendarDays size={11} color={isFirst ? "#ffffff80" : MUTE} />
+                              <span style={{ fontSize: "11px", color: isFirst ? "#ffffff80" : MUTE, letterSpacing: "0.04em", ...MONO }}>
+                                {formatEventDate(evt.start, evt.all_day)}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: "10px", color: isFirst ? "#ffffff55" : `${MUTE}88`, ...MONO, marginLeft: "auto" }}>
+                              {evt.countdown}
+                            </span>
+                          </div>
 
-                <p style={{ fontSize: "11px", color: MUTE, marginTop: "10px", textAlign: "center" }}>
-                  Events are managed by your admin. Add to your own calendar by clicking any event inside the calendar above.
-                </p>
-              </>
+                          {/* Title */}
+                          <div style={{
+                            fontFamily: "'Bebas Neue', cursive",
+                            fontSize: isMobile ? "22px" : "28px",
+                            color: isFirst ? W : B,
+                            lineHeight: 1,
+                            letterSpacing: "0.02em",
+                            marginBottom: cleanDesc ? "10px" : "0",
+                          }}>
+                            {evt.title}
+                          </div>
+
+                          {/* Description */}
+                          {cleanDesc && (
+                            <p style={{ fontSize: "12px", color: isFirst ? "#ffffffa0" : MUTE, lineHeight: 1.7, marginBottom: meetLink ? "14px" : "0", maxWidth: "560px" }}>
+                              {cleanDesc.slice(0, 200)}
+                            </p>
+                          )}
+
+                          {/* Join button */}
+                          {meetLink && (
+                            <a
+                              href={meetLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                backgroundColor: Y,
+                                color: B,
+                                border: `2px solid ${B}`,
+                                padding: "9px 20px",
+                                fontSize: "11px",
+                                fontWeight: 800,
+                                letterSpacing: "0.1em",
+                                textDecoration: "none",
+                                boxShadow: `3px 3px 0 ${B}`,
+                                transition: "all 0.12s",
+                                ...MONO,
+                              }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translate(-2px,-2px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `5px 5px 0 ${B}`; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `3px 3px 0 ${B}`; }}
+                            >
+                              JOIN SESSION →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
+          </div>
+        )}
+
+        {/* ── MOCK INTERVIEW VIEW ──────────────────────────────────────────── */}
+        {currentView === "mockinterview" && (
+          <div style={{ padding: isMobile ? "16px 0" : "32px 24px" }}>
+            <MockInterview onExit={() => setCurrentView("recommended")} />
           </div>
         )}
       </div>

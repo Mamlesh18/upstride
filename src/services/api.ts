@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -179,6 +179,28 @@ export const api = {
     },
     apply: (data: { name: string; email: string; phone: string }) =>
       request("/api/public/apply", { method: "POST", body: JSON.stringify(data) }),
+  },
+
+  mockInterview: {
+    getCredits: () =>
+      request<{ credits: number; max_credits: number }>("/api/mock-interview/credits"),
+    consumeCredit: () =>
+      request<{ credits: number; consumed: boolean }>("/api/mock-interview/consume-credit", { method: "POST" }),
+    getDeepgramToken: () =>
+      request<{ token: string; type: string }>("/api/mock-interview/deepgram-token"),
+    tts: (text: string, voice = "aura-asteria-en") =>
+      fetch(`${BASE_URL}/api/mock-interview/tts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+        body: JSON.stringify({ text, voice }),
+      }),
+    chat: (data: { role: string; candidate_info: string; messages: { role: string; content: string }[] }) =>
+      request<{ evaluation: string; question: string; is_final: boolean; final_report: unknown }>("/api/mock-interview/chat", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    analyze: (data: { role: string; candidate_info: string; messages: { role: string; content: string }[] }) =>
+      request("/api/mock-interview/analyze", { method: "POST", body: JSON.stringify(data) }),
   },
 
   events: {

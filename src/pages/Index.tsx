@@ -200,6 +200,8 @@ const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq,    setOpenFaq]    = useState<number | null>(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   // Apply modal
   const [applyOpen, setApplyOpen]   = useState(false);
@@ -264,6 +266,17 @@ const Index = () => {
   useEffect(() => {
     const t = setTimeout(() => setHeroLoaded(true), 80);
     return () => clearTimeout(t);
+  }, []);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   // Auto-open apply modal after 20s (once per session)
@@ -360,17 +373,45 @@ const Index = () => {
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
             >APPLY NOW →</button>
             {isLoggedIn ? (
-              <>
-                <div style={{ display: "flex", alignItems: "center", padding: "0 16px", borderLeft: `3px solid ${B}`, ...MONO, fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
-                  {displayName.toUpperCase()}
-                </div>
+              <div ref={profileRef} style={{ position: "relative", borderLeft: `3px solid ${B}` }}>
                 <button
-                  onClick={handleLogout}
-                  style={{ padding: "16px 20px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
-                >LOGOUT</button>
-              </>
+                  onClick={() => setProfileOpen(p => !p)}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 20px", background: profileOpen ? B : "transparent", color: profileOpen ? Y : B, border: "none", cursor: "pointer", transition: "all 0.15s", ...MONO }}
+                  onMouseEnter={e => { if (!profileOpen) { (e.currentTarget as HTMLButtonElement).style.background = `${B}10`; } }}
+                  onMouseLeave={e => { if (!profileOpen) { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; } }}
+                >
+                  {/* Avatar circle */}
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", backgroundColor: profileOpen ? Y : B, color: profileOpen ? B : Y, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 800, flexShrink: 0, transition: "all 0.15s" }}>
+                    {displayName.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
+                    {displayName.toUpperCase().slice(0, 12)}{displayName.length > 12 ? "…" : ""}
+                  </span>
+                  <span style={{ fontSize: "9px", opacity: 0.6, marginLeft: "2px" }}>{profileOpen ? "▲" : "▼"}</span>
+                </button>
+
+                {profileOpen && (
+                  <div style={{
+                    position: "absolute", top: "100%", right: 0,
+                    backgroundColor: W, border: `3px solid ${B}`,
+                    boxShadow: `4px 4px 0 ${B}`,
+                    minWidth: "180px", zIndex: 2000,
+                  }}>
+                    <div style={{ padding: "12px 16px", borderBottom: `2px solid ${B}18`, ...MONO }}>
+                      <div style={{ fontSize: "10px", color: `${B}60`, letterSpacing: "0.1em", marginBottom: "2px" }}>SIGNED IN AS</div>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: B, wordBreak: "break-all" }}>{displayName}</div>
+                    </div>
+                    <button
+                      onClick={() => { handleLogout(); setProfileOpen(false); }}
+                      style={{ display: "block", width: "100%", padding: "12px 16px", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", ...MONO, fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.1em", transition: "all 0.12s" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+                    >
+                      LOGOUT →
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => navigate("/login")}
@@ -409,14 +450,19 @@ const Index = () => {
               style={{ display: "block", width: "100%", padding: "16px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.15em", background: B, color: Y, cursor: "pointer", ...MONO }}
             >APPLY NOW →</button>
             {isLoggedIn ? (
-              <button
-                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderBottom: `1px solid ${B}18`, borderTop: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
-              >LOGOUT ({displayName})</button>
+              <>
+                <div style={{ padding: "10px 24px 4px", ...MONO, fontSize: "10px", color: `${B}60`, letterSpacing: "0.1em", borderTop: `1px solid ${B}18` }}>
+                  SIGNED IN AS {displayName.toUpperCase()}
+                </div>
+                <button
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                  style={{ display: "block", width: "100%", padding: "10px 24px 14px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, border: "none", cursor: "pointer", ...MONO }}
+                >LOGOUT →</button>
+              </>
             ) : (
               <button
                 onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
-                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderTop: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
+                style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderTop: `1px solid ${B}18`, cursor: "pointer", border: "none", ...MONO }}
               >LOGIN</button>
             )}
           </div>
@@ -436,37 +482,6 @@ const Index = () => {
         alignItems: "center",
         justifyContent: "center",
       }}>
-        {/* Subtle grid */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${B}10 1px, transparent 1px), linear-gradient(90deg, ${B}10 1px, transparent 1px)`, backgroundSize: "60px 60px", pointerEvents: "none" }} />
-
-        {/* Floating yellow light orbs */}
-        {([
-          { w: 340, h: 340, top: "8%",  left: "-6%",  anim: "float-slow",   dur: "9s",  opacity: 0.28, blur: 80 },
-          { w: 200, h: 200, top: "60%", left: "2%",   anim: "float-fast",   dur: "6s",  opacity: 0.2,  blur: 55 },
-          { w: 280, h: 280, top: "5%",  right: "-4%", anim: "float-medium", dur: "11s", opacity: 0.22, blur: 70 },
-          { w: 160, h: 160, top: "55%", right: "3%",  anim: "float-slow",   dur: "13s", opacity: 0.32, blur: 45 },
-          { w: 120, h: 120, top: "30%", left: "10%",  anim: "float-fast",   dur: "7s",  opacity: 0.18, blur: 35 },
-          { w: 90,  h: 90,  top: "25%", right: "12%", anim: "float-medium", dur: "8s",  opacity: 0.25, blur: 25 },
-          { w: 60,  h: 60,  top: "80%", left: "30%",  anim: "float-fast",   dur: "5s",  opacity: 0.35, blur: 18 },
-          { w: 50,  h: 50,  top: "15%", left: "45%",  anim: "float-slow",   dur: "10s", opacity: 0.3,  blur: 14 },
-        ] as { w: number; h: number; top?: string; left?: string; right?: string; anim: string; dur: string; opacity: number; blur: number }[]).map((orb, i) => (
-          <div key={i} style={{
-            position: "absolute",
-            width: orb.w,
-            height: orb.h,
-            borderRadius: "50%",
-            backgroundColor: Y,
-            filter: `blur(${orb.blur}px)`,
-            opacity: orb.opacity,
-            top: orb.top,
-            left: orb.left,
-            right: orb.right,
-            animation: `${orb.anim} ${orb.dur} ease-in-out infinite`,
-            animationDelay: `${i * 0.8}s`,
-            pointerEvents: "none",
-            zIndex: 0,
-          }} />
-        ))}
 
         <div style={{
           maxWidth: "1300px",
@@ -497,23 +512,25 @@ const Index = () => {
               ★ THE MARKET HAS ALREADY CHANGED ★
             </div>
 
-            <h1 style={{ ...BEBAS, fontSize: isMobile ? "clamp(40px, 11vw, 68px)" : "clamp(56px, 6.8vw, 100px)", lineHeight: 0.91, marginBottom: "28px", color: B, letterSpacing: "0.01em" }}>
-              {"BECOME THE PROFESSIONAL".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0) rotate(0deg)" : "translateY(60px) rotate(-8deg)", transition: `all 0.45s ${i * 0.016}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? "" : ch}
-                </span>
-              ))}
-              <br />
-              {"BUILT FOR THE NEXT DECADE".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, color: Y, WebkitTextStroke: `2px ${B}`, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(50px)", transition: `all 0.48s ${0.3 + i * 0.014}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? "" : ch}
-                </span>
-              ))}
-              <br />
-              {"IN AI.".split("").map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", minWidth: ch === " " ? "0.32em" : undefined, opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "translateY(0)" : "translateY(40px)", transition: `all 0.45s ${0.64 + i * 0.06}s cubic-bezier(0.34, 1.56, 0.64, 1)` }}>
-                  {ch === " " ? "" : ch}
-                </span>
+            <h1 style={{ ...BEBAS, lineHeight: 0.92, marginBottom: "28px", color: B }}>
+              {[
+                { text: "BECOME THE PROFESSIONAL", yellow: false, delay: "0s" },
+                { text: "BUILT FOR THE NEXT DECADE", yellow: true, delay: "0.15s" },
+                { text: "IN AI.", yellow: false, delay: "0.3s" },
+              ].map(({ text, yellow, delay }) => (
+                <div key={text} style={{
+                  display: "block",
+                  fontSize: isMobile ? "10.5vw" : "clamp(62px, 7.2vw, 108px)",
+                  color: yellow ? Y : B,
+                  WebkitTextStroke: yellow ? "2px " + B : undefined,
+                  paintOrder: "stroke fill" as React.CSSProperties["paintOrder"],
+                  opacity: heroLoaded ? 1 : 0,
+                  transform: heroLoaded ? "translateY(0)" : "translateY(32px)",
+                  transition: "opacity 0.5s ease, transform 0.5s ease",
+                  transitionDelay: delay,
+                }}>
+                  {text}
+                </div>
               ))}
             </h1>
 
@@ -1145,141 +1162,172 @@ const Index = () => {
         </div>
       </div>
 
-      {/* ── Apply Now Modal ───────────────────────────────────────────────── */}
+      {/* ── Apply Now Modal — full page ───────────────────────────────────── */}
       {applyOpen && (
-        <div
-          style={{
-            position: "fixed", inset: 0, zIndex: 9999,
-            backgroundColor: "rgba(10,10,10,0.75)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "16px",
-          }}
-          onClick={(e) => { if (e.target === e.currentTarget) closeApply(); }}
-        >
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", backgroundColor: W }}>
+
+          {/* ── LEFT: branding panel ── */}
           <div
+            className="hidden md:flex"
             style={{
-              backgroundColor: W,
-              border: `3px solid ${B}`,
-              boxShadow: `8px 8px 0 ${Y}`,
-              width: "100%",
-              maxWidth: "440px",
-              padding: "36px 32px",
-              position: "relative",
+              width: "44%", flexShrink: 0,
+              backgroundColor: B, flexDirection: "column",
+              justifyContent: "space-between", padding: "48px 52px",
+              position: "relative", overflow: "hidden",
             }}
           >
-            {/* Close */}
-            <button
-              onClick={closeApply}
-              style={{
-                position: "absolute", top: "14px", right: "14px",
-                background: "transparent", border: "none",
-                cursor: "pointer", padding: 0, lineHeight: 1,
-              }}
-              aria-label="Close"
-            >
-              <X size={22} color={B} strokeWidth={2.5} />
-            </button>
+            {/* yellow corner accent */}
+            <div style={{ position: "absolute", top: 0, right: 0, width: "100px", height: "100px", backgroundColor: Y }} />
 
-            {!applyDone ? (
-              <>
-                <p style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: B, opacity: 0.5, marginBottom: "6px" }}>
-                  START YOUR JOURNEY
-                </p>
-                <h2 style={{ ...BEBAS, fontSize: "36px", color: B, lineHeight: 1, marginBottom: "24px" }}>
-                  APPLY NOW
-                </h2>
+            {/* logo */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", position: "relative", zIndex: 1 }}>
+              <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "34px", filter: "brightness(0) invert(1)" }} />
+              <span style={{ ...BEBAS, fontSize: "24px", color: W, letterSpacing: "0.1em" }}>UPSTRIDE</span>
+            </div>
 
-                <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div>
-                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
-                      FULL NAME *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Your name"
-                      value={applyForm.name}
-                      onChange={(e) => setApplyForm(f => ({ ...f, name: e.target.value }))}
-                      required
-                      style={{
-                        ...MONO, width: "100%", padding: "10px 12px",
-                        border: `2px solid ${B}`, backgroundColor: W,
-                        fontSize: "14px", outline: "none", boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
-                      PHONE NUMBER *
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      value={applyForm.phone}
-                      onChange={(e) => setApplyForm(f => ({ ...f, phone: e.target.value }))}
-                      required
-                      style={{
-                        ...MONO, width: "100%", padding: "10px 12px",
-                        border: `2px solid ${B}`, backgroundColor: W,
-                        fontSize: "14px", outline: "none", boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: B, display: "block", marginBottom: "6px" }}>
-                      EMAIL (OPTIONAL)
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="you@example.com"
-                      value={applyForm.email}
-                      onChange={(e) => setApplyForm(f => ({ ...f, email: e.target.value }))}
-                      style={{
-                        ...MONO, width: "100%", padding: "10px 12px",
-                        border: `2px solid ${B}`, backgroundColor: W,
-                        fontSize: "14px", outline: "none", boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={applySubmitting}
-                    style={{
-                      ...MONO, marginTop: "8px",
-                      backgroundColor: applySubmitting ? "#ccc" : Y,
-                      color: B, border: `2px solid ${B}`,
-                      padding: "13px 0", fontSize: "14px", fontWeight: 800,
-                      letterSpacing: "0.08em", cursor: applySubmitting ? "not-allowed" : "pointer",
-                      boxShadow: applySubmitting ? "none" : `4px 4px 0 ${B}`,
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    {applySubmitting ? "SUBMITTING..." : "SUBMIT APPLICATION →"}
-                  </button>
-                </form>
-              </>
-            ) : (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: "48px", marginBottom: "16px" }}>&#10003;</div>
-                <h2 style={{ ...BEBAS, fontSize: "36px", color: B, marginBottom: "10px" }}>YOU'RE IN!</h2>
-                <p style={{ ...MONO, fontSize: "13px", color: B, opacity: 0.7, lineHeight: 1.6, marginBottom: "24px" }}>
-                  We've received your application. Our team will reach out to you shortly.
-                </p>
-                <button
-                  onClick={closeApply}
-                  style={{
-                    ...MONO, backgroundColor: Y, color: B,
-                    border: `2px solid ${B}`, padding: "12px 32px",
-                    fontSize: "13px", fontWeight: 800, letterSpacing: "0.08em",
-                    cursor: "pointer", boxShadow: `4px 4px 0 ${B}`,
-                  }}
-                >
-                  CLOSE
-                </button>
+            {/* headline block */}
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ display: "inline-block", backgroundColor: Y, color: B, padding: "5px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px", ...MONO }}>
+                STUDENT PORTAL
               </div>
-            )}
+              <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 3.5vw, 52px)", color: W, lineHeight: 1.05, marginBottom: "18px" }}>
+                Your career<br />resources,<br /><span style={{ color: Y }}>all in one place.</span>
+              </h2>
+              <p style={{ fontSize: "14px", color: `${W}99`, lineHeight: 1.8, maxWidth: "360px", ...MONO }}>
+                Access curated training materials, placement prep, company-specific resources, and mentorship guides.
+              </p>
+
+              {/* stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", backgroundColor: `${W}22`, marginTop: "32px" }}>
+                {[
+                  { val: "250+", label: "STUDENTS TRAINED" },
+                  { val: "30+",  label: "INTERNSHIPS SECURED" },
+                  { val: "6+",   label: "COLLEGES VISITED" },
+                ].map(({ val, label }) => (
+                  <div key={label} style={{ backgroundColor: `${W}08`, padding: "18px 14px", textAlign: "center", border: `1px solid ${W}15` }}>
+                    <div style={{ ...BEBAS, fontSize: "28px", color: Y, marginBottom: "4px" }}>{val}</div>
+                    <div style={{ fontSize: "9px", color: `${W}70`, letterSpacing: "0.1em", lineHeight: 1.4, ...MONO }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* quote */}
+            <div style={{ borderLeft: `3px solid ${Y}`, paddingLeft: "20px", position: "relative", zIndex: 1 }}>
+              <p style={{ fontSize: "13px", color: `${W}88`, lineHeight: 1.8, fontStyle: "italic", ...MONO }}>
+                "The gap between where you are and where you want to be is just information."
+              </p>
+              <span style={{ fontSize: "11px", color: Y, fontWeight: 700, letterSpacing: "0.1em", ...MONO }}>
+                — Upstrides Team
+              </span>
+            </div>
+          </div>
+
+          {/* ── RIGHT: form panel ── */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+            {/* top bar with cancel */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 32px", borderBottom: `2px solid ${B}18`, flexShrink: 0 }}>
+              {/* mobile-only logo */}
+              <div className="md:hidden" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px" }} />
+                <span style={{ ...BEBAS, fontSize: "20px", color: B, letterSpacing: "0.1em" }}>UPSTRIDE</span>
+              </div>
+              <div className="hidden md:block" />
+              <button
+                onClick={closeApply}
+                style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: `2px solid ${B}`, padding: "8px 16px", cursor: "pointer", ...MONO, fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.1em", transition: "all 0.15s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = W; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+              >
+                <X size={14} strokeWidth={2.5} /> CANCEL
+              </button>
+            </div>
+
+            {/* form content */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px" }}>
+              <div style={{ width: "100%", maxWidth: "420px" }}>
+                {!applyDone ? (
+                  <>
+                    <p style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: `${B}60`, marginBottom: "6px" }}>
+                      START YOUR JOURNEY
+                    </p>
+                    <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 5vw, 56px)", color: B, lineHeight: 0.95, marginBottom: "32px" }}>
+                      APPLY NOW
+                    </h2>
+
+                    <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                      {[
+                        { label: "FULL NAME *",      key: "name",  type: "text",  placeholder: "Your full name",    required: true },
+                        { label: "PHONE NUMBER *",   key: "phone", type: "tel",   placeholder: "+91 98765 43210",   required: true },
+                        { label: "EMAIL (OPTIONAL)", key: "email", type: "email", placeholder: "you@example.com",   required: false },
+                      ].map(({ label, key, type, placeholder, required }) => (
+                        <div key={key}>
+                          <label style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: B, display: "block", marginBottom: "7px" }}>
+                            {label}
+                          </label>
+                          <input
+                            type={type}
+                            placeholder={placeholder}
+                            value={applyForm[key as keyof typeof applyForm]}
+                            onChange={e => setApplyForm(f => ({ ...f, [key]: e.target.value }))}
+                            required={required}
+                            style={{
+                              ...MONO, width: "100%", padding: "12px 14px",
+                              border: `2px solid ${B}18`, borderBottom: `2px solid ${B}`,
+                              backgroundColor: W, fontSize: "14px", outline: "none",
+                              boxSizing: "border-box", color: B, transition: "border-color 0.15s",
+                            }}
+                            onFocus={e => { (e.currentTarget as HTMLInputElement).style.borderColor = B; (e.currentTarget as HTMLInputElement).style.boxShadow = `3px 3px 0 ${Y}`; }}
+                            onBlur={e => { (e.currentTarget as HTMLInputElement).style.borderColor = ""; (e.currentTarget as HTMLInputElement).style.boxShadow = "none"; }}
+                          />
+                        </div>
+                      ))}
+
+                      <button
+                        type="submit"
+                        disabled={applySubmitting}
+                        style={{
+                          ...MONO, marginTop: "8px",
+                          backgroundColor: applySubmitting ? `${B}40` : Y,
+                          color: B, border: `2px solid ${B}`,
+                          padding: "15px 0", fontSize: "13px", fontWeight: 800,
+                          letterSpacing: "0.1em", cursor: applySubmitting ? "not-allowed" : "pointer",
+                          boxShadow: applySubmitting ? "none" : `4px 4px 0 ${B}`,
+                          transition: "all 0.15s",
+                        }}
+                        onMouseEnter={e => { if (!applySubmitting) { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-2px,-2px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `6px 6px 0 ${B}`; } }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = `4px 4px 0 ${B}`; }}
+                      >
+                        {applySubmitting ? "SUBMITTING..." : "SUBMIT APPLICATION →"}
+                      </button>
+                    </form>
+
+                    <p style={{ ...MONO, fontSize: "10px", color: `${B}50`, marginTop: "20px", lineHeight: 1.7 }}>
+                      By applying, you agree to our{" "}
+                      <button onClick={() => navigate("/terms")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "10px", fontWeight: 700, textDecoration: "underline", ...MONO }}>Terms</button>
+                      {" "}and{" "}
+                      <button onClick={() => navigate("/privacy-policy")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "10px", fontWeight: 700, textDecoration: "underline", ...MONO }}>Privacy Policy</button>.
+                    </p>
+                  </>
+                ) : (
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: Y, border: `3px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", boxShadow: `4px 4px 0 ${B}` }}>
+                      <span style={{ fontSize: "28px", color: B, fontWeight: 900 }}>&#10003;</span>
+                    </div>
+                    <h2 style={{ ...BEBAS, fontSize: "48px", color: B, lineHeight: 0.95, marginBottom: "14px" }}>YOU'RE IN!</h2>
+                    <p style={{ ...MONO, fontSize: "13px", color: `${B}80`, lineHeight: 1.7, marginBottom: "28px", maxWidth: "320px", margin: "0 auto 28px" }}>
+                      We've received your application. Our team will reach out to you personally within 24 hours.
+                    </p>
+                    <button
+                      onClick={closeApply}
+                      style={{ ...MONO, backgroundColor: Y, color: B, border: `2px solid ${B}`, padding: "13px 36px", fontSize: "13px", fontWeight: 800, letterSpacing: "0.1em", cursor: "pointer", boxShadow: `4px 4px 0 ${B}` }}
+                    >
+                      CLOSE
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

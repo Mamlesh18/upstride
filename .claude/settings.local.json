@@ -17,7 +17,8 @@
       "Bash(python3 *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(grep -n \"Add Event Modal\\\\|Add Resource Modal\\\\|</div>\\\\s*$\\\\|{/\\\\* ── Resources Tab\" C:/Users/mamle/visualstudiocode/Upstride/upstride/src/pages/Admin.tsx)"
+      "Bash(grep -n \"Add Event Modal\\\\|Add Resource Modal\\\\|</div>\\\\s*$\\\\|{/\\\\* ── Resources Tab\" C:/Users/mamle/visualstudiocode/Upstride/upstride/src/pages/Admin.tsx)",
+      "Bash(xargs ls *)"
     ],
     "deny": [],
     "ask": []
