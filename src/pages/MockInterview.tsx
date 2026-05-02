@@ -105,12 +105,13 @@ interface MockInterviewProps { onExit: () => void }
 const MockInterview = ({ onExit }: MockInterviewProps) => {
   // ── Credits ──────────────────────────────────────────────────────────────
   const [credits, setCredits]         = useState<number | null>(null);
+  const [creditsError, setCreditsError] = useState(false);
   const [creditsLoading, setCreditsLoading] = useState(true);
 
   useEffect(() => {
     api.mockInterview.getCredits()
-      .then(r => setCredits(r.credits))
-      .catch(() => setCredits(0))
+      .then(r => { setCredits(r.credits); setCreditsError(false); })
+      .catch(() => setCreditsError(true))
       .finally(() => setCreditsLoading(false));
   }, []);
 
@@ -437,6 +438,31 @@ const MockInterview = ({ onExit }: MockInterviewProps) => {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0" }}>
         <div style={{ ...MONO, fontSize: 13, color: "#6B7280", letterSpacing: "0.1em" }}>LOADING...</div>
+      </div>
+    );
+  }
+
+  if (creditsError) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 24px", gap: 16 }}>
+        <AlertTriangle size={32} color="#D97706" />
+        <div style={{ ...MONO, fontSize: 13, fontWeight: 700, color: B }}>COULD NOT LOAD CREDITS</div>
+        <div style={{ ...MONO, fontSize: 11, color: "#6B7280", textAlign: "center", maxWidth: 320, lineHeight: 1.6 }}>
+          Make sure you are logged in as a student and the server is reachable.
+        </div>
+        <button
+          onClick={() => {
+            setCreditsLoading(true);
+            setCreditsError(false);
+            api.mockInterview.getCredits()
+              .then(r => { setCredits(r.credits); setCreditsError(false); })
+              .catch(() => setCreditsError(true))
+              .finally(() => setCreditsLoading(false));
+          }}
+          style={{ ...MONO, padding: "10px 24px", backgroundColor: B, color: Y, border: `2px solid ${B}`, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer" }}
+        >
+          RETRY
+        </button>
       </div>
     );
   }
