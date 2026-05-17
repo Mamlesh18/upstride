@@ -187,6 +187,7 @@ const Index = () => {
 
   // Auth
   const isLoggedIn  = !!localStorage.getItem("token");
+  const userRole    = localStorage.getItem("userRole") ?? "";
   const rawEmail    = localStorage.getItem("userEmail") ?? "";
   const rawName     = localStorage.getItem("userName")  ?? "";
   const displayName = rawName.trim() || rawEmail.split("@")[0] || "";
@@ -401,6 +402,16 @@ const Index = () => {
                       <div style={{ fontSize: "10px", color: `${B}60`, letterSpacing: "0.1em", marginBottom: "2px" }}>SIGNED IN AS</div>
                       <div style={{ fontSize: "12px", fontWeight: 700, color: B, wordBreak: "break-all" }}>{displayName}</div>
                     </div>
+                    {userRole === "student" && (
+                      <button
+                        onClick={() => { navigate("/portal"); setProfileOpen(false); }}
+                        style={{ display: "block", width: "100%", padding: "12px 16px", textAlign: "left", background: "transparent", border: "none", borderBottom: `1px solid ${B}18`, cursor: "pointer", ...MONO, fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.1em", transition: "all 0.12s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = Y; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+                      >
+                        GO TO PORTAL →
+                      </button>
+                    )}
                     <button
                       onClick={() => { handleLogout(); setProfileOpen(false); }}
                       style={{ display: "block", width: "100%", padding: "12px 16px", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", ...MONO, fontSize: "12px", fontWeight: 700, color: B, letterSpacing: "0.1em", transition: "all 0.12s" }}
@@ -454,6 +465,12 @@ const Index = () => {
                 <div style={{ padding: "10px 24px 4px", ...MONO, fontSize: "10px", color: `${B}60`, letterSpacing: "0.1em", borderTop: `1px solid ${B}18` }}>
                   SIGNED IN AS {displayName.toUpperCase()}
                 </div>
+                {userRole === "student" && (
+                  <button
+                    onClick={() => { navigate("/portal"); setMobileMenuOpen(false); }}
+                    style={{ display: "block", width: "100%", padding: "10px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: Y, color: B, border: "none", cursor: "pointer", ...MONO }}
+                  >GO TO PORTAL →</button>
+                )}
                 <button
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                   style={{ display: "block", width: "100%", padding: "10px 24px 14px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, border: "none", cursor: "pointer", ...MONO }}
@@ -486,7 +503,7 @@ const Index = () => {
         <div style={{
           maxWidth: "1300px",
           margin: "0 auto",
-          padding: "0 32px",
+          padding: isMobile ? "0 20px" : "0 32px",
           position: "relative",
           zIndex: 1,
           width: "100%",
@@ -512,7 +529,7 @@ const Index = () => {
               ★ THE MARKET HAS ALREADY CHANGED ★
             </div>
 
-            <h1 style={{ ...BEBAS, lineHeight: 0.92, marginBottom: "28px", color: B }}>
+            <h1 style={{ ...BEBAS, lineHeight: isMobile ? 1.05 : 0.92, marginBottom: "28px", color: B }}>
               {[
                 { text: "BECOME THE PROFESSIONAL", yellow: false, delay: "0s" },
                 { text: "BUILT FOR THE NEXT DECADE", yellow: true, delay: "0.15s" },
@@ -520,7 +537,7 @@ const Index = () => {
               ].map(({ text, yellow, delay }) => (
                 <div key={text} style={{
                   display: "block",
-                  fontSize: isMobile ? "10.5vw" : "clamp(62px, 7.2vw, 108px)",
+                  fontSize: isMobile ? "clamp(22px, 8.5vw, 36px)" : "clamp(62px, 7.2vw, 108px)",
                   color: yellow ? Y : B,
                   WebkitTextStroke: yellow ? "2px " + B : undefined,
                   paintOrder: "stroke fill" as React.CSSProperties["paintOrder"],
@@ -579,7 +596,7 @@ const Index = () => {
             <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>
               REAL STUDENTS. REAL RESULTS.
             </div>
-            <h2 style={{ ...BEBAS, fontSize: "clamp(44px, 7vw, 96px)", color: W, lineHeight: 0.9 }}>
+            <h2 style={{ ...BEBAS, fontSize: isMobile ? "clamp(32px, 10vw, 52px)" : "clamp(44px, 7vw, 96px)", color: W, lineHeight: isMobile ? 1.05 : 0.9 }}>
               PROOF IT<br /><span style={{ color: Y }}>WORKS.</span>
             </h2>
           </div>
@@ -626,7 +643,7 @@ const Index = () => {
             <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "32px" : "60px", alignItems: "center" }}>
               <div>
                 <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "6px 14px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "24px", ...MONO }}>UPCOMING EVENT</div>
-                <h2 style={{ ...BEBAS, fontSize: "clamp(36px, 6vw, 80px)", color: B, lineHeight: 0.92, marginBottom: "20px" }}>
+                <h2 style={{ ...BEBAS, fontSize: isMobile ? "clamp(28px, 9vw, 48px)" : "clamp(36px, 6vw, 80px)", color: B, lineHeight: isMobile ? 1.05 : 0.92, marginBottom: "20px" }}>
                   Upstrides IS<br /><span style={{ color: Y, WebkitTextStroke: `2px ${B}` }}>COMING TO</span><br />{ev.location.toUpperCase()}
                 </h2>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "28px" }}>
@@ -669,7 +686,7 @@ const Index = () => {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ marginBottom: "60px", opacity: mediaSec.inView ? 1 : 0, transform: mediaSec.inView ? "translateY(0)" : "translateY(30px)", transition: "all 0.5s ease" }}>
             <div style={{ backgroundColor: Y, color: B, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>PROOF OF WORK</div>
-            <h2 style={{ ...BEBAS, fontSize: "clamp(44px, 7vw, 96px)", color: W, lineHeight: 0.9 }}>
+            <h2 style={{ ...BEBAS, fontSize: isMobile ? "clamp(32px, 10vw, 52px)" : "clamp(44px, 7vw, 96px)", color: W, lineHeight: isMobile ? 1.05 : 0.9 }}>
               WE DON'T JUST<br /><span style={{ color: Y }}>TALK ABOUT IT.</span>
             </h2>
           </div>
@@ -735,10 +752,10 @@ const Index = () => {
             height: "100%",
             maxWidth: "1200px",
             margin: "0 auto",
-            padding: "80px 24px 0",
+            padding: isMobile ? "40px 20px 0" : "80px 24px 0",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "80px",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: isMobile ? "32px" : "80px",
             alignItems: "center",
           }}>
             {/* LEFT */}
@@ -746,7 +763,7 @@ const Index = () => {
               <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "24px", ...MONO }}>
                 HOW Upstrides WORKS
               </div>
-              <h2 style={{ ...BEBAS, fontSize: "clamp(48px, 5.5vw, 80px)", color: B, lineHeight: 0.88, marginBottom: "20px" }}>
+              <h2 style={{ ...BEBAS, fontSize: isMobile ? "clamp(30px, 9vw, 48px)" : "clamp(48px, 5.5vw, 80px)", color: B, lineHeight: isMobile ? 1.08 : 0.88, marginBottom: "20px" }}>
                 A SYSTEM,<br />NOT JUST<br /><span style={{ color: W, WebkitTextStroke: `2px ${B}` }}>CONTENT.</span>
               </h2>
               <p style={{ ...SANS, fontSize: "15px", color: `${B}cc`, lineHeight: 1.7, maxWidth: "420px", marginBottom: "44px" }}>
@@ -904,7 +921,7 @@ const Index = () => {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ opacity: whatSec.inView ? 1 : 0, transform: whatSec.inView ? "translateY(0)" : "translateY(40px)", transition: "all 0.5s ease", marginBottom: "60px" }}>
             <div style={{ backgroundColor: B, color: Y, display: "inline-block", padding: "8px 20px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: "20px", ...MONO }}>WHAT WE DO</div>
-            <h2 style={{ ...BEBAS, fontSize: "clamp(48px, 8vw, 110px)", color: B, lineHeight: 0.9, maxWidth: "800px" }}>
+            <h2 style={{ ...BEBAS, fontSize: isMobile ? "clamp(32px, 10vw, 52px)" : "clamp(68px, 8vw, 110px)", color: B, lineHeight: isMobile ? 1.08 : 0.9, maxWidth: "800px" }}>
               WE DON'T SELL<br />COURSES.<br /><span style={{ WebkitTextStroke: `3px ${B}`, color: Y }}>WE SELL</span><br />EXPERIENCE.
             </h2>
             <p style={{ ...SANS, fontSize: "16px", color: `${B}cc`, maxWidth: "620px", lineHeight: 1.7, marginTop: "24px" }}>

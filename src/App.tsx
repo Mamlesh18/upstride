@@ -57,6 +57,26 @@ const App = () => (
                 <Portal />
               </ProtectedRoute>
             } />
+            <Route path="/portal/career-kit/:ckSlug" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Portal />
+              </ProtectedRoute>
+            } />
+            <Route path="/portal/interviews/:ivSlug" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Portal />
+              </ProtectedRoute>
+            } />
+            <Route path="/portal/placements/:companySlug" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Portal />
+              </ProtectedRoute>
+            } />
+            <Route path="/portal/:slug" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Portal />
+              </ProtectedRoute>
+            } />
             <Route path="/admin" element={
               <ProtectedRoute allowedRoles={["super_admin"]}>
                 <Admin />

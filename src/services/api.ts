@@ -222,6 +222,46 @@ export const api = {
     delete: (id: string) => request(`/api/admin/resources/${id}`, { method: "DELETE" }),
   },
 
+  adminCourses: {
+    list: () => request("/api/admin/courses"),
+    create: (data: Record<string, unknown>) =>
+      request("/api/admin/courses", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: string, data: Record<string, unknown>) =>
+      request(`/api/admin/courses/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    delete: (id: string) => request(`/api/admin/courses/${id}`, { method: "DELETE" }),
+    addTopic: (courseId: string, data: Record<string, unknown>) =>
+      request(`/api/admin/courses/${courseId}/topics`, { method: "POST", body: JSON.stringify(data) }),
+    bulkAddTopics: (courseId: string, topics: Record<string, unknown>[]) =>
+      request(`/api/admin/courses/${courseId}/topics/bulk`, { method: "POST", body: JSON.stringify({ topics }) }),
+    updateTopic: (courseId: string, topicId: string, data: Record<string, unknown>) =>
+      request(`/api/admin/courses/${courseId}/topics/${topicId}`, { method: "PATCH", body: JSON.stringify(data) }),
+    deleteTopic: (courseId: string, topicId: string) =>
+      request(`/api/admin/courses/${courseId}/topics/${topicId}`, { method: "DELETE" }),
+  },
+
+  courses: {
+    list: () => request<{ success: boolean; data: unknown[] }>("/api/courses"),
+    get: (courseId: string) => request<{ success: boolean; data: unknown }>(`/api/courses/${courseId}`),
+    markComplete: (courseId: string, topicId: string) =>
+      request(`/api/courses/${courseId}/progress/${topicId}`, { method: "POST" }),
+    markIncomplete: (courseId: string, topicId: string) =>
+      request(`/api/courses/${courseId}/progress/${topicId}`, { method: "DELETE" }),
+  },
+
+  standup: {
+    pmBatches: () => request<{ success: boolean; data: { batches: { id: string; name: string }[] } }>("/api/standup/pm/batches"),
+    pmGet: (batchId: string) => request<{ success: boolean; data: { batch_id: string; dates: string[]; students: { email: string; name: string; role: string; updates: Record<string, string> }[] } }>(`/api/standup/pm/${batchId}`),
+    pmUpdateCell: (batchId: string, date: string, student_email: string, update: string) =>
+      request(`/api/standup/pm/${batchId}/cell`, { method: "PATCH", body: JSON.stringify({ date, student_email, update }) }),
+    pmUpdateRole: (batchId: string, student_email: string, role: string) =>
+      request(`/api/standup/pm/${batchId}/role`, { method: "PATCH", body: JSON.stringify({ student_email, role }) }),
+    pmAddDate: (batchId: string, date: string) =>
+      request(`/api/standup/pm/${batchId}/date`, { method: "POST", body: JSON.stringify({ date }) }),
+    pmRemoveDate: (batchId: string, date: string) =>
+      request(`/api/standup/pm/${batchId}/date/remove`, { method: "POST", body: JSON.stringify({ date }) }),
+    studentGet: () => request<{ success: boolean; data: { batch_id: string | null; dates: string[]; students: { email: string; name: string; role: string; updates: Record<string, string> }[] } }>("/api/standup/student"),
+  },
+
   batches: {
     list: () => request("/api/admin/batches"),
     create: (data: { name: string; resume_enhancer_email?: string; resume_enhancer_password?: string; common_calendar_url?: string; calendar_url_1?: string; calendar_url_2?: string }) =>

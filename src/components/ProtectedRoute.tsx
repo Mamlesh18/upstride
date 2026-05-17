@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,8 +8,12 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("userRole");
+  const location = useLocation();
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) {
+    const redirect = location.pathname !== "/portal" ? `?redirect=${encodeURIComponent(location.pathname)}` : "";
+    return <Navigate to={`/login${redirect}`} replace />;
+  }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
     if (role === "super_admin") return <Navigate to="/admin" replace />;

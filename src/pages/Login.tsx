@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -14,6 +14,8 @@ const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = new URLSearchParams(location.search).get("redirect") || null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,9 +28,11 @@ const Login = () => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("userRole");
     if (token) routeByRole(role);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const routeByRole = (role: string | null) => {
+    if (redirectTo) { navigate(redirectTo); return; }
     if (role === "super_admin") navigate("/admin");
     else if (role === "project_manager") navigate("/projects");
     else if (role === "sales_person") navigate("/sales");

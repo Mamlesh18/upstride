@@ -8,7 +8,7 @@ const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFA
 const BORD = "#E5E5E5"; const MUTE = "#6B7280"; const RED = "#EF4444"; const GREEN = "#22C55E";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "resources" | "batches" | "placements" | "leads";
+type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "batches" | "placements" | "leads" | "courses";
 type ContactStatus = "pending" | "picked" | "rejected" | "missed" | "joining" | "will_discuss";
 
 interface Student { id: string; name: string; email: string; is_active: boolean; must_change_password: boolean; }
@@ -93,12 +93,6 @@ export default function Admin() {
   const [eventsList, setEventsList] = useState<EventItem[]>([]);
   const [showAddEvent, setShowAddEvent] = useState(false);
 
-  interface AdminResource { id: string; section: string; category: string; name: string; tagline: string; url: string; company_type?: string; sub_type?: string; emoji?: string; badge_label?: string; badge_accent?: boolean; }
-  const [adminResources, setAdminResources] = useState<AdminResource[]>([]);
-  const [showAddResource, setShowAddResource] = useState(false);
-  const [resourceSection, setResourceSection] = useState("recommended");
-  const [resourceForm, setResourceForm] = useState({ section: "recommended", category: "", name: "", tagline: "", url: "", company_type: "service", sub_type: "", emoji: "", badge_label: "", badge_accent: false });
-
   // Placements (Jobs)
   interface Job { id: string; role: string; company: string; description: string; apply_link: string; category: string; is_active: boolean; created_at?: string; }
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -111,6 +105,31 @@ export default function Admin() {
   interface PublicUser { id: string; name: string; email: string; phone?: string; created_at: string; }
   const [leads, setLeads] = useState<Lead[]>([]);
   const [publicUsers, setPublicUsers] = useState<PublicUser[]>([]);
+
+  // Courses
+  interface QAItem { question: string; answer: string; }
+  interface MCQItem { question: string; options: string[]; correct_index: number; }
+  interface CourseTopic { id: string; title: string; content_type: string; video_url: string; duration: string; order: number; qa_items: QAItem[]; mcq_items: MCQItem[]; difficulty: string; platform: string; }
+  interface AdminCourse { id: string; title: string; slug: string; category: string; section: string; description: string; emoji: string; image_url: string; duration: string; order: number; is_active: boolean; is_recommended: boolean; topics: CourseTopic[]; total_topics: number; created_at: string | null; }
+  const [adminCourses, setAdminCourses]       = useState<AdminCourse[]>([]);
+  const [expandedCourse, setExpandedCourse]   = useState<string | null>(null);
+  const [showAddCourse, setShowAddCourse]     = useState(false);
+  const [editCourse, setEditCourse]           = useState<AdminCourse | null>(null);
+  const [courseForm, setCourseForm]           = useState({ title: "", category: "training", section: "", description: "", emoji: "📚", image_url: "", duration: "", order: 0, is_active: true, is_recommended: false });
+  const [showBulkTopic, setShowBulkTopic]     = useState<string | null>(null);
+  const [bulkTopicMode, setBulkTopicMode]     = useState<"video" | "qa" | "mixed" | "dsa" | "article">("video");
+  const [bulkVideoText, setBulkVideoText]     = useState("");
+  const [bulkQATitle, setBulkQATitle]         = useState("");
+  const [bulkQAText, setBulkQAText]           = useState("");
+  const [bulkMixedTitle, setBulkMixedTitle]   = useState("");
+  const [bulkMixedUrl, setBulkMixedUrl]       = useState("");
+  const [bulkMixedDuration, setBulkMixedDuration] = useState("");
+  const [bulkMixedQAText, setBulkMixedQAText] = useState("");
+  const [bulkDSAText, setBulkDSAText]         = useState("");
+  const [bulkArticleTitle, setBulkArticleTitle] = useState("");
+  const [bulkArticleQAText, setBulkArticleQAText] = useState("");
+  const [editTopic, setEditTopic]             = useState<{ courseId: string; topic: CourseTopic } | null>(null);
+  const [topicForm, setTopicForm]             = useState({ title: "", content_type: "video", video_url: "", duration: "", qa_text: "", mcq_text: "", difficulty: "Easy", platform: "LeetCode" });
   const [eventForm, setEventForm] = useState({ title: "", location: "", date: "", description: "", is_active: true });
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventImagePreview, setEventImagePreview] = useState<string | null>(null);
@@ -248,14 +267,6 @@ export default function Admin() {
 
   useEffect(() => { if (tab === "events") loadEvents(); }, [tab, loadEvents]);
 
-  const loadAdminResources = useCallback(async () => {
-    try {
-      const r = await api.resources.adminList() as { data: { resources: AdminResource[] } };
-      setAdminResources(r.data.resources);
-    } catch { /* silent */ }
-  }, []);
-
-  useEffect(() => { if (tab === "resources") loadAdminResources(); }, [tab, loadAdminResources]);
   useEffect(() => { if (tab === "batches") loadBatches(); }, [tab, loadBatches]);
 
   const loadJobs = useCallback(async () => {
@@ -281,6 +292,14 @@ export default function Admin() {
 
   useEffect(() => { if (tab === "placements") loadJobs(); }, [tab, loadJobs]);
   useEffect(() => { if (tab === "leads") { loadLeads(); loadPublicUsers(); } }, [tab, loadLeads, loadPublicUsers]);
+
+  const loadAdminCourses = useCallback(async () => {
+    try {
+      const r = await api.adminCourses.list() as { data: AdminCourse[] };
+      setAdminCourses(r.data);
+    } catch { /* silent */ }
+  }, []);
+  useEffect(() => { if (tab === "courses") loadAdminCourses(); }, [tab, loadAdminCourses]);
   useEffect(() => { loadBatches(); }, [loadBatches]); // load once for student add dropdown
 
   const handleBulkSetResumeCreds = async () => {
@@ -522,36 +541,177 @@ export default function Admin() {
     catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
-  const handleAddResource = async () => {
-    if (!resourceForm.name || !resourceForm.tagline || !resourceForm.url) {
-      toast({ title: "Name, tagline and URL are required", variant: "destructive" }); return;
-    }
-    const payload: Record<string, unknown> = {
-      section: resourceForm.section,
-      category: resourceForm.category || resourceForm.name,
-      name: resourceForm.name,
-      tagline: resourceForm.tagline,
-      url: resourceForm.url,
-    };
-    if (resourceForm.section === "placement") {
-      payload.company_type = resourceForm.company_type;
-      if (resourceForm.company_type === "service" && resourceForm.sub_type) payload.sub_type = resourceForm.sub_type;
-      if (resourceForm.emoji) payload.emoji = resourceForm.emoji;
-    }
-    if (resourceForm.badge_label) { payload.badge_label = resourceForm.badge_label; payload.badge_accent = resourceForm.badge_accent; }
-    if (resourceForm.emoji && resourceForm.section !== "placement") payload.emoji = resourceForm.emoji;
+  const handleSaveCourse = async () => {
     try {
-      await api.resources.add(payload as Parameters<typeof api.resources.add>[0]);
-      toast({ title: "Resource added" });
-      setShowAddResource(false);
-      setResourceForm({ section: "recommended", category: "", name: "", tagline: "", url: "", company_type: "service", sub_type: "", emoji: "", badge_label: "", badge_accent: false });
-      loadAdminResources();
+      if (editCourse) {
+        await api.adminCourses.update(editCourse.id, courseForm);
+        toast({ title: "Course updated" });
+      } else {
+        await api.adminCourses.create({ ...courseForm, order: Number(courseForm.order) });
+        toast({ title: "Course created" });
+      }
+      setShowAddCourse(false);
+      setEditCourse(null);
+      setCourseForm({ title: "", category: "training", section: "", description: "", emoji: "📚", image_url: "", duration: "", order: 0, is_active: true, is_recommended: false });
+      loadAdminCourses();
     } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
-  const handleDeleteResource = async (id: string, name: string) => {
-    if (!confirm(`Delete "${name}"?`)) return;
-    try { await api.resources.delete(id); loadAdminResources(); toast({ title: "Deleted" }); }
+  const handleDeleteCourse = async (id: string, title: string) => {
+    if (!confirm(`Delete course "${title}" and all its topics? This cannot be undone.`)) return;
+    try { await api.adminCourses.delete(id); loadAdminCourses(); toast({ title: "Course deleted" }); }
+    catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const parseQAText = (text: string): { question: string; answer: string }[] => {
+    const blocks = text.trim().split(/\n{2,}/);
+    const items: { question: string; answer: string }[] = [];
+    for (const block of blocks) {
+      const lines = block.trim().split("\n");
+      let q = "", a = "";
+      for (const line of lines) {
+        if (line.startsWith("Q:")) q = line.slice(2).trim();
+        else if (line.startsWith("A:")) a = line.slice(2).trim();
+      }
+      if (q && a) items.push({ question: q, answer: a });
+    }
+    return items;
+  };
+
+  const parseMCQText = (text: string): { question: string; options: string[]; correct_index: number }[] => {
+    const blocks = text.trim().split(/\n\s*\n/);
+    const items: { question: string; options: string[]; correct_index: number }[] = [];
+    for (const block of blocks) {
+      const lines = block.trim().split("\n").map(l => l.trim()).filter(Boolean);
+      if (!lines.length || !lines[0].startsWith("Q:")) continue;
+      const question = lines[0].slice(2).trim();
+      const options: string[] = [];
+      let correct_index = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const l = lines[i];
+        if (l.startsWith("* ")) { correct_index = options.length; options.push(l.slice(2).trim()); }
+        else if (l.startsWith("- ")) { options.push(l.slice(2).trim()); }
+      }
+      if (question && options.length >= 2) items.push({ question, options, correct_index });
+    }
+    return items;
+  };
+
+
+  const handleBulkAddTopics = async () => {
+    if (!showBulkTopic) return;
+    const courseId = showBulkTopic;
+
+    if (bulkTopicMode === "video") {
+      // Merge continuation lines: if a line starts with "," it belongs to the previous line
+      const rawLines = bulkVideoText.trim().split("\n");
+      const merged: string[] = [];
+      for (const line of rawLines) {
+        const t = line.trim();
+        if (!t) continue;
+        if (t.startsWith(",") && merged.length > 0) {
+          merged[merged.length - 1] += t; // append ", duration" to previous line
+        } else {
+          merged.push(t);
+        }
+      }
+      // Skip pure-number lines (row indices from Excel/Sheets)
+      const lines = merged.filter(l => !/^\d+$/.test(l));
+      const topics = lines.map(line => {
+        const sep = line.includes("\t") ? "\t" : ",";
+        const parts = line.split(sep).map(p => p.trim());
+        return { title: parts[0] || "", content_type: "video", video_url: parts[1] || "", duration: parts[2] || "", qa_items: [] };
+      }).filter(t => t.title);
+      if (!topics.length) { toast({ title: "No topics found. Format: Title, URL, Duration (one per line)", variant: "destructive" }); return; }
+      try {
+        await api.adminCourses.bulkAddTopics(courseId, topics);
+        toast({ title: `${topics.length} topic(s) added` });
+        setShowBulkTopic(null); setBulkVideoText("");
+        loadAdminCourses();
+      } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+
+    } else if (bulkTopicMode === "qa") {
+      if (!bulkQATitle.trim()) { toast({ title: "Topic title is required", variant: "destructive" }); return; }
+      const qa_items = parseQAText(bulkQAText);
+      if (!qa_items.length) { toast({ title: "No Q&A pairs found. Use Q: / A: format, separated by blank lines.", variant: "destructive" }); return; }
+      try {
+        await api.adminCourses.bulkAddTopics(courseId, [{ title: bulkQATitle.trim(), content_type: "qa", video_url: "", duration: "", qa_items }]);
+        toast({ title: `Topic with ${qa_items.length} Q&A pairs added` });
+        setShowBulkTopic(null); setBulkQATitle(""); setBulkQAText("");
+        loadAdminCourses();
+      } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+
+    } else if (bulkTopicMode === "mixed") {
+      if (!bulkMixedTitle.trim()) { toast({ title: "Topic title is required", variant: "destructive" }); return; }
+      const qa_items = parseQAText(bulkMixedQAText);
+      try {
+        await api.adminCourses.bulkAddTopics(courseId, [{ title: bulkMixedTitle.trim(), content_type: "mixed", video_url: bulkMixedUrl.trim(), duration: bulkMixedDuration.trim(), qa_items }]);
+        toast({ title: "Topic added" });
+        setShowBulkTopic(null); setBulkMixedTitle(""); setBulkMixedUrl(""); setBulkMixedDuration(""); setBulkMixedQAText("");
+        loadAdminCourses();
+      } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+
+    } else if (bulkTopicMode === "dsa") {
+      const rawLines = bulkDSAText.trim().split("\n");
+      const merged: string[] = [];
+      for (const line of rawLines) {
+        const t = line.trim();
+        if (!t) continue;
+        if (t.startsWith(",") && merged.length > 0) { merged[merged.length - 1] += t; } else { merged.push(t); }
+      }
+      const topics = merged.filter(l => !/^\d+$/.test(l)).map(line => {
+        const sep = line.includes("\t") ? "\t" : ",";
+        const parts = line.split(sep).map(p => p.trim());
+        return { title: parts[0] || "", content_type: "dsa", video_url: parts[1] || "", duration: "", qa_items: [], mcq_items: [], difficulty: parts[2] || "Easy", platform: parts[3] || "LeetCode" };
+      }).filter(t => t.title);
+      if (!topics.length) { toast({ title: "No topics found. Format: Problem Name, URL, Difficulty, Platform", variant: "destructive" }); return; }
+      try {
+        await api.adminCourses.bulkAddTopics(courseId, topics);
+        toast({ title: `${topics.length} DSA problem(s) added` });
+        setShowBulkTopic(null); setBulkDSAText("");
+        loadAdminCourses();
+      } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+
+    } else if (bulkTopicMode === "article") {
+      if (!bulkArticleTitle.trim()) { toast({ title: "Topic title is required", variant: "destructive" }); return; }
+      const qa_items = parseQAText(bulkArticleQAText);
+      if (!qa_items.length) { toast({ title: "No Q&A pairs found. Use Q: / A: format, separated by blank lines.", variant: "destructive" }); return; }
+      try {
+        await api.adminCourses.bulkAddTopics(courseId, [{ title: bulkArticleTitle.trim(), content_type: "article", video_url: "", duration: "", qa_items, mcq_items: [] }]);
+        toast({ title: `Article topic with ${qa_items.length} questions added` });
+        setShowBulkTopic(null); setBulkArticleTitle(""); setBulkArticleQAText("");
+        loadAdminCourses();
+      } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+    }
+  };
+
+  const handleSaveTopic = async () => {
+    if (!editTopic) return;
+    const { courseId, topic } = editTopic;
+    const ct = topicForm.content_type;
+    const qa_items = (ct === "qa" || ct === "mixed" || ct === "article") ? parseQAText(topicForm.qa_text) : [];
+    const mcq_items = ct === "mcq" ? parseMCQText(topicForm.mcq_text) : [];
+    try {
+      await api.adminCourses.updateTopic(courseId, topic.id, {
+        title: topicForm.title,
+        content_type: ct,
+        video_url: topicForm.video_url,
+        duration: topicForm.duration,
+        qa_items,
+        mcq_items,
+        difficulty: topicForm.difficulty,
+        platform: topicForm.platform,
+      });
+      toast({ title: "Topic updated" });
+      setEditTopic(null);
+      setTopicForm({ title: "", content_type: "video", video_url: "", duration: "", qa_text: "", mcq_text: "", difficulty: "Easy", platform: "LeetCode" });
+      loadAdminCourses();
+    } catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const handleDeleteTopic = async (courseId: string, topicId: string, title: string) => {
+    if (!confirm(`Delete topic "${title}"?`)) return;
+    try { await api.adminCourses.deleteTopic(courseId, topicId); loadAdminCourses(); toast({ title: "Topic deleted" }); }
     catch (e: unknown) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
   };
 
@@ -572,10 +732,10 @@ export default function Admin() {
     { key: "sessions", label: "Sessions", icon: <PlayCircle size={15} /> },
     { key: "feedback", label: "Feedback", icon: <MessageSquare size={15} /> },
     { key: "events", label: "Events", icon: <CalendarDays size={15} /> },
-    { key: "resources", label: "Resources", icon: <BookOpen size={15} /> },
     { key: "batches",     label: "Batches",       icon: <Layers size={15} /> },
     { key: "placements",  label: "Placements",    icon: <Briefcase size={15} /> },
     { key: "leads",       label: "Leads & Signups", icon: <UserPlus size={15} /> },
+    { key: "courses",     label: "Courses",       icon: <BookOpen size={15} /> },
   ];
 
   return (
@@ -1259,73 +1419,6 @@ export default function Admin() {
         )}
 
         {/* -- Resources Tab --------------------------------------- */}
-        {tab === "resources" && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
-              <div style={{ display: "flex", gap: "6px" }}>
-                {["all", "recommended", "training", "placement"].map(s => (
-                  <button key={s} onClick={() => setResourceSection(s)}
-                    style={{ padding: "6px 14px", borderRadius: "20px", border: `2px solid ${resourceSection === s ? B : BORD}`, backgroundColor: resourceSection === s ? B : W, color: resourceSection === s ? Y : MUTE, fontSize: "11px", fontWeight: 700, cursor: "pointer", ...MONO }}>
-                    {s === "all" ? "ALL" : s.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <Btn onClick={loadAdminResources} small><RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />Refresh</Btn>
-                <Btn onClick={() => setShowAddResource(true)} small><Plus size={12} style={{ display: "inline", marginRight: "4px" }} />Add Resource</Btn>
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: `${B}08`, borderBottom: `2px solid ${BORD}` }}>
-                    {["Section", "Category", "Name", "Tagline", "Sub-type / Company Type", "Actions"].map(h => (
-                      <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", whiteSpace: "nowrap" }}>{h.toUpperCase()}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {adminResources
-                    .filter(r => resourceSection === "all" || r.section === resourceSection)
-                    .map((r, i, arr) => (
-                      <tr key={r.id} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${BORD}` : "none" }}>
-                        <td style={{ padding: "10px 14px" }}>
-                          <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px",
-                            backgroundColor: r.section === "recommended" ? Y : r.section === "training" ? "#E0F2FE" : "#EDE9FE",
-                            color: r.section === "recommended" ? B : r.section === "training" ? "#0369A1" : "#7C3AED" }}>
-                            {r.section.toUpperCase()}
-                          </span>
-                        </td>
-                        <td style={{ padding: "10px 14px", fontSize: "12px", color: MUTE }}>{r.category}</td>
-                        <td style={{ padding: "10px 14px", fontSize: "13px", fontWeight: 600, color: B }}>
-                          {r.emoji && <span style={{ marginRight: "6px" }}>{r.emoji}</span>}
-                          {r.name}
-                        </td>
-                        <td style={{ padding: "10px 14px", fontSize: "11px", color: MUTE, maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.tagline}</td>
-                        <td style={{ padding: "10px 14px", fontSize: "11px", color: MUTE }}>
-                          {r.sub_type || r.company_type || "�"}
-                        </td>
-                        <td style={{ padding: "10px 14px" }}>
-                          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#6366F1", fontWeight: 700 }}>Open &rarr;</a>
-                            <button onClick={() => handleDeleteResource(r.id, r.name)} style={{ background: "none", border: "none", cursor: "pointer", color: RED }}><Trash2 size={14} /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  {adminResources.filter(r => resourceSection === "all" || r.section === resourceSection).length === 0 && (
-                    <tr><td colSpan={6} style={{ padding: "32px", textAlign: "center", color: MUTE, fontSize: "13px" }}>No resources in this section</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <p style={{ fontSize: "11px", color: MUTE, marginTop: "8px" }}>
-              Total: {adminResources.length} resources
-            </p>
-          </div>
-        )}
-
         {/* -- Batches Tab ------------------------------------------- */}
         {tab === "batches" && (
           <div>
@@ -1487,7 +1580,357 @@ export default function Admin() {
           </div>
         )}
 
+        {/* ── Courses Tab ─────────────────────────────────────────────── */}
+        {tab === "courses" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
+              <div>
+                <h2 style={{ fontSize: "22px", fontWeight: 700, color: B }}>Courses</h2>
+                <p style={{ fontSize: "12px", color: MUTE, marginTop: "4px" }}>Manage structured courses with video topics and progress tracking.</p>
+              </div>
+              <Btn onClick={() => { setShowAddCourse(true); setEditCourse(null); setCourseForm({ title: "", category: "training", section: "", description: "", emoji: "📚", image_url: "", duration: "", order: 0, is_active: true, is_recommended: false }); }}>
+                + New Course
+              </Btn>
+            </div>
+
+            {adminCourses.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 24px", border: `2px dashed ${BORD}`, borderRadius: "12px", color: MUTE }}>
+                <BookOpen size={40} style={{ marginBottom: "12px", opacity: 0.3 }} />
+                <p style={{ fontWeight: 600, color: B, marginBottom: "4px" }}>No courses yet</p>
+                <p style={{ fontSize: "12px" }}>Create your first course and add video topics to it.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {adminCourses.map(course => (
+                  <div key={course.id} style={{ border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden", background: W }}>
+                    {/* Course header row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "16px 20px", cursor: "pointer", borderBottom: expandedCourse === course.id ? `1px solid ${BORD}` : "none" }}
+                      onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}>
+                      <div style={{ width: "36px", height: "36px", background: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0, borderRadius: "6px" }}>
+                        {course.emoji}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "15px", fontWeight: 700, color: B }}>{course.title}</span>
+                          <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", background: course.category === "training" ? "#DBEAFE" : "#EDE9FE", color: course.category === "training" ? "#1D4ED8" : "#7C3AED", borderRadius: "4px", ...MONO }}>
+                            {course.category.toUpperCase()}
+                          </span>
+                          {course.section && <span style={{ fontSize: "10px", padding: "2px 8px", background: "#F3F4F6", color: MUTE, borderRadius: "4px", ...MONO }}>{course.section}</span>}
+                          {course.is_recommended && <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", background: "#FEF9C3", color: "#A16207", borderRadius: "4px", ...MONO }}>★ RECOMMENDED</span>}
+                          {!course.is_active && <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", background: "#F3F4F6", color: MUTE, borderRadius: "4px", ...MONO }}>HIDDEN</span>}
+                        </div>
+                        <div style={{ fontSize: "11px", color: MUTE, marginTop: "3px", ...MONO }}>{course.total_topics} topics · order #{course.order}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                        <Btn small color="#2563EB" onClick={e => { e.stopPropagation(); setEditCourse(course); setCourseForm({ title: course.title, category: course.category, section: course.section || "", description: course.description, emoji: course.emoji, image_url: course.image_url || "", duration: course.duration || "", order: course.order, is_active: course.is_active, is_recommended: course.is_recommended }); setShowAddCourse(true); }}>Edit</Btn>
+                        <Btn small color={RED} onClick={e => { e.stopPropagation(); handleDeleteCourse(course.id, course.title); }}>Delete</Btn>
+                      </div>
+                      <span style={{ fontSize: "18px", color: MUTE, userSelect: "none", transform: expandedCourse === course.id ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>›</span>
+                    </div>
+
+                    {/* Topics expanded section */}
+                    {expandedCourse === course.id && (
+                      <div style={{ padding: "16px 20px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 700, color: B, ...MONO }}>TOPICS ({course.topics.length})</span>
+                          <Btn small onClick={() => { setShowBulkTopic(course.id); setBulkTopicMode("video"); setBulkVideoText(""); setBulkQATitle(""); setBulkQAText(""); setBulkMixedTitle(""); setBulkMixedUrl(""); setBulkMixedDuration(""); setBulkMixedQAText(""); setBulkDSAText(""); setBulkArticleTitle(""); setBulkArticleQAText(""); }}>+ Add Topics</Btn>
+                        </div>
+
+                        {course.topics.length === 0 ? (
+                          <div style={{ textAlign: "center", padding: "24px", border: `2px dashed ${BORD}`, borderRadius: "8px", color: MUTE, fontSize: "13px" }}>
+                            No topics yet. Click "+ Add Topics" to get started.
+                          </div>
+                        ) : (
+                          <div style={{ border: `1px solid ${BORD}`, borderRadius: "8px", overflow: "hidden" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 90px 90px 130px", background: B, padding: "8px 14px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: Y, gap: "10px" }}>
+                              <span>#</span><span>TITLE</span><span>TYPE</span><span>DURATION</span><span>ACTIONS</span>
+                            </div>
+                            {course.topics.map((topic, idx) => (
+                              <div key={topic.id} style={{ display: "grid", gridTemplateColumns: "40px 1fr 90px 90px 130px", padding: "10px 14px", borderTop: `1px solid ${BORD}`, alignItems: "center", gap: "10px", background: idx % 2 === 0 ? W : BG }}>
+                                <span style={{ fontSize: "12px", fontWeight: 700, color: MUTE, textAlign: "center", ...MONO }}>{idx + 1}</span>
+                                <div>
+                                  <div style={{ fontSize: "13px", fontWeight: 600, color: B }}>{topic.title}</div>
+                                  {topic.video_url && <div style={{ fontSize: "10px", color: "#2563EB", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", ...MONO }}>{topic.video_url}</div>}
+                                  {topic.qa_items?.length > 0 && <div style={{ fontSize: "10px", color: "#7C3AED", marginTop: "2px", ...MONO }}>{topic.qa_items.length} Q&A pairs</div>}
+                                </div>
+                                <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", background: topic.content_type === "video" ? "#DBEAFE" : topic.content_type === "qa" ? "#EDE9FE" : topic.content_type === "dsa" ? "#FEF3C7" : topic.content_type === "mcq" ? "#FCE7F3" : topic.content_type === "article" ? "#ECFDF5" : "#DCFCE7", color: topic.content_type === "video" ? "#1D4ED8" : topic.content_type === "qa" ? "#7C3AED" : topic.content_type === "dsa" ? "#D97706" : topic.content_type === "mcq" ? "#BE185D" : topic.content_type === "article" ? "#065F46" : "#16A34A", borderRadius: "4px", ...MONO, textAlign: "center" }}>
+                                  {(topic.content_type || "video").toUpperCase()}
+                                </span>
+                                <span style={{ fontSize: "12px", color: MUTE, ...MONO }}>{topic.duration || "—"}</span>
+                                <div style={{ display: "flex", gap: "6px" }}>
+                                  <Btn small color="#2563EB" onClick={() => {
+                                    setEditTopic({ courseId: course.id, topic });
+                                    const qaText = (topic.qa_items || []).map((q: { question: string; answer: string }) => `Q: ${q.question}\nA: ${q.answer}`).join("\n\n");
+                                    const mcqText = (topic.mcq_items || []).map((m: { question: string; options: string[]; correct_index: number }) =>
+                                      `Q: ${m.question}\n${m.options.map((o, i) => (i === m.correct_index ? `* ${o}` : `- ${o}`)).join("\n")}`
+                                    ).join("\n\n");
+                                    setTopicForm({ title: topic.title, content_type: topic.content_type || "video", video_url: topic.video_url, duration: topic.duration, qa_text: qaText, mcq_text: mcqText, difficulty: topic.difficulty || "Easy", platform: topic.platform || "LeetCode" });
+                                  }}>Edit</Btn>
+                                  <Btn small color={RED} onClick={() => handleDeleteTopic(course.id, topic.id, topic.title)}>Del</Btn>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
+
+      {/* ── Course & Topic Modals ────────────────────────────────────── */}
+      {(showAddCourse) && (
+        <Modal title={editCourse ? `Edit Course` : "New Course"} onClose={() => { setShowAddCourse(false); setEditCourse(null); }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <Input label="TITLE" type="text" placeholder="e.g. Generative AI for Beginners" value={courseForm.title} onChange={e => setCourseForm(f => ({ ...f, title: e.target.value }))} />
+            <div style={{ display: "flex", gap: "10px" }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>CATEGORY</label>
+                <select value={courseForm.category} onChange={e => setCourseForm(f => ({ ...f, category: e.target.value }))}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="training">Courses</option>
+                  <option value="placement">Placements</option>
+                  <option value="interviews">Interviews</option>
+                  <option value="career_kit">Career Kit</option>
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Input label="SECTION (optional)" type="text" placeholder="e.g. Interview Prep" value={courseForm.section} onChange={e => setCourseForm(f => ({ ...f, section: e.target.value }))} />
+              </div>
+              <div style={{ width: "120px" }}>
+                <Input label="DURATION (optional)" type="text" placeholder="e.g. 2:30:00" value={courseForm.duration} onChange={e => setCourseForm(f => ({ ...f, duration: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>COVER IMAGE URL (optional)</label>
+              <input type="url" value={courseForm.image_url} onChange={e => setCourseForm(f => ({ ...f, image_url: e.target.value }))}
+                placeholder="https://... paste any image URL"
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", boxSizing: "border-box" as const }} />
+              {courseForm.image_url && (
+                <img src={courseForm.image_url} alt="preview" style={{ marginTop: "8px", width: "100%", height: "120px", objectFit: "cover", borderRadius: "6px", border: `1px solid ${BORD}` }} />
+              )}
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>DESCRIPTION (optional)</label>
+              <textarea value={courseForm.description} onChange={e => setCourseForm(f => ({ ...f, description: e.target.value }))} rows={3}
+                placeholder="Describe what students will learn in this course"
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <Input label="DISPLAY ORDER" type="number" value={String(courseForm.order)} onChange={e => setCourseForm(f => ({ ...f, order: Number(e.target.value) }))} />
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>VISIBLE</label>
+                <select value={courseForm.is_active ? "yes" : "no"} onChange={e => setCourseForm(f => ({ ...f, is_active: e.target.value === "yes" }))}
+                  style={{ padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="yes">Yes</option>
+                  <option value="no">Hidden</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>RECOMMENDED</label>
+                <select value={courseForm.is_recommended ? "yes" : "no"} onChange={e => setCourseForm(f => ({ ...f, is_recommended: e.target.value === "yes" }))}
+                  style={{ padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes ★</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Btn onClick={() => { setShowAddCourse(false); setEditCourse(null); }} color={MUTE} small>Cancel</Btn>
+              <Btn onClick={handleSaveCourse} small>{editCourse ? "Save Changes" : "Create Course"}</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Bulk Add Topics Modal */}
+      {showBulkTopic && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" }}>
+          <div style={{ backgroundColor: W, border: `2px solid ${B}`, borderRadius: "12px", padding: "32px", width: "100%", maxWidth: "560px", boxShadow: `6px 6px 0 ${Y}`, ...MONO, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 700, color: B }}>Add Topics</h3>
+              <button onClick={() => setShowBulkTopic(null)} style={{ background: "none", border: "none", cursor: "pointer", color: MUTE }}><X size={20} /></button>
+            </div>
+
+            {/* Mode tabs */}
+            <div style={{ display: "flex", gap: "0", marginBottom: "20px", border: `2px solid ${BORD}`, borderRadius: "6px", overflow: "hidden" }}>
+              {(["video", "dsa", "article", "qa", "mixed"] as const).map((mode) => {
+                const labels: Record<string, string> = { video: "Video", dsa: "DSA", article: "Article", qa: "Q&A Only", mixed: "Video+Q&A" };
+                return (
+                  <button key={mode} onClick={() => setBulkTopicMode(mode)}
+                    style={{ flex: 1, padding: "9px 4px", border: "none", background: bulkTopicMode === mode ? B : "transparent", color: bulkTopicMode === mode ? Y : MUTE, fontSize: "10px", fontWeight: 700, cursor: "pointer", ...MONO, transition: "all 0.12s" }}>
+                    {labels[mode]}
+                  </button>
+                );
+              })}
+            </div>
+
+            {bulkTopicMode === "video" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <p style={{ fontSize: "12px", color: MUTE, margin: 0 }}>Format: <strong>Title, URL, Duration</strong> — one topic per line. Duration as <strong>mm:ss</strong> (e.g. 9:39). Also handles two-line format where duration is on the next line.</p>
+                <textarea
+                  value={bulkVideoText}
+                  onChange={e => setBulkVideoText(e.target.value)}
+                  rows={10}
+                  placeholder={"Introduction to ML, https://youtube.com/..., 9:39\nNeural Networks, https://youtube.com/..., 29:14"}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }}
+                />
+              </div>
+            )}
+
+            {bulkTopicMode === "qa" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Input label="TOPIC TITLE" type="text" placeholder="e.g. Python Interview Questions" value={bulkQATitle} onChange={e => setBulkQATitle(e.target.value)} />
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>Q&A PAIRS</label>
+                  <p style={{ fontSize: "11px", color: MUTE, marginBottom: "8px" }}>Use <code>Q:</code> and <code>A:</code> prefixes, separated by blank lines.</p>
+                  <textarea
+                    value={bulkQAText}
+                    onChange={e => setBulkQAText(e.target.value)}
+                    rows={12}
+                    placeholder={"Q: What is a list in Python?\nA: A list is a mutable ordered collection.\n\nQ: What is a tuple?\nA: A tuple is an immutable ordered collection."}
+                    style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {bulkTopicMode === "mixed" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Input label="TOPIC TITLE" type="text" placeholder="e.g. Python + Interview Questions" value={bulkMixedTitle} onChange={e => setBulkMixedTitle(e.target.value)} />
+                <Input label="VIDEO URL" type="url" placeholder="https://youtube.com/..." value={bulkMixedUrl} onChange={e => setBulkMixedUrl(e.target.value)} />
+                <Input label="DURATION (optional)" type="text" placeholder="e.g. 9:39" value={bulkMixedDuration} onChange={e => setBulkMixedDuration(e.target.value)} />
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>Q&A PAIRS (optional)</label>
+                  <textarea
+                    value={bulkMixedQAText}
+                    onChange={e => setBulkMixedQAText(e.target.value)}
+                    rows={8}
+                    placeholder={"Q: What is...\nA: It is...\n\nQ: How does...\nA: It works by..."}
+                    style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {bulkTopicMode === "dsa" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <p style={{ fontSize: "12px", color: MUTE, margin: 0 }}>Format: <strong>Problem Name, URL, Difficulty, Platform</strong> — one per line.<br />e.g. <code>Two Sum, https://leetcode.com/problems/two-sum/, Easy, LeetCode</code></p>
+                <textarea
+                  value={bulkDSAText}
+                  onChange={e => setBulkDSAText(e.target.value)}
+                  rows={10}
+                  placeholder={"Two Sum, https://leetcode.com/problems/two-sum/, Easy, LeetCode\nMerge Intervals, https://leetcode.com/problems/merge-intervals/, Medium, LeetCode"}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }}
+                />
+              </div>
+            )}
+
+            {bulkTopicMode === "article" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Input label="ARTICLE TITLE" type="text" placeholder="e.g. Python Interview Questions" value={bulkArticleTitle} onChange={e => setBulkArticleTitle(e.target.value)} />
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>QUESTIONS & ANSWERS</label>
+                  <p style={{ fontSize: "11px", color: MUTE, marginBottom: "8px" }}>Use <code>Q:</code> and <code>A:</code> prefixes, separated by blank lines.</p>
+                  <textarea
+                    value={bulkArticleQAText}
+                    onChange={e => setBulkArticleQAText(e.target.value)}
+                    rows={12}
+                    placeholder={"Q: What is a decorator in Python?\nA: A decorator is a function that wraps another function...\n\nQ: Explain list comprehension.\nA: List comprehension provides a concise way to create lists..."}
+                    style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "20px" }}>
+              <Btn onClick={() => setShowBulkTopic(null)} color={MUTE} small>Cancel</Btn>
+              <Btn onClick={handleBulkAddTopics} small>Add Topics</Btn>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Topic Modal */}
+      {editTopic && (
+        <Modal title="Edit Topic" onClose={() => { setEditTopic(null); setTopicForm({ title: "", content_type: "video", video_url: "", duration: "", qa_text: "", mcq_text: "", difficulty: "Easy", platform: "LeetCode" }); }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <Input label="TOPIC TITLE" type="text" value={topicForm.title} onChange={e => setTopicForm(f => ({ ...f, title: e.target.value }))} />
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>CONTENT TYPE</label>
+              <select value={topicForm.content_type} onChange={e => setTopicForm(f => ({ ...f, content_type: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                <option value="video">Video</option>
+                <option value="qa">Q&A Only</option>
+                <option value="mixed">Video + Q&A</option>
+                <option value="dsa">DSA Problem</option>
+                <option value="mcq">MCQ Quiz</option>
+                <option value="article">Article (Interview Q&A)</option>
+              </select>
+            </div>
+            {(topicForm.content_type === "video" || topicForm.content_type === "mixed") && (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 2 }}><Input label="VIDEO URL" type="url" placeholder="https://youtube.com/..." value={topicForm.video_url} onChange={e => setTopicForm(f => ({ ...f, video_url: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><Input label="DURATION" type="text" placeholder="9:39" value={topicForm.duration} onChange={e => setTopicForm(f => ({ ...f, duration: e.target.value }))} /></div>
+              </div>
+            )}
+            {topicForm.content_type === "dsa" && (
+              <>
+                <Input label="PROBLEM URL (LeetCode / GFG / etc.)" type="url" placeholder="https://leetcode.com/problems/..." value={topicForm.video_url} onChange={e => setTopicForm(f => ({ ...f, video_url: e.target.value }))} />
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>DIFFICULTY</label>
+                    <select value={topicForm.difficulty} onChange={e => setTopicForm(f => ({ ...f, difficulty: e.target.value }))}
+                      style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>PLATFORM</label>
+                    <select value={topicForm.platform} onChange={e => setTopicForm(f => ({ ...f, platform: e.target.value }))}
+                      style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
+                      <option value="LeetCode">LeetCode</option>
+                      <option value="GFG">GFG</option>
+                      <option value="HackerRank">HackerRank</option>
+                      <option value="CodeChef">CodeChef</option>
+                      <option value="Codeforces">Codeforces</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+            {(topicForm.content_type === "qa" || topicForm.content_type === "mixed" || topicForm.content_type === "article") && (
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>Q&A PAIRS</label>
+                <textarea value={topicForm.qa_text} onChange={e => setTopicForm(f => ({ ...f, qa_text: e.target.value }))} rows={8}
+                  placeholder={"Q: What is...\nA: It is...\n\nQ: How does...\nA: ..."}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+              </div>
+            )}
+            {topicForm.content_type === "mcq" && (
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>MCQ QUESTIONS</label>
+                <p style={{ fontSize: "11px", color: MUTE, marginBottom: "8px" }}>Use <code>Q:</code> for question, <code>- option</code> for wrong answers, <code>* option</code> for correct answer.</p>
+                <textarea value={topicForm.mcq_text} onChange={e => setTopicForm(f => ({ ...f, mcq_text: e.target.value }))} rows={10}
+                  placeholder={"Q: What is Python?\n- A compiled language\n* An interpreted language\n- A markup language\n\nQ: What does len() return?\n* The number of items in an object\n- The last index\n- The memory size"}
+                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "12px", ...MONO, outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+              </div>
+            )}
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Btn onClick={() => { setEditTopic(null); setTopicForm({ title: "", content_type: "video", video_url: "", duration: "", qa_text: "", mcq_text: "", difficulty: "Easy", platform: "LeetCode" }); }} color={MUTE} small>Cancel</Btn>
+              <Btn onClick={handleSaveTopic} small>Save Changes</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Resume Enhancer Credentials Modal */}
       {showResumeCreds && (
@@ -1697,69 +2140,7 @@ export default function Admin() {
         </Modal>
       )}
 
-      {/* Add Resource Modal */}
-      {showAddResource && (
-        <Modal title="Add Resource" onClose={() => setShowAddResource(false)}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxHeight: "70vh", overflowY: "auto" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>SECTION</label>
-              <select value={resourceForm.section} onChange={e => setResourceForm(f => ({ ...f, section: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
-                <option value="recommended">Recommended</option>
-                <option value="training">Training</option>
-                <option value="placement">Placement</option>
-              </select>
-            </div>
 
-            {resourceForm.section === "placement" && (
-              <div>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>COMPANY TYPE</label>
-                <select value={resourceForm.company_type} onChange={e => setResourceForm(f => ({ ...f, company_type: e.target.value }))}
-                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
-                  <option value="service">Service (TCS, Infosys...)</option>
-                  <option value="product">Product (Google, Amazon...)</option>
-                </select>
-              </div>
-            )}
-
-            <Input
-              label={resourceForm.section === "placement" && resourceForm.company_type === "service" ? "COMPANY NAME (Category)" : "CATEGORY"}
-              type="text"
-              placeholder={resourceForm.section === "training" ? "e.g. Python, React, DSA" : resourceForm.section === "placement" ? "e.g. TCS, Infosys, Google" : "e.g. Resume, LinkedIn"}
-              value={resourceForm.category}
-              onChange={e => setResourceForm(f => ({ ...f, category: e.target.value }))}
-            />
-
-            {resourceForm.section === "placement" && resourceForm.company_type === "service" && (
-              <div>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "6px" }}>QUESTION TYPE</label>
-                <select value={resourceForm.sub_type} onChange={e => setResourceForm(f => ({ ...f, sub_type: e.target.value }))}
-                  style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BORD}`, borderRadius: "6px", fontSize: "13px", ...MONO, outline: "none" }}>
-                  <option value="">Select type...</option>
-                  <option value="Aptitude">Aptitude</option>
-                  <option value="DSA">DSA</option>
-                  <option value="Technical Interview">Technical Interview</option>
-                </select>
-              </div>
-            )}
-
-            <Input label="RESOURCE NAME" type="text" placeholder="e.g. Python Crash Course" value={resourceForm.name} onChange={e => setResourceForm(f => ({ ...f, name: e.target.value }))} />
-            <Input label="TAGLINE / DESCRIPTION" type="text" placeholder="One line that sells this resource" value={resourceForm.tagline} onChange={e => setResourceForm(f => ({ ...f, tagline: e.target.value }))} />
-            <Input label="URL" type="url" placeholder="https://..." value={resourceForm.url} onChange={e => setResourceForm(f => ({ ...f, url: e.target.value }))} />
-
-            <Input label="EMOJI (optional)" type="text" placeholder="e.g. ??" value={resourceForm.emoji} onChange={e => setResourceForm(f => ({ ...f, emoji: e.target.value }))} />
-
-            {resourceForm.section === "recommended" && (
-              <Input label="BADGE LABEL (optional)" type="text" placeholder="e.g. MUST USE, TOP PICK" value={resourceForm.badge_label} onChange={e => setResourceForm(f => ({ ...f, badge_label: e.target.value }))} />
-            )}
-
-            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <Btn onClick={() => setShowAddResource(false)} color={MUTE} small>Cancel</Btn>
-              <Btn onClick={handleAddResource} small>Add Resource</Btn>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* Add / Edit Batch Modal */}
       {(showAddBatch || editBatch) && (
