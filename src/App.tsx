@@ -13,6 +13,7 @@ const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Portal = lazy(() => import("./pages/Portal"));
 const Login = lazy(() => import("./pages/Login"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ProjectManager = lazy(() => import("./pages/ProjectManager"));
 const SalesPerson = lazy(() => import("./pages/SalesPerson"));
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/programs" element={<Programs />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/change-password" element={
               <ProtectedRoute>
                 <ChangePassword />

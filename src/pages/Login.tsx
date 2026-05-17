@@ -158,6 +158,15 @@ const Login = () => {
               <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required />
               <PasswordToggle show={showPassword} setShow={setShowPassword} />
             </Field>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
+              <button type="button" onClick={() => navigate("/forgot-password")}
+                style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0 }}
+                onMouseEnter={e => (e.currentTarget.style.color = B)}
+                onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
+              >
+                Forgot password?
+              </button>
+            </div>
             <SubmitButton isLoading={isLoading} label="ACCESS PORTAL ->" loadingLabel="AUTHENTICATING..." />
           </form>
         </div>

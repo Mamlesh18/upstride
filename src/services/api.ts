@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -55,6 +55,11 @@ export const api = {
       request("/api/auth/change-password", {
         method: "POST",
         body: JSON.stringify({ current_password, new_password }),
+      }),
+    forgotPassword: (email: string, new_password: string) =>
+      request<{ success: boolean; message?: string }>("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email, new_password }),
       }),
     me: () => request("/api/auth/me"),
   },
