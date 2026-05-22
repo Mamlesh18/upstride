@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -37,6 +37,50 @@ async function formRequest<T>(path: string, formData: FormData, method = "POST")
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || data.message || "Request failed");
   return data;
+}
+
+// ── Compass types ──
+export interface CompassNextSkill {
+  name: string;
+  why: string;
+  resource_hint?: string;
+}
+export interface CompassRoadmapStep {
+  step: number;
+  title: string;
+  duration: string;
+  skills: string[];
+  milestone: string;
+  resource_hint?: string;
+}
+export interface CompassRole {
+  id: string;
+  title: string;
+  description: string;
+  demand: string;
+  salary_range?: string;
+  next_skills: CompassNextSkill[];
+  roadmap?: CompassRoadmapStep[];
+  combination_of?: string[];
+}
+export interface CompassCluster {
+  id: string;
+  label: string;
+  tagline: string;
+  color: string;
+  matched_skills: string[];
+  roles: CompassRole[];
+}
+export interface CompassMap {
+  clusters: CompassCluster[];
+  combo_roles?: CompassRole[];
+}
+export interface CompassMapResponse {
+  skills_input: string[];
+  interests?: string | null;
+  generated_at?: string | null;
+  updated_at?: string | null;
+  map: CompassMap | null;
 }
 
 export const api = {
@@ -172,6 +216,15 @@ export const api = {
     getLeaderboard: () => request("/api/student/leaderboard"),
     getSchedule: () => request("/api/student/schedule"),
     getUpcomingEvents: () => request("/api/student/events"),
+
+    // ── Compass — personalized career graph ──
+    getCompass: () => request<CompassMapResponse>("/api/student/compass"),
+    generateCompass: (skills: string[], interests?: string) =>
+      request<CompassMapResponse>("/api/student/compass/generate", {
+        method: "POST",
+        body: JSON.stringify({ skills, interests: interests || null }),
+      }),
+    deleteCompass: () => request("/api/student/compass", { method: "DELETE" }),
   },
 
   public: {

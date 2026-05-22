@@ -23,6 +23,7 @@ const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Results = lazy(() => import("./pages/Results"));
+const Compass = lazy(() => import("./pages/Compass"));
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,11 @@ const App = () => (
             <Route path="/workspace" element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <Workspace />
+              </ProtectedRoute>
+            } />
+            <Route path="/portal/compass" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Compass />
               </ProtectedRoute>
             } />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

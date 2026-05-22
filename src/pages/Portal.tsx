@@ -25,6 +25,7 @@ import {
   CreditCard, Banknote, Building, Landmark, Hexagon, BarChart3,
   Router, Apple as AppleIcon, Package, Mail, Bike,
   ChevronsRight, Sun, Compass, HardHat, Calculator, PieChart, Lightbulb, Monitor, Leaf,
+  CircuitBoard,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -222,7 +223,7 @@ const CK_KEY_TITLE: Record<CKKey, string> = {
 };
 
 // ─── Interview Topics ─────────────────────────────────────────────────────────
-type IVKey = "system_design" | "backend" | "computer_network" | "database" | "java" | "operating_system" | "python" | "mern" | "react" | "sql" | "genai" | "mobile";
+type IVKey = "system_design" | "backend" | "computer_network" | "database" | "java" | "operating_system" | "python" | "mern" | "react" | "sql" | "genai" | "mobile" | "business_analyst" | "embedded";
 const IV_SLUG_MAP: Record<string, IVKey> = {
   "system-design":     "system_design",
   "backend":           "backend",
@@ -236,6 +237,8 @@ const IV_SLUG_MAP: Record<string, IVKey> = {
   "sql":               "sql",
   "genai":             "genai",
   "mobile":            "mobile",
+  "business-analyst":  "business_analyst",
+  "embedded":          "embedded",
 };
 const IV_KEY_TO_SLUG: Record<IVKey, string> = {
   system_design:    "system-design",
@@ -250,6 +253,8 @@ const IV_KEY_TO_SLUG: Record<IVKey, string> = {
   sql:              "sql",
   genai:            "genai",
   mobile:           "mobile",
+  business_analyst: "business-analyst",
+  embedded:         "embedded",
 };
 const IV_KEY_TITLE: Record<IVKey, string> = {
   system_design:    "System Design Interview",
@@ -264,6 +269,8 @@ const IV_KEY_TITLE: Record<IVKey, string> = {
   sql:              "SQL Interview",
   genai:            "GenAI / LLM Interview",
   mobile:           "Mobile Developer Interview",
+  business_analyst: "Business Analyst Interview",
+  embedded:         "Embedded Developer Interview",
 };
 const IV_KEY_TAGLINE: Record<IVKey, string> = {
   system_design:    "Scalability, CAP theorem, sharding — the FAANG architecture questions in one place.",
@@ -278,6 +285,8 @@ const IV_KEY_TAGLINE: Record<IVKey, string> = {
   sql:              "Joins, aggregates, window functions, CTEs — the SQL questions every analyst gets quizzed on.",
   genai:            "Tokens, attention, RAG, LoRA, prompting — the LLM questions AI roles love to ask.",
   mobile:           "Android, iOS, React Native, Flutter — the mobile interview answers across every platform.",
+  business_analyst: "BRD, SRS, SDLC, Agile, stakeholders — the business-meets-tech questions every BA role asks.",
+  embedded:         "Microcontrollers, RTOS, SPI/I2C, ARM Cortex-M — the embedded systems questions every firmware role asks.",
 };
 type QA = { q: string; a: string };
 type IVMCQ = { q: string; opts: string[]; ans: number; why: string };
@@ -1027,6 +1036,176 @@ const IV_DATA: Record<IVKey, {
       "Firebase Crashlytics is used by ~80% of top-grossing mobile apps for crash monitoring.",
       "Flutter powers Google Pay, BMW My, and ByteDance's CapCut — cross-platform can scale.",
       "React Native's new architecture (JSI + Fabric) closes most of the perf gap with native.",
+    ],
+  },
+  business_analyst: {
+    beginner: [
+      { q: "What does a Business Analyst do?", a: "A BA understands business problems and helps teams build the right solution. They bridge business teams and technical teams." },
+      { q: "What are business requirements?", a: "Business requirements explain what the business wants to achieve. They focus on goals and outcomes, not the how." },
+      { q: "What is a functional requirement?", a: "A functional requirement explains what the system should do. Example: 'Users should be able to log in.'" },
+      { q: "What is a non-functional requirement?", a: "Non-functional requirements describe performance or quality — speed, security, scalability, reliability." },
+      { q: "What is SDLC?", a: "Software Development Life Cycle: planning → development → testing → deployment → maintenance." },
+      { q: "What is Agile methodology?", a: "Agile develops software in small, fast cycles. Teams continuously improve based on feedback." },
+      { q: "What is Scrum?", a: "An Agile framework where teams work in short sprints with daily standups and sprint reviews." },
+      { q: "What is a sprint?", a: "A short development cycle (usually 1–4 weeks) during which a team completes planned tasks." },
+      { q: "What is a stakeholder?", a: "Anyone affected by the project — clients, managers, developers, end users, executives." },
+      { q: "What is requirement gathering?", a: "Collecting business needs from stakeholders to define the project clearly." },
+      { q: "What is BRD?", a: "Business Requirement Document — explains business goals and high-level requirements." },
+      { q: "What is SRS?", a: "Software Requirement Specification — contains detailed system requirements (functional + non-functional)." },
+      { q: "What is a use case?", a: "Describes how a user interacts with a system step-by-step to complete an action." },
+      { q: "What is UML?", a: "Unified Modeling Language — used to visually represent systems and workflows (class, sequence, use-case diagrams)." },
+      { q: "What is SWOT analysis?", a: "Strengths, Weaknesses, Opportunities, Threats — a framework to analyze a business situation." },
+      { q: "What is gap analysis?", a: "Compares current performance with desired performance to identify improvement areas." },
+      { q: "What is a flowchart?", a: "A visual representation of process steps using shapes and arrows. Helps explain workflows clearly." },
+      { q: "What is UAT?", a: "User Acceptance Testing — real users test whether the system meets business needs before go-live." },
+      { q: "What tools do Business Analysts use?", a: "Excel, JIRA, Confluence, Power BI, Tableau, SQL, Visio, Lucidchart, Figma. Mix depends on the project." },
+      { q: "Why do you want to become a Business Analyst?", a: "I enjoy solving problems at the intersection of people, business, and technology — and improving processes." },
+    ],
+    intermediate: [
+      { q: "Agile vs Waterfall?", a: "Waterfall: fixed sequence of phases, locked scope. Agile: iterative, flexible, accommodates change." },
+      { q: "What is a user story?", a: "A feature described from the user's perspective. Format: 'As a [user], I want [goal] so that [benefit].'" },
+      { q: "What is acceptance criteria?", a: "Conditions that define when a feature is considered complete. Used by testers + developers to verify." },
+      { q: "What is the backlog in Agile?", a: "An ordered list of tasks, features, and improvements. The Product Owner manages it." },
+      { q: "What is requirement prioritization?", a: "Deciding which features are most important first — by value, urgency, effort, or strategic fit." },
+      { q: "What is MoSCoW prioritization?", a: "Must Have, Should Have, Could Have, Won't Have. Ranks requirements by criticality." },
+      { q: "What is process modeling?", a: "Visually representing workflows and business operations using BPMN, UML, or flowcharts." },
+      { q: "What is a KPI?", a: "Key Performance Indicator — a measurable value showing how effectively goals are being achieved." },
+      { q: "What is feasibility analysis?", a: "Checks whether a project is possible technically, financially, and operationally before commitment." },
+      { q: "What is root cause analysis?", a: "Identifies the main reason behind a problem (5 Whys, Fishbone) to prevent it from recurring." },
+      { q: "What is BPMN?", a: "Business Process Model and Notation — a standard for diagramming business processes." },
+      { q: "What is data analysis in BA work?", a: "Studying data to find patterns and insights that support better business decisions." },
+      { q: "Why is SQL useful for BAs?", a: "SQL lets BAs pull data directly from databases for reporting, validation, and decision support." },
+      { q: "What is change management?", a: "Helping organizations and people adapt to new systems, processes, or structures smoothly." },
+      { q: "What is requirement traceability?", a: "Tracking each requirement throughout the project lifecycle to ensure nothing is missed or unverified." },
+      { q: "What is a wireframe?", a: "A low-fidelity visual layout of an app or webpage — focuses on structure, not design." },
+      { q: "What challenges do BAs face?", a: "Unclear requirements, communication gaps, scope creep, conflicting stakeholders, changing priorities." },
+      { q: "How do you handle conflicting stakeholder opinions?", a: "Listen to all sides, focus on business goals, facilitate discussion, use data to break ties." },
+      { q: "What is a business process?", a: "A set of structured steps used to achieve a business goal. Example: customer onboarding." },
+      { q: "How do BAs communicate with developers?", a: "Through clear requirements, user stories, acceptance criteria, walkthrough meetings, and JIRA tickets." },
+    ],
+    advanced: [
+      { q: "How do you handle changing requirements?", a: "Discuss impact with stakeholders, update documentation, log change requests, re-prioritize the backlog." },
+      { q: "What is requirement elicitation?", a: "The process of collecting requirements from stakeholders — interviews, workshops, surveys, observation." },
+      { q: "Techniques used for requirement gathering?", a: "Interviews, brainstorming, workshops, observation, questionnaires, prototyping, document analysis." },
+      { q: "What is a risk in a project?", a: "A potential issue that may affect the project's success. Identified early, tracked in a risk register." },
+      { q: "What is a business case?", a: "A document explaining WHY a project should be started — benefits, costs, risks, expected ROI." },
+      { q: "What is scope creep?", a: "Uncontrolled growth of requirements after the project starts. Prevent it with change-control processes." },
+      { q: "What is a dashboard?", a: "A visual display of key business data and KPIs. Helps stakeholders track performance at a glance." },
+      { q: "What is data visualization?", a: "Presenting data using charts, graphs, and dashboards so insights are easy to understand and act on." },
+      { q: "What is requirement validation?", a: "Checking that requirements are correct, complete, and aligned with business goals before development." },
+      { q: "What is stakeholder management?", a: "Identifying, engaging, and communicating with stakeholders to keep them aligned and supportive." },
+      { q: "What is the BA's role during testing?", a: "Ensures the system matches business requirements, supports UAT, clarifies issues, signs off scenarios." },
+      { q: "What is impact analysis?", a: "Assesses how a proposed change affects systems, processes, and stakeholders BEFORE implementation." },
+      { q: "What is prototyping?", a: "Building a sample version of a product (clickable mockup, MVP) to gather feedback before full development." },
+      { q: "What is digital transformation?", a: "Using technology to fundamentally improve business operations, customer experience, and revenue models." },
+      { q: "What is requirement ambiguity?", a: "When requirements are unclear or open to multiple interpretations. Resolve with examples and stakeholder reviews." },
+      { q: "What metrics can BAs track?", a: "KPIs, revenue growth, customer satisfaction (NPS, CSAT), project velocity, defect rates, adoption rates." },
+      { q: "Business Analyst vs Data Analyst?", a: "BA focuses on business problems and solutions. DA focuses on data exploration, insights, and visualizations." },
+      { q: "How do you ensure clear requirements?", a: "Use simple language, examples, visuals, get stakeholder sign-off, peer-review documentation." },
+      { q: "What makes a good Business Analyst?", a: "Strong communication, problem-solving, analytical thinking, curiosity, empathy, comfort with ambiguity." },
+      { q: "Where do you see yourself as a BA?", a: "Growing into senior/lead BA roles, then product management or BA consulting on larger transformations." },
+    ],
+    mcq: [
+      { q: "Which of these is a NON-functional requirement?", opts: ["Users can reset their password", "System must respond in under 2 seconds", "Admin can delete a user", "Export reports as PDF"], ans: 1, why: "Non-functional requirements describe quality attributes like performance, security, or scalability. Response time is a classic performance requirement." },
+      { q: "MoSCoW prioritization stands for?", opts: ["Mandatory, Standard, Critical, Wishful", "Must, Should, Could, Won't", "Major, Significant, Casual, Wait", "Manage, Solve, Communicate, Win"], ans: 1, why: "MoSCoW = Must Have, Should Have, Could Have, Won't Have. Used to rank requirements by business criticality." },
+      { q: "Which document is detailed and technical?", opts: ["BRD", "SRS", "Business Case", "SWOT"], ans: 1, why: "SRS (Software Requirement Specification) has detailed functional + non-functional system requirements. BRD is higher-level business goals." },
+      { q: "What's the BA's role during UAT?", opts: ["Write all test scripts", "Ensure system matches requirements + support real users testing", "Replace QA team", "Approve code merges"], ans: 1, why: "BAs facilitate UAT, clarify acceptance criteria, and confirm the solution meets the business need before go-live." },
+      { q: "Best technique for finding the real cause of a recurring problem?", opts: ["SWOT analysis", "Wireframing", "Root Cause Analysis (5 Whys, Fishbone)", "Brainstorming"], ans: 2, why: "Root Cause Analysis (5 Whys, Fishbone/Ishikawa diagram) drills past symptoms to the underlying cause so the problem doesn't recur." },
+    ],
+    facts: [
+      "📚 BABOK Guide (Business Analysis Body of Knowledge) — the IIBA's definitive reference. Every BA should own a copy.",
+      "🎯 Crack the interview: frame every answer around BUSINESS VALUE — 'this solves X for the user/customer/business' beats technical jargon.",
+      "💡 BA tool trifecta in 2025: SQL (data), Excel/Power BI (analysis), JIRA + Confluence (delivery). Master these three.",
+      "📖 'User Story Mapping' by Jeff Patton — the best book on writing user stories that actually capture value.",
+      "📊 The 5 Whys technique solves 80% of process issues — keep asking 'why?' until the root cause is obvious.",
+      "🏆 Certifications: ECBA (entry), CCBA (mid), CBAP (senior) from IIBA. PMI-PBA is another respected one.",
+      "🤝 Soft skills = 50% of the job. Active listening + facilitation skills matter as much as documentation.",
+      "🎓 Free resource: 'BA Times' (batimes.com) — articles from working BAs across industries. Read it weekly.",
+    ],
+  },
+  embedded: {
+    beginner: [
+      { q: "What is an embedded system?", a: "A computer designed for a specific task, built into a larger device. Examples: washing machines, microwaves, car ECUs, smart watches." },
+      { q: "Microcontroller vs microprocessor?", a: "Microcontroller = CPU + RAM + ROM + I/O on one chip. Microprocessor = just the CPU, needs external memory + peripherals." },
+      { q: "What is GPIO?", a: "General Purpose Input/Output — programmable pins on a microcontroller used to read sensors or drive LEDs, motors, relays." },
+      { q: "What is a real-time OS (RTOS)?", a: "An OS that processes tasks within guaranteed time limits. Used where timing is critical — airbags, pacemakers, motor controllers." },
+      { q: "RAM vs ROM in embedded systems?", a: "RAM: volatile, runtime data. ROM (Flash): non-volatile, stores firmware permanently. RAM is fast; Flash survives power-off." },
+      { q: "What is a bootloader?", a: "A small program that runs first on power-on. Initializes hardware, optionally accepts firmware updates, then jumps to the main application." },
+      { q: "What is UART?", a: "Universal Asynchronous Receiver-Transmitter — serial protocol using 2 wires (TX, RX) for simple point-to-point communication." },
+      { q: "What is SPI?", a: "Serial Peripheral Interface — synchronous protocol using 4 lines (MOSI, MISO, SCK, CS). Faster than I2C; used for sensors, displays, flash." },
+      { q: "What is I2C?", a: "Inter-Integrated Circuit — 2-wire protocol (SDA, SCL) supporting multiple devices on the same bus via addressing." },
+      { q: "What is PWM?", a: "Pulse Width Modulation — controls power by varying the duty cycle of a digital signal. Used for LED brightness, motor speed, servos." },
+      { q: "What is an interrupt?", a: "A signal that tells the CPU to pause its current task and handle an urgent event. After handling, the CPU resumes." },
+      { q: "What is an ADC?", a: "Analog-to-Digital Converter — converts a real-world analog signal (e.g. temperature voltage) into a digital number the MCU can process." },
+      { q: "What is a DAC?", a: "Digital-to-Analog Converter — converts a digital number into an analog voltage. Used in audio output, motor control, signal generators." },
+      { q: "What does 'volatile' mean in embedded C?", a: "Tells the compiler NOT to optimize that variable because it can change unexpectedly — from an ISR or a hardware register." },
+      { q: "What is a watchdog timer?", a: "A timer that resets the system if the program gets stuck. Software must regularly 'feed' (reset) it to prevent a reboot." },
+      { q: "What is cross-compilation?", a: "Writing code on one machine (e.g. x86 PC) and compiling it to run on a different target architecture (e.g. ARM Cortex-M)." },
+      { q: "What is a linker script?", a: "Tells the linker where to place code and data sections (.text, .data, .bss) in the target's memory map." },
+      { q: "Polling vs interrupt-driven I/O?", a: "Polling loops checking a status flag (wastes CPU). Interrupt-driven lets the CPU do other work and only responds when hardware signals." },
+      { q: "What is a hex file in embedded?", a: "A compiled firmware file (.hex) in Intel HEX format, ready to be flashed onto the microcontroller's flash memory." },
+      { q: "What is a register in a microcontroller?", a: "A small, fixed-size memory location inside the CPU used to control hardware peripherals or store temporary data very quickly." },
+    ],
+    intermediate: [
+      { q: "What is DMA and why use it?", a: "Direct Memory Access transfers data between memory and peripherals WITHOUT the CPU. Frees the CPU for other work — huge performance win." },
+      { q: "What is an ISR (Interrupt Service Routine)?", a: "A function that runs automatically when an interrupt fires. Should be short and fast to avoid blocking other time-critical tasks." },
+      { q: "Stack vs heap memory in embedded?", a: "Stack: auto-managed, used for local variables. Heap: manual (malloc/free) for dynamic allocation. Embedded prefers stack — heap fragments." },
+      { q: "What is bit manipulation and why important?", a: "Using bitwise operators (&, |, ^, ~, <<, >>) to set/clear/toggle individual bits in hardware registers. Essential for low-level peripheral control." },
+      { q: "What is memory-mapped I/O?", a: "Hardware peripheral registers are assigned specific memory addresses. You control hardware by simply reading/writing those addresses." },
+      { q: "What is endianness?", a: "Byte order of multi-byte data. Little-endian: least significant byte first (ARM, x86). Big-endian: most significant byte first (some network protocols)." },
+      { q: "What is a semaphore in RTOS?", a: "A synchronization primitive used to control access to shared resources or signal events from an ISR to a task." },
+      { q: "What is a mutex?", a: "Mutual exclusion lock — only one task can hold it at a time. Prevents two tasks from accessing a shared resource simultaneously." },
+      { q: "What is priority inversion?", a: "A high-priority task is blocked by a low-priority task holding a resource. Solved using priority inheritance protocols in RTOS." },
+      { q: "What is a task/thread in RTOS?", a: "An independent unit of execution with its own stack. The RTOS scheduler decides which task runs based on priority and state." },
+      { q: "Hard vs soft real-time systems?", a: "Hard: deadlines are absolute — missing one is catastrophic (airbag). Soft: occasional misses are acceptable (video streaming)." },
+      { q: "What is debouncing?", a: "Removing noisy signals from a mechanical switch bouncing. Done in software (small delay) or hardware (RC filter)." },
+      { q: "What is CAN bus?", a: "Controller Area Network — robust serial bus protocol for automotive and industrial systems. Multiple nodes communicate reliably on one twisted pair." },
+      { q: "Purpose of a HAL?", a: "Hardware Abstraction Layer — provides a standard API to control hardware. Lets you write portable code across different microcontrollers." },
+      { q: "What is stack overflow? How to prevent?", a: "The stack grows beyond its allocated memory, corrupting nearby data. Prevent by sizing stacks correctly, avoiding deep recursion, using stack canaries." },
+      { q: "What is a circular buffer?", a: "A fixed-size ring buffer where old data gets overwritten when full. Widely used for UART receive buffers, audio sample queues, log buffers." },
+      { q: "Purpose of 'static' keyword in embedded C?", a: "Static variables retain value between function calls. Static functions are restricted to file scope — improves encapsulation and saves linker work." },
+      { q: "What is JTAG?", a: "Hardware debugging interface that lets you program and step-debug a microcontroller through test access ports. Used with OpenOCD, ST-Link, GDB." },
+      { q: "Power consumption optimization techniques?", a: "Use low-power sleep modes, reduce clock speed, disable unused peripherals, use DMA to minimize CPU wake time, lower I/O voltage." },
+      { q: "What is a memory leak in embedded C?", a: "Heap memory that's allocated but never freed. In embedded systems with tiny RAM, even a small leak crashes the device over hours/days." },
+    ],
+    advanced: [
+      { q: "What is cache coherency in multi-core embedded?", a: "Ensures all CPU cores see a consistent view of memory. Without it, one core's cached data may be stale compared to another core's write." },
+      { q: "What is an MPU (Memory Protection Unit)?", a: "Defines memory regions with access permissions. Prevents one task or driver from corrupting another's memory — improves system robustness." },
+      { q: "What is a device tree in embedded Linux?", a: "A data structure that describes hardware to the Linux kernel. Separates hardware description from kernel code — enables portability across SoCs." },
+      { q: "Kernel module vs user-space driver?", a: "Kernel module: runs in privileged kernel space, direct hardware access, faster, harder to debug. User-space: safer, easier to debug, slower." },
+      { q: "What is clock stretching in I2C?", a: "A slave holds SCL low to pause the master while it processes data. Not all masters support it — must be checked when picking parts." },
+      { q: "Preemptive vs cooperative scheduling?", a: "Preemptive: scheduler forcibly switches tasks by priority or time slice. Cooperative: tasks run until they voluntarily yield — risks starvation." },
+      { q: "What is a race condition? How to prevent?", a: "Two tasks access shared data simultaneously, producing unpredictable results. Prevent via mutexes, disabling interrupts, or atomic operations." },
+      { q: "What is PID control? Where is it used?", a: "Proportional-Integral-Derivative — feedback control algorithm to maintain setpoints. Used for motor speed, temperature, drone altitude, robotics." },
+      { q: "What is firmware OTA update? Risks?", a: "Over-The-Air updates remotely without physical access. Risk: incomplete writes brick the device. Mitigated with dual-bank or A/B update schemes." },
+      { q: "Role of the startup file (startup.s) in ARM Cortex-M?", a: "Initializes stack pointer, copies .data to RAM, zeros .bss, defines the vector table, then calls main()." },
+      { q: "Spinlock vs mutex in an embedded OS?", a: "Spinlock busy-waits in a loop — used in ISR or single-core contexts. Mutex puts the task to sleep — for tasks where blocking is acceptable." },
+      { q: "What is zero-copy networking in embedded Linux?", a: "Avoids redundant data copies between kernel and user-space buffers. Reduces CPU overhead and latency in high-speed network applications." },
+      { q: "What is secure boot?", a: "Verifies each stage of the boot chain using cryptographic signatures. Ensures only authenticated firmware runs — prevents malware or tampering." },
+      { q: "Baremetal vs RTOS-based development?", a: "Baremetal: no OS, direct hardware control, simple, lowest overhead. RTOS: adds tasks + scheduling + resource management for complex multi-tasking." },
+      { q: "What is ECC memory and why does it matter?", a: "Error Correcting Code memory detects + corrects single-bit errors automatically. Critical for safety-critical systems — aerospace, automotive ECUs, medical." },
+      { q: "What is memory alignment? Why issues?", a: "Data stored at addresses matching its size. Unaligned access can cause bus faults on ARM Cortex-M or significant performance penalties." },
+      { q: "What is the Cortex-M NVIC?", a: "Nested Vectored Interrupt Controller — manages interrupts with configurable priorities and nesting. Higher-priority IRQs preempt lower ones." },
+      { q: "What is MISRA C?", a: "A set of coding guidelines for safety-critical embedded C. Restricts unsafe C constructs to reduce bugs — required in automotive and aerospace." },
+      { q: "Time-triggered vs event-triggered architecture?", a: "Time-triggered: tasks run on a fixed schedule (predictable, rigid). Event-triggered: respond to events (flexible, harder timing analysis)." },
+      { q: "What is TrustZone in ARM processors?", a: "Divides the processor into Secure World and Normal World. Used to protect sensitive code (crypto keys, secure boot) from untrusted apps." },
+    ],
+    mcq: [
+      { q: "GPIO stands for?", opts: ["General Programmable Input/Output", "General Purpose Input/Output", "Global Pin Input/Output", "General Peripheral I/O"], ans: 1, why: "GPIO = General Purpose Input/Output. Software-controlled pins used to read switches/sensors or drive LEDs/motors." },
+      { q: "Which keyword tells the compiler NOT to optimize a variable that can change unexpectedly?", opts: ["const", "static", "extern", "volatile"], ans: 3, why: "'volatile' tells the compiler the variable can change outside the normal flow (ISR, hardware register), so always re-read it from memory." },
+      { q: "Which protocol uses MOSI, MISO, SCK, and CS?", opts: ["I2C", "UART", "SPI", "CAN"], ans: 2, why: "SPI = Serial Peripheral Interface. 4 lines: MOSI (master-out), MISO (master-in), SCK (clock), CS (chip select). Full duplex, faster than I2C." },
+      { q: "What does a watchdog timer do?", opts: ["Logs system events", "Resets the system if the program gets stuck", "Manages power consumption", "Schedules tasks in RTOS"], ans: 1, why: "If the software doesn't 'feed' (reset) the watchdog regularly, it assumes the program hung and forces a hardware reset." },
+      { q: "What does NVIC in Cortex-M stand for?", opts: ["Network Vector Interrupt Controller", "Nested Vectored Interrupt Controller", "Non-Volatile Internal Cache", "New Virtual Interrupt Controller"], ans: 1, why: "NVIC = Nested Vectored Interrupt Controller. Manages priorities and allows higher-priority IRQs to preempt lower-priority ISRs already running." },
+    ],
+    facts: [
+      "📚 'Making Embedded Systems' by Elecia White — the modern fresher's bible. Read it cover to cover.",
+      "🎯 Crack tip: explain WHY embedded ≠ general purpose — timing constraints, tiny memory, power budgets, no malloc in many cases.",
+      "📖 'The Definitive Guide to ARM Cortex-M3/M4' by Joseph Yiu — the ARM internals book interviewers love to test on.",
+      "💡 Tool stack to know: GCC-ARM toolchain, OpenOCD, ST-Link, PlatformIO/STM32CubeIDE, FreeRTOS source. Touch all 5.",
+      "🔧 Hardware to own: STM32F4 Discovery (~$25), Raspberry Pi Pico (~$5), ESP32 (~$8). Cheap and resume-worthy.",
+      "📊 Read AN-XXXX application notes from ST, NXP, TI — real-world drivers + design patterns beyond toy projects.",
+      "🏆 Free training: ARM University Program (university.arm.com), Yocto Project intro for embedded Linux roles.",
+      "🌍 r/embedded subreddit is the #1 community — lurk for 2 weeks, you'll learn more than from any course.",
     ],
   },
 };
@@ -4838,7 +5017,7 @@ const Portal = () => {
   const completedTopics = courses.reduce((s, c) => s + c.completed_topics, 0);
   const overallPct = totalTopics > 0 ? Math.round(completedTopics / totalTopics * 100) : 0;
 
-  type NavItem = { view: ViewType; label: string; icon: typeof LayoutDashboard; count: string };
+  type NavItem = { view: ViewType; label: string; icon: typeof LayoutDashboard; count: string; href?: string; isNew?: boolean };
   const tabs: NavItem[] = [
     { view: "overview",     label: "Overview",      icon: LayoutDashboard, count: "" },
     { view: "courses",      label: "Courses",        icon: GraduationCap,   count: `${coursesCourses.length || ""}` },
@@ -4853,6 +5032,13 @@ const Portal = () => {
   ];
 
   const navGroups: { label: string; accent: string; items: NavItem[] }[] = [
+    {
+      label: "DISCOVER",
+      accent: "#FFB000",
+      items: [
+        { view: "overview", label: "Compass", icon: Compass, count: "", href: "/portal/compass", isNew: true },
+      ],
+    },
     {
       label: "LEARN",
       accent: B,
@@ -4990,12 +5176,17 @@ const Portal = () => {
                   <div style={{ flex: 1, height: "1px", backgroundColor: `${group.accent}22` }} />
                 </div>
                 {/* Items */}
-                {group.items.map(({ view, label, icon: Icon, count }) => {
-                  const active = currentView === view;
+                {group.items.map(({ view, label, icon: Icon, count, href, isNew }) => {
+                  const active = !href && currentView === view;
                   return (
                     <button
-                      key={view}
+                      key={`${group.label}-${label}`}
                       onClick={() => {
+                        if (href) {
+                          navigate(href);
+                          if (isMobile) setSidebarOpen(false);
+                          return;
+                        }
                         switchView(view);
                         if (isMobile) setSidebarOpen(false);
                         navigate(view === "standup" ? "/portal/standup" : "/portal", { replace: true });
@@ -5019,6 +5210,11 @@ const Portal = () => {
                       {count && (
                         <span style={{ fontSize: "10px", fontWeight: 700, color: active ? B : group.accent, backgroundColor: active ? `${B}15` : `${group.accent}18`, padding: "1px 7px", borderRadius: "10px", flexShrink: 0, ...MONO }}>
                           {count}
+                        </span>
+                      )}
+                      {isNew && (
+                        <span style={{ fontSize: "9px", fontWeight: 700, color: B, backgroundColor: Y, padding: "1px 6px", borderRadius: "10px", flexShrink: 0, ...MONO, letterSpacing: "0.08em" }}>
+                          NEW
                         </span>
                       )}
                     </button>
@@ -7504,6 +7700,177 @@ const Portal = () => {
                 </div>
               </div>
 
+              {/* Card 13 — Business Analyst */}
+              <div style={{ cursor: "pointer" }} onClick={() => openInterviewTopic("business_analyst")}>
+                <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "12px", overflow: "hidden", transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s", height: "100%" }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = B; el.style.boxShadow = `6px 6px 0 ${Y}`; el.style.transform = "translate(-2px,-2px)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = BORD; el.style.boxShadow = "none"; el.style.transform = "translate(0,0)"; }}
+                >
+                  <div style={{ height: "200px", backgroundColor: "#0F1B2E", overflow: "hidden", position: "relative" }}>
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style={{position:"absolute",inset:0,width:"100%",height:"100%",display:"block"}} preserveAspectRatio="xMidYMid slice">
+                      <rect width="400" height="200" fill="#0F1B2E"/>
+                      <defs>
+                        <pattern id="ba-grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M 22 0 L 0 0 0 22" fill="none" stroke="#FFE500" strokeWidth="0.4" opacity="0.15"/></pattern>
+                      </defs>
+                      <rect width="400" height="200" fill="url(#ba-grid)"/>
+                      {/* Dashboard frame */}
+                      <rect x="18" y="32" width="364" height="138" rx="6" fill="#15243F" stroke="#FFE500" strokeWidth="1.2"/>
+                      <rect x="18" y="32" width="364" height="20" rx="6" fill="#1E3257"/>
+                      <circle cx="30" cy="42" r="3" fill="#EF4444"/>
+                      <circle cx="42" cy="42" r="3" fill="#FBBF24"/>
+                      <circle cx="54" cy="42" r="3" fill="#22C55E"/>
+                      <text x="200" y="46" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#FFE500" textAnchor="middle">REQUIREMENTS · PROCESS · INSIGHTS</text>
+                      {/* Bar chart (left) */}
+                      <text x="34" y="68" fontFamily="monospace" fontSize="7" fontWeight="700" fill="#9CA3AF">REVENUE</text>
+                      {[
+                        [34, 28], [50, 42], [66, 36], [82, 56], [98, 48], [114, 64],
+                      ].map(([x, h], i) => (
+                        <rect key={`bar-${i}`} x={x} y={140 - h} width="10" height={h} fill={i === 5 ? "#FFE500" : "#3B82F6"} rx="1"/>
+                      ))}
+                      <line x1="32" y1="142" x2="132" y2="142" stroke="#FFE500" strokeWidth="0.6" opacity="0.5"/>
+                      {/* Line chart (centre) */}
+                      <text x="200" y="68" fontFamily="monospace" fontSize="7" fontWeight="700" fill="#9CA3AF" textAnchor="middle">KPI TREND</text>
+                      <path d="M 152 130 L 168 116 L 184 122 L 200 100 L 216 108 L 232 86 L 248 78" stroke="#22D3EE" strokeWidth="1.6" fill="none"/>
+                      {[
+                        [152, 130], [168, 116], [184, 122], [200, 100], [216, 108], [232, 86], [248, 78],
+                      ].map(([cx, cy], i) => (
+                        <circle key={`pt-${i}`} cx={cx} cy={cy} r="2" fill="#22D3EE"/>
+                      ))}
+                      <line x1="152" y1="142" x2="248" y2="142" stroke="#FFE500" strokeWidth="0.6" opacity="0.5"/>
+                      {/* Pie chart (right) */}
+                      <text x="332" y="68" fontFamily="monospace" fontSize="7" fontWeight="700" fill="#9CA3AF" textAnchor="middle">SEGMENTS</text>
+                      <circle cx="332" cy="112" r="22" fill="#1E3257"/>
+                      <path d="M 332 112 L 332 90 A 22 22 0 0 1 351 123 Z" fill="#FFE500"/>
+                      <path d="M 332 112 L 351 123 A 22 22 0 0 1 320 132 Z" fill="#22C55E"/>
+                      <path d="M 332 112 L 320 132 A 22 22 0 0 1 332 90 Z" fill="#3B82F6"/>
+                      <circle cx="332" cy="112" r="8" fill="#15243F"/>
+                      {/* Footer KPI strip */}
+                      <rect x="32" y="152" width="68" height="14" rx="3" fill="#0F1B2E"/>
+                      <text x="36" y="162" fontFamily="monospace" fontSize="7" fill="#22C55E" fontWeight="700">+18.4% ▲</text>
+                      <rect x="108" y="152" width="68" height="14" rx="3" fill="#0F1B2E"/>
+                      <text x="112" y="162" fontFamily="monospace" fontSize="7" fill="#FFE500" fontWeight="700">SLA 99.2%</text>
+                      <rect x="184" y="152" width="68" height="14" rx="3" fill="#0F1B2E"/>
+                      <text x="188" y="162" fontFamily="monospace" fontSize="7" fill="#22D3EE" fontWeight="700">NPS +42</text>
+                      <rect x="260" y="152" width="68" height="14" rx="3" fill="#0F1B2E"/>
+                      <text x="264" y="162" fontFamily="monospace" fontSize="7" fill="#A78BFA" fontWeight="700">14 EPICS</text>
+                      <text x="200" y="22" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#FFE500" textAnchor="middle">BUSINESS ANALYST DASHBOARD</text>
+                    </svg>
+                    <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: B, color: W, padding: "3px 10px", fontSize: "9px", fontWeight: 700, letterSpacing: "0.15em" }}>60 Q&amp;A</div>
+                    <div style={{ position: "absolute", top: "12px", right: "12px", backgroundColor: W, border: `1.5px solid ${BORD}`, borderRadius: "6px", padding: "4px 8px", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <ClipboardList size={11} color={B} />
+                      <span style={{ fontSize: "9px", fontWeight: 700, color: B, letterSpacing: "0.08em" }}>OPEN</span>
+                    </div>
+                  </div>
+                  <div style={{ padding: "20px" }}>
+                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: B, marginBottom: "8px", letterSpacing: "-0.01em" }}>Business Analyst</h3>
+                    <p style={{ fontSize: "12px", color: MUTE, lineHeight: 1.7, margin: 0 }}>{IV_KEY_TAGLINE.business_analyst}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 14 — Embedded Developer */}
+              <div style={{ cursor: "pointer" }} onClick={() => openInterviewTopic("embedded")}>
+                <div style={{ backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "12px", overflow: "hidden", transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s", height: "100%" }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = B; el.style.boxShadow = `6px 6px 0 ${Y}`; el.style.transform = "translate(-2px,-2px)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = BORD; el.style.boxShadow = "none"; el.style.transform = "translate(0,0)"; }}
+                >
+                  <div style={{ height: "200px", backgroundColor: "#0A1F0F", overflow: "hidden", position: "relative" }}>
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style={{position:"absolute",inset:0,width:"100%",height:"100%",display:"block"}} preserveAspectRatio="xMidYMid slice">
+                      {/* PCB green background */}
+                      <rect width="400" height="200" fill="#0A3D1F"/>
+                      {/* Copper traces grid */}
+                      <defs>
+                        <pattern id="emb-pcb" width="14" height="14" patternUnits="userSpaceOnUse">
+                          <circle cx="2" cy="2" r="1" fill="#FFE500" opacity="0.18"/>
+                        </pattern>
+                      </defs>
+                      <rect width="400" height="200" fill="url(#emb-pcb)"/>
+                      {/* Horizontal/vertical PCB traces */}
+                      <line x1="0" y1="60" x2="120" y2="60" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="120" y1="60" x2="140" y2="80" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="140" y1="80" x2="140" y2="120" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="280" y1="60" x2="400" y2="60" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="260" y1="80" x2="280" y2="60" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="0" y1="140" x2="140" y2="140" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="260" y1="140" x2="400" y2="140" stroke="#FFE500" strokeWidth="1.5" opacity="0.55"/>
+                      <line x1="0" y1="170" x2="400" y2="170" stroke="#FFE500" strokeWidth="0.8" opacity="0.35"/>
+                      {/* Solder pads on trace ends */}
+                      <circle cx="0" cy="60" r="3" fill="#FFE500"/>
+                      <circle cx="400" cy="60" r="3" fill="#FFE500"/>
+                      <circle cx="0" cy="140" r="3" fill="#FFE500"/>
+                      <circle cx="400" cy="140" r="3" fill="#FFE500"/>
+                      {/* Microcontroller chip body */}
+                      <rect x="140" y="68" width="120" height="64" rx="4" fill="#0F1A14" stroke="#FFE500" strokeWidth="1.5"/>
+                      {/* Chip pins — top */}
+                      {[152, 168, 184, 200, 216, 232, 248].map(x => (
+                        <rect key={`pt-${x}`} x={x - 2} y="62" width="4" height="8" fill="#FFE500"/>
+                      ))}
+                      {/* Chip pins — bottom */}
+                      {[152, 168, 184, 200, 216, 232, 248].map(x => (
+                        <rect key={`pb-${x}`} x={x - 2} y="130" width="4" height="8" fill="#FFE500"/>
+                      ))}
+                      {/* Chip pins — left */}
+                      {[76, 88, 100, 112, 124].map(y => (
+                        <rect key={`pl-${y}`} x="134" y={y - 2} width="8" height="4" fill="#FFE500"/>
+                      ))}
+                      {/* Chip pins — right */}
+                      {[76, 88, 100, 112, 124].map(y => (
+                        <rect key={`pr-${y}`} x="258" y={y - 2} width="8" height="4" fill="#FFE500"/>
+                      ))}
+                      {/* Pin-1 notch */}
+                      <circle cx="148" cy="76" r="2" fill="#FFE500" opacity="0.6"/>
+                      {/* Chip wordmark */}
+                      <text x="200" y="96" fontFamily="'Bebas Neue', sans-serif" fontSize="14" fontWeight="700" fill="#FFE500" textAnchor="middle">CORTEX-M4</text>
+                      <text x="200" y="112" fontFamily="monospace" fontSize="8" fill="#86EFAC" textAnchor="middle">STM32F4 · 168MHz</text>
+                      <text x="200" y="124" fontFamily="monospace" fontSize="7" fill="#86EFAC" opacity="0.7" textAnchor="middle">192KB SRAM · 1MB FLASH</text>
+                      {/* Resistor (left side) */}
+                      <rect x="48" y="86" width="40" height="14" rx="2" fill="#1A2D14" stroke="#FFE500" strokeWidth="0.8"/>
+                      <rect x="56" y="86" width="3" height="14" fill="#EF4444"/>
+                      <rect x="62" y="86" width="3" height="14" fill="#22C55E"/>
+                      <rect x="68" y="86" width="3" height="14" fill="#FBBF24"/>
+                      <text x="68" y="78" fontFamily="monospace" fontSize="7" fill="#FFE500" textAnchor="middle">10kΩ</text>
+                      {/* Capacitor (right side) */}
+                      <rect x="316" y="86" width="20" height="20" rx="10" fill="#1A2D14" stroke="#FFE500" strokeWidth="1"/>
+                      <text x="326" y="100" fontFamily="monospace" fontSize="7" fontWeight="700" fill="#FFE500" textAnchor="middle">100µF</text>
+                      {/* LED blinking */}
+                      <circle cx="48" cy="140" r="6" fill="#22C55E">
+                        <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite"/>
+                      </circle>
+                      <text x="60" y="143" fontFamily="monospace" fontSize="8" fill="#22C55E" fontWeight="700">PWR</text>
+                      <circle cx="100" cy="140" r="6" fill="#FBBF24">
+                        <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" repeatCount="indefinite"/>
+                      </circle>
+                      <text x="112" y="143" fontFamily="monospace" fontSize="8" fill="#FBBF24" fontWeight="700">TX</text>
+                      {/* Header label top */}
+                      <rect x="120" y="14" width="160" height="20" rx="10" fill="#FFE500"/>
+                      <text x="200" y="28" fontFamily="monospace" fontSize="10" fontWeight="700" fill="#0A3D1F" textAnchor="middle">EMBEDDED · FIRMWARE</text>
+                      {/* Protocol pills bottom */}
+                      <rect x="40" y="178" width="48" height="14" rx="3" fill="#1E40AF"/>
+                      <text x="64" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#fff" textAnchor="middle">SPI</text>
+                      <rect x="96" y="178" width="48" height="14" rx="3" fill="#7C3AED"/>
+                      <text x="120" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#fff" textAnchor="middle">I2C</text>
+                      <rect x="152" y="178" width="48" height="14" rx="3" fill="#DC2626"/>
+                      <text x="176" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#fff" textAnchor="middle">UART</text>
+                      <rect x="208" y="178" width="48" height="14" rx="3" fill="#0891B2"/>
+                      <text x="232" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#fff" textAnchor="middle">CAN</text>
+                      <rect x="264" y="178" width="48" height="14" rx="3" fill="#16A34A"/>
+                      <text x="288" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#fff" textAnchor="middle">PWM</text>
+                      <rect x="320" y="178" width="48" height="14" rx="3" fill="#FBBF24"/>
+                      <text x="344" y="188" fontFamily="monospace" fontSize="8" fontWeight="700" fill="#0A3D1F" textAnchor="middle">RTOS</text>
+                    </svg>
+                    <div style={{ position: "absolute", top: "44px", left: "12px", backgroundColor: B, color: W, padding: "3px 10px", fontSize: "9px", fontWeight: 700, letterSpacing: "0.15em" }}>60 Q&amp;A</div>
+                    <div style={{ position: "absolute", top: "44px", right: "12px", backgroundColor: W, border: `1.5px solid ${BORD}`, borderRadius: "6px", padding: "4px 8px", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <CircuitBoard size={11} color={B} />
+                      <span style={{ fontSize: "9px", fontWeight: 700, color: B, letterSpacing: "0.08em" }}>OPEN</span>
+                    </div>
+                  </div>
+                  <div style={{ padding: "20px" }}>
+                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: B, marginBottom: "8px", letterSpacing: "-0.01em" }}>Embedded Developer</h3>
+                    <p style={{ fontSize: "12px", color: MUTE, lineHeight: 1.7, margin: 0 }}>{IV_KEY_TAGLINE.embedded}</p>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* Legacy: still show course-bound interview material if any exists */}
@@ -7556,6 +7923,8 @@ const Portal = () => {
                     {interviewTopic === "sql" && <><Table size={13} /> SQL</>}
                     {interviewTopic === "genai" && <><Brain size={13} /> GENAI / LLM</>}
                     {interviewTopic === "mobile" && <><Smartphone size={13} /> MOBILE DEVELOPER</>}
+                    {interviewTopic === "business_analyst" && <><ClipboardList size={13} /> BUSINESS ANALYST</>}
+                    {interviewTopic === "embedded" && <><CircuitBoard size={13} /> EMBEDDED DEVELOPER</>}
                   </div>
                   <h1 style={{ fontSize: "clamp(24px, 3.5vw, 38px)", fontWeight: 700, color: B, marginBottom: "8px", letterSpacing: "-0.02em" }}>
                     {IV_KEY_TITLE[interviewTopic]}
