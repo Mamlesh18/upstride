@@ -18,7 +18,9 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(grep -n \"Add Event Modal\\\\|Add Resource Modal\\\\|</div>\\\\s*$\\\\|{/\\\\* ── Resources Tab\" C:/Users/mamle/visualstudiocode/Upstride/upstride/src/pages/Admin.tsx)",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "PowerShell(npx tsc --noEmit)",
+      "PowerShell(cd C:\\\\Users\\\\mamle\\\\visualstudiocode\\\\Upstride\\\\Upstride-Backend-Portal; $env:JWT_SECRET=\"test-secret\"; $env:MONGODB_URL=\"mongodb://localhost\"; python -c \"from app.core.referral import encode_referral, decode_referral; t=encode_referral\\('Mamlesh@Gmail.com'\\); print\\('token:', t[:40], '...'\\); print\\('decoded:', decode_referral\\(t\\)\\); print\\('bad:', decode_referral\\('notatoken'\\)\\); from app.routers import sheet, referral; print\\('routers OK'\\)\")"
     ],
     "deny": [],
     "ask": []

@@ -101,7 +101,7 @@ export default function Admin() {
   const [jobForm, setJobForm] = useState({ role: "", company: "", description: "", apply_link: "", category: "internship" });
 
   // Leads & Signups
-  interface Lead { id: string; name: string; email: string; phone: string; created_at: string; }
+  interface Lead { id: string; name: string; email: string; phone: string; created_at: string; referred_by?: string | null; }
   interface PublicUser { id: string; name: string; email: string; phone?: string; created_at: string; }
   const [leads, setLeads] = useState<Lead[]>([]);
   const [publicUsers, setPublicUsers] = useState<PublicUser[]>([]);
@@ -1532,14 +1532,23 @@ export default function Admin() {
                 </div>
               ) : (
                 <div style={{ border: `2px solid ${BORD}`, borderRadius: "10px", overflow: "hidden" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", background: B, padding: "10px 16px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: Y }}>
-                    <span>NAME</span><span>EMAIL</span><span>PHONE</span><span>DATE</span>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 140px", background: B, padding: "10px 16px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: Y }}>
+                    <span>NAME</span><span>EMAIL</span><span>PHONE</span><span>REFERRED BY</span><span>DATE</span>
                   </div>
                   {leads.map((lead, i) => (
-                    <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 160px", padding: "12px 16px", fontSize: "12px", background: i % 2 === 0 ? W : BG, borderTop: `1px solid ${BORD}`, alignItems: "center" }}>
+                    <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 140px", padding: "12px 16px", fontSize: "12px", background: i % 2 === 0 ? W : BG, borderTop: `1px solid ${BORD}`, alignItems: "center" }}>
                       <span style={{ fontWeight: 600, color: B }}>{lead.name || "—"}</span>
                       <span style={{ color: MUTE }}>{lead.email || "—"}</span>
                       <span style={{ color: MUTE, ...MONO }}>{lead.phone || "—"}</span>
+                      <span style={{ ...MONO, fontSize: "11px" }}>
+                        {lead.referred_by ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "3px 8px", background: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A", borderRadius: "10px", fontWeight: 600 }} title={lead.referred_by}>
+                            🎁 {lead.referred_by}
+                          </span>
+                        ) : (
+                          <span style={{ color: "#9CA3AF" }}>Self-applied</span>
+                        )}
+                      </span>
                       <span style={{ color: MUTE, fontSize: "11px" }}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</span>
                     </div>
                   ))}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import MockInterview from "./MockInterview";
 import CourseViewer from "@/components/CourseViewer";
+import CourseCover, { getCourseDescription } from "@/components/CourseCover";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -25,7 +26,7 @@ import {
   CreditCard, Banknote, Building, Landmark, Hexagon, BarChart3,
   Router, Apple as AppleIcon, Package, Mail, Bike,
   ChevronsRight, Sun, Compass, HardHat, Calculator, PieChart, Lightbulb, Monitor, Leaf,
-  CircuitBoard,
+  CircuitBoard, Gift, Copy, Check, IndianRupee, Share2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -5036,7 +5037,9 @@ const Portal = () => {
       label: "DISCOVER",
       accent: "#FFB000",
       items: [
-        { view: "overview", label: "Compass", icon: Compass, count: "", href: "/portal/compass", isNew: true },
+        { view: "overview", label: "Compass", icon: Compass, count: "", href: "/portal/compass" },
+        { view: "overview", label: "Upstrides Sheet", icon: Code2, count: "", href: "/upstrides-sheet" },
+        { view: "mockinterview", label: "Mock Interview", icon: MessageCircle, count: "" },
       ],
     },
     {
@@ -5044,7 +5047,7 @@ const Portal = () => {
       accent: B,
       items: [
         { view: "overview",   label: "Overview",   icon: LayoutDashboard, count: "" },
-        { view: "courses",    label: "Courses",    icon: GraduationCap,   count: `${coursesCourses.length || ""}` },
+        { view: "courses",    label: "Courses",    icon: GraduationCap,   count: '' },
         { view: "placements", label: "Placements", icon: Building2,       count: `${placementsCourses.length || ""}` },
         { view: "interviews", label: "Interviews", icon: Users,           count: `${interviewsCourses.length || ""}` },
         { view: "career_kit", label: "Career Kit", icon: Briefcase,       count: "" },
@@ -5054,7 +5057,7 @@ const Portal = () => {
       label: "UPSTRIDE",
       accent: "#6366F1",
       items: [
-        { view: "sessions",  label: "Sessions", icon: PlayCircle,   count: sessionsInfo ? `${sessionsInfo.unlocked_count}` : "" },
+        { view: "sessions",  label: "Sessions", icon: PlayCircle,   count: "" },
         { view: "schedule",  label: "Schedule", icon: CalendarDays, count: "" },
         { view: "standup",   label: "Standup",  icon: ClipboardList, count: "" },
       ],
@@ -5064,13 +5067,6 @@ const Portal = () => {
       accent: "#F59E0B",
       items: [
         { view: "leaderboard", label: "Leaderboard", icon: Trophy, count: "" },
-      ],
-    },
-    {
-      label: "PRACTICE",
-      accent: "#10B981",
-      items: [
-        { view: "mockinterview", label: "Mock Interview", icon: MessageCircle, count: "" },
       ],
     },
   ];
@@ -5447,6 +5443,9 @@ const Portal = () => {
 
               {/* ══ RIGHT SIDEBAR ════════════════════════════════════════ */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "80px", alignSelf: "flex-start" }}>
+
+                {/* REFER & EARN */}
+                <ReferEarnCard userEmail={userEmail} />
 
                 {/* QUICK FIRE MCQ */}
                 <div style={{ background: W, border: "1.5px solid #E5E5E5", borderRadius: "12px", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
@@ -10543,23 +10542,9 @@ function CourseCard({ course, onClick }: { course: CourseSummary; onClick: () =>
         flexDirection: "column",
       }}
     >
-      {/* ── Cover image ── */}
+      {/* ── Cover image (designed, no online image) ── */}
       <div style={{ position: "relative", height: "180px", overflow: "hidden", flexShrink: 0, backgroundColor: B }}>
-        {course.image_url ? (
-          <img
-            src={course.image_url}
-            alt={course.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.3s ease", transform: hovered ? "scale(1.04)" : "scale(1)" }}
-          />
-        ) : (
-          <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, ${B} 0%, #1a1a2e 60%, #16213e 100%)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "48px", fontWeight: 900, color: Y, opacity: 0.25, ...MONO, lineHeight: 1 }}>
-                {course.title.charAt(0).toUpperCase()}
-              </div>
-            </div>
-          </div>
-        )}
+        <CourseCover slug={course.slug} title={course.title} hovered={hovered} />
         {/* Badges top-right */}
         <div style={{ position: "absolute", top: "10px", right: "10px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
           {isComplete && (
@@ -10593,12 +10578,15 @@ function CourseCard({ course, onClick }: { course: CourseSummary; onClick: () =>
           {course.title}
         </h3>
 
-        {/* Description — fully visible, no clamp */}
-        {course.description && (
-          <p style={{ fontSize: "12px", color: B, lineHeight: 1.7, margin: 0, fontWeight: 400, opacity: 0.75 }}>
-            {course.description}
-          </p>
-        )}
+        {/* Description — curated copy with backend fallback */}
+        {(() => {
+          const desc = getCourseDescription(course);
+          return desc ? (
+            <p style={{ fontSize: "12px", color: B, lineHeight: 1.7, margin: 0, fontWeight: 400, opacity: 0.75 }}>
+              {desc}
+            </p>
+          ) : null;
+        })()}
 
         {/* Progress bar (only if started) */}
         {inProgress && (
@@ -10633,6 +10621,106 @@ function CourseCard({ course, onClick }: { course: CourseSummary; onClick: () =>
   );
 }
 
+// ─── Refer & Earn — sidebar card ──────────────────────────────────────────────
+function ReferEarnCard({ userEmail }: { userEmail: string }) {
+  const [copied, setCopied] = useState(false);
+  const [code, setCode] = useState<string | null>(null);
+
+  // Fetch the encrypted referral token from the backend — the email is never
+  // exposed in the link; the backend decrypts it when a lead applies.
+  useEffect(() => {
+    let alive = true;
+    api.student.getReferralCode()
+      .then(r => { if (alive) setCode(r.code); })
+      .catch(() => { /* keep fallback link */ });
+    return () => { alive = false; };
+  }, []);
+
+  const referralLink = code
+    ? `https://upstrides.in/?ref=${encodeURIComponent(code)}`
+    : `https://upstrides.in/`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      toast({ title: "Link copied", description: "Share it with your friends." });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Couldn't copy", description: "Long-press the link to copy it manually.", variant: "destructive" });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "Upstrides — Apply now",
+      text: "I'm on Upstrides and it's been a game-changer for placements. Apply using my link 👇",
+      url: referralLink,
+    };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else await handleCopy();
+    } catch { /* user cancelled */ }
+  };
+
+  return (
+    <div style={{
+      position: "relative",
+      background: "linear-gradient(135deg, #0A0A0A 0%, #1F1F1F 60%, #2A2A2A 100%)",
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 6px 20px rgba(0,0,0,0.18)",
+      border: "1.5px solid #1F1F1F",
+    }}>
+      {/* Decorative orbs */}
+      <div style={{ position: "absolute", top: "-30px", right: "-30px", width: "120px", height: "120px", background: "radial-gradient(circle, #FFE50055, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "-40px", left: "-20px", width: "100px", height: "100px", background: "radial-gradient(circle, #FFE50022, transparent 70%)", pointerEvents: "none" }} />
+
+      {/* Header */}
+      <div style={{ position: "relative", padding: "12px 14px 8px", display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ width: "24px", height: "24px", background: "#FFE500", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Gift size={12} color="#0A0A0A" />
+        </div>
+        <span style={{ fontSize: "11px", fontWeight: 700, color: "#FFE500", letterSpacing: "0.06em" }}>REFER & EARN</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ position: "relative", padding: "0 14px 14px" }}>
+        <div style={{ fontSize: "10.5px", fontWeight: 600, color: "#FFE500AA", marginBottom: "2px" }}>Earn up to</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "10px" }}>
+          <IndianRupee size={20} color="#FFE500" strokeWidth={2.5} />
+          <span style={{ fontSize: "26px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}>10,000</span>
+        </div>
+
+        {/* Link box */}
+        <div style={{ background: "#FFFFFF08", border: "1.5px dashed #FFE50055", borderRadius: "8px", padding: "7px 10px", marginBottom: "10px" }}>
+          <div style={{ fontSize: "11px", color: "#FFFFFF", fontFamily: "'IBM Plex Mono', monospace", wordBreak: "break-all", lineHeight: 1.4 }}>
+            {referralLink}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button onClick={handleCopy}
+            style={{
+              flex: 1, padding: "8px 12px", background: copied ? "#22C55E" : "#FFE500", color: "#0A0A0A",
+              border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+              cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              transition: "all 0.15s",
+            }}>
+            {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy link</>}
+          </button>
+          <button onClick={handleShare}
+            title="Share"
+            style={{ width: "36px", padding: "8px", background: "transparent", color: "#FFE500", border: "1.5px solid #FFE50055", borderRadius: "8px", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <Share2 size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LearningProgressCard({ course, onClick, isMobile, animIndex }: { course: CourseSummary; onClick: () => void; isMobile: boolean; animIndex: number }) {
   const [hovered, setHovered] = useState(false);
   const pct = course.progress_pct;
@@ -10648,9 +10736,7 @@ function LearningProgressCard({ course, onClick, isMobile, animIndex }: { course
         display: "grid",
         gridTemplateColumns: isMobile
           ? "5px 1fr"
-          : course.image_url
-            ? "5px 1fr 80px 160px"
-            : "5px 1fr 160px",
+          : "5px 1fr 88px 160px",
         background: W,
         border: `2px solid ${hovered ? B : BORD}`,
         borderRadius: "10px",
@@ -10683,10 +10769,10 @@ function LearningProgressCard({ course, onClick, isMobile, animIndex }: { course
         </div>
       </div>
 
-      {/* thumbnail (desktop, if image) */}
-      {!isMobile && course.image_url && (
+      {/* designed thumbnail (desktop) */}
+      {!isMobile && (
         <div style={{ overflow: "hidden", position: "relative", flexShrink: 0 }}>
-          <img src={course.image_url} alt="" style={{ width: "80px", height: "100%", objectFit: "cover", display: "block", filter: hovered ? "brightness(0.9) saturate(1.3)" : "brightness(0.75) saturate(1)", transition: "filter 0.2s" }} />
+          <CourseCover slug={course.slug} title={course.title} hovered={hovered} variant="thumb" width="88px" />
         </div>
       )}
 

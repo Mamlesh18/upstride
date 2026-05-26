@@ -24,6 +24,9 @@ const ContactUs = lazy(() => import("./pages/ContactUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Results = lazy(() => import("./pages/Results"));
 const Compass = lazy(() => import("./pages/Compass"));
+const Payment = lazy(() => import("./pages/Payment"));
+const UpstridesSheet = lazy(() => import("./pages/UpstridesSheet"));
+const CheatSheet = lazy(() => import("./pages/CheatSheet"));
 
 const queryClient = new QueryClient();
 
@@ -109,6 +112,17 @@ const App = () => (
             <Route path="/terms" element={<TermsOfAgreement />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/upstrides-sheet" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <UpstridesSheet />
+              </ProtectedRoute>
+            } />
+            <Route path="/cheat-sheet/:topic" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <CheatSheet />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

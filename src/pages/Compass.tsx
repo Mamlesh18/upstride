@@ -3,9 +3,17 @@ import { useNavigate } from "react-router-dom";
 import {
   Compass as CompassIcon, ArrowLeft, X, Sparkles, RotateCw, ChevronDown, ChevronUp,
   TrendingUp, BookOpen, Loader2, MapPin, Target, Lightbulb, Layers, Flag, Clock, GitBranch,
+  ExternalLink, Briefcase, Building2, Wrench, Trophy,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { api, type CompassMapResponse, type CompassRole } from "@/services/api";
+import {
+  api,
+  type CompassMapResponse,
+  type CompassRole,
+  type CompassRecommendedLink,
+  type CompassPhase,
+  type CompassLinkType,
+} from "@/services/api";
 
 const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFAFA";
 const BORD = "#E5E5E5"; const MUTE = "#6B7280";
@@ -355,8 +363,8 @@ const ROLE_W = 268;
 const ROLE_H = 86;
 const ROLE_GAP = 14;            // gap between consecutive roles
 const ROLE_ROW_H = ROLE_H + ROLE_GAP;
-const ROADMAP_W = 360;
-const ROADMAP_H = 460;          // generous so all step text is visible
+const ROADMAP_W = 380;
+const ROADMAP_H = 540;          // generous so all step text + tabs are visible
 const ROADMAP_GAP = 18;
 const COMBO_W = 290;
 const COMBO_H = 100;
@@ -810,7 +818,8 @@ const GraphView = ({ data, expandedClusters, setExpandedClusters, expandedRoleId
 };
 
 // ════════════════════════════════════════════════════════════════════════════
-//  INLINE ROADMAP — compact card shown beneath the expanded role
+//  INLINE ROADMAP — tabbed card shown beneath the expanded role
+//  Tabs: Roadmap (steps) · Projects (flagship builds) · Resources (portal links)
 // ════════════════════════════════════════════════════════════════════════════
 
 interface InlineRoadmapProps {
@@ -819,99 +828,271 @@ interface InlineRoadmapProps {
   onClose: () => void;
 }
 
+// Phase color + label for the foundations → interview progression
+const PHASE_META: Record<CompassPhase, { color: string; label: string }> = {
+  foundations: { color: "#22C55E", label: "FOUNDATIONS" },
+  core:        { color: "#3B82F6", label: "CORE" },
+  advanced:    { color: "#A78BFA", label: "ADVANCED" },
+  projects:    { color: "#FB923C", label: "PROJECTS" },
+  interview:   { color: "#EF4444", label: "INTERVIEW" },
+};
+
+const phaseOf = (p: CompassPhase | undefined) => PHASE_META[p ?? "core"];
+
+const LINK_TYPE_META: Record<CompassLinkType, { icon: typeof BookOpen; label: string; routeBase: (slug: string) => string }> = {
+  course:      { icon: BookOpen, label: "Course",       routeBase: (s) => `/portal/${s}` },
+  interview:   { icon: Target,   label: "Interview",    routeBase: (s) => `/portal/interviews/${s}` },
+  career_kit:  { icon: Lightbulb, label: "Career Kit",   routeBase: (s) => `/portal/career-kit/${s}` },
+  placement:   { icon: Building2, label: "Placement",    routeBase: (s) => `/portal/placements/${s}` },
+};
+
+interface LinkChipProps {
+  link: CompassRecommendedLink;
+  accent: string;
+  size?: "sm" | "md";
+}
+const LinkChip = ({ link, accent, size = "sm" }: LinkChipProps) => {
+  const navigate = useNavigate();
+  const meta = LINK_TYPE_META[link.type];
+  const Icon = meta.icon;
+  const sm = size === "sm";
+  return (
+    <button
+      onClick={() => navigate(meta.routeBase(link.slug))}
+      title={link.note ?? `Open ${meta.label}: ${link.label}`}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: "6px",
+        padding: sm ? "5px 10px" : "8px 12px",
+        background: W, color: B,
+        border: `1.5px solid ${accent}`,
+        borderRadius: "999px",
+        fontSize: sm ? "11px" : "12px", fontWeight: 700, cursor: "pointer",
+        boxShadow: `0 2px 6px ${accent}22`,
+        transition: "all 0.15s", lineHeight: 1.25, textAlign: "left", maxWidth: "100%",
+        ...SANS,
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}14`; e.currentTarget.style.transform = "translateY(-1px)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = W; e.currentTarget.style.transform = "translateY(0)"; }}
+    >
+      <Icon size={sm ? 11 : 13} color={accent} style={{ flexShrink: 0 }} />
+      <span style={{ fontSize: "9px", fontWeight: 700, color: accent, letterSpacing: "0.08em", ...MONO, flexShrink: 0 }}>{meta.label.toUpperCase()}</span>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{link.label}</span>
+      <ExternalLink size={sm ? 10 : 11} color={MUTE} style={{ flexShrink: 0, marginLeft: "2px" }} />
+    </button>
+  );
+};
+
+type TabKey = "roadmap" | "projects" | "resources";
+
 const InlineRoadmap = ({ role, accent, onClose }: InlineRoadmapProps) => {
+  const [tab, setTab] = useState<TabKey>("roadmap");
   const [step, setStep] = useState(0);
   const steps = role.roadmap ?? [];
+  const projects = role.flagship_projects ?? [];
+  const roleLinks = role.recommended_links ?? [];
 
-  useEffect(() => { setStep(0); }, [role.id]);
-
-  if (steps.length === 0) {
-    return (
-      <div style={{ width: "100%", height: "100%", background: W, border: `2px solid ${accent}`, borderRadius: "12px", padding: "16px", boxShadow: `0 10px 30px ${accent}44`, ...SANS }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-          <div style={{ fontSize: "13px", fontWeight: 700, color: B }}>No roadmap yet</div>
-          <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", color: MUTE }}><X size={16} /></button>
-        </div>
-        <div style={{ fontSize: "12px", color: MUTE, lineHeight: 1.55 }}>Try regenerating your Compass to get a full roadmap.</div>
-      </div>
-    );
-  }
+  useEffect(() => { setStep(0); setTab("roadmap"); }, [role.id]);
 
   const current = steps[step];
+
+  // Tab definitions — always render the tab bar so empty states are still discoverable
+  const tabs: { key: TabKey; label: string; count: number; icon: typeof BookOpen }[] = [
+    { key: "roadmap",   label: "Roadmap",  count: steps.length,    icon: Layers },
+    { key: "projects",  label: "Projects", count: projects.length, icon: Briefcase },
+    { key: "resources", label: "Links",    count: roleLinks.length, icon: ExternalLink },
+  ];
 
   return (
     <div style={{ width: "100%", height: "100%", background: W, border: `2px solid ${accent}`, borderRadius: "12px", boxShadow: `0 12px 32px ${accent}55`, overflow: "hidden", display: "flex", flexDirection: "column", ...SANS }}>
       {/* Header */}
-      <div style={{ background: B, padding: "14px 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
+      <div style={{ background: B, padding: "12px 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: "9px", fontWeight: 700, color: accent, letterSpacing: "0.14em", marginBottom: "4px", ...MONO }}>ROADMAP · {steps.length} STEPS</div>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: accent, letterSpacing: "0.14em", marginBottom: "3px", ...MONO }}>
+            {steps.length}-STEP ROADMAP · {projects.length} PROJECTS
+          </div>
           <div style={{ fontSize: "15px", fontWeight: 700, color: Y, letterSpacing: "-0.01em", lineHeight: 1.25, wordBreak: "break-word" }}>{role.title}</div>
+          {role.salary_range && (
+            <div style={{ fontSize: "11px", color: `${W}AA`, fontWeight: 600, marginTop: "2px", ...MONO }}>{role.salary_range}</div>
+          )}
         </div>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${W}30`, color: W, width: "28px", height: "28px", borderRadius: "7px", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
           onMouseEnter={e => (e.currentTarget.style.background = `${W}15`)}
           onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><X size={14} /></button>
       </div>
 
-      {/* Step dots */}
-      <div style={{ padding: "12px 16px 0", display: "flex", alignItems: "center", gap: "5px", overflowX: "auto", flexShrink: 0 }}>
-        {steps.map((_, i) => (
-          <button key={i} onClick={() => setStep(i)}
-            style={{ flex: "0 0 auto", width: "30px", height: "30px", borderRadius: "50%", background: i === step ? accent : (i < step ? `${accent}55` : "#F3F4F6"), color: i === step ? B : (i < step ? B : MUTE), border: i === step ? `2px solid ${B}` : "none", cursor: "pointer", fontSize: "12px", fontWeight: 700, transition: "all 0.15s", ...MONO }}>
-            {i + 1}
-          </button>
-        ))}
-        <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: Y, color: B, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: "4px", border: `2px solid ${B}` }} title="Hired!">
-          <Flag size={14} />
-        </div>
+      {/* Tab bar */}
+      <div style={{ display: "flex", borderBottom: `1.5px solid ${BORD}`, background: BG, flexShrink: 0 }}>
+        {tabs.map((t) => {
+          const Ti = t.icon;
+          const active = tab === t.key;
+          return (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{
+                flex: 1, padding: "9px 8px", background: active ? W : "transparent",
+                border: "none", borderBottom: active ? `2.5px solid ${accent}` : "2.5px solid transparent",
+                marginBottom: "-1.5px",
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px",
+                color: active ? B : MUTE, fontSize: "11.5px", fontWeight: 700, ...SANS, transition: "all 0.15s",
+              }}>
+              <Ti size={12} />
+              {t.label}
+              <span style={{ padding: "1px 6px", background: active ? `${accent}22` : "#E5E7EB", color: active ? B : MUTE, borderRadius: "10px", fontSize: "9.5px", fontWeight: 700, ...MONO }}>{t.count}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Current step body — scrolls if content overflows */}
-      <div style={{ padding: "12px 16px 12px", flex: 1, overflowY: "auto", minHeight: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: accent, letterSpacing: "0.12em", ...MONO }}>STEP {current.step} OF {steps.length}</div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "3px 9px", background: `${accent}22`, borderRadius: "10px", fontSize: "11px", fontWeight: 700, color: B }}>
-            <Clock size={11} color={accent} /> {current.duration}
-          </div>
-        </div>
-        <div style={{ fontSize: "15px", fontWeight: 700, color: B, lineHeight: 1.35, marginBottom: "12px", letterSpacing: "-0.005em", wordBreak: "break-word" }}>{current.title}</div>
+      {/* TAB BODY */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+        {tab === "roadmap" && (
+          steps.length === 0 ? (
+            <div style={{ padding: "16px", fontSize: "12px", color: MUTE, lineHeight: 1.55 }}>
+              No roadmap yet — try regenerating your Compass.
+            </div>
+          ) : (
+            <>
+              {/* Step dots */}
+              <div style={{ padding: "10px 12px 6px", display: "flex", alignItems: "center", gap: "4px", overflowX: "auto", flexShrink: 0, borderBottom: `1px dashed ${BORD}` }}>
+                {steps.map((s, i) => {
+                  const ph = phaseOf(s.phase);
+                  return (
+                    <button key={i} onClick={() => setStep(i)} title={`Step ${i + 1} · ${ph.label}`}
+                      style={{ flex: "0 0 auto", width: "26px", height: "26px", borderRadius: "50%", background: i === step ? ph.color : (i < step ? `${ph.color}55` : "#F3F4F6"), color: i === step ? W : (i < step ? B : MUTE), border: i === step ? `2px solid ${B}` : "none", cursor: "pointer", fontSize: "11px", fontWeight: 700, transition: "all 0.15s", ...MONO }}>
+                      {i + 1}
+                    </button>
+                  );
+                })}
+                <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: Y, color: B, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: "4px", border: `2px solid ${B}` }} title="Hired!">
+                  <Trophy size={12} />
+                </div>
+              </div>
 
-        <div style={{ marginBottom: "12px" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px", ...MONO }}>
-            <Layers size={11} /> WHAT TO LEARN
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-            {current.skills.map(s => (
-              <span key={s} style={{ padding: "4px 10px", background: `${accent}18`, color: B, border: `1px solid ${accent}55`, borderRadius: "20px", fontSize: "11.5px", fontWeight: 600, lineHeight: 1.3, wordBreak: "break-word" }}>{s}</span>
-            ))}
-          </div>
-        </div>
+              {/* Current step body */}
+              <div style={{ padding: "12px 16px" }}>
+                {(() => { const ph = phaseOf(current.phase); return (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ padding: "3px 8px", background: ph.color, color: W, borderRadius: "10px", fontSize: "9.5px", fontWeight: 700, letterSpacing: "0.1em", ...MONO }}>{ph.label}</span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", ...MONO }}>STEP {current.step} / {steps.length}</span>
+                    </div>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "3px 9px", background: `${accent}22`, borderRadius: "10px", fontSize: "11px", fontWeight: 700, color: B }}>
+                      <Clock size={11} color={accent} /> {current.duration}
+                    </div>
+                  </div>
+                ); })()}
+                <div style={{ fontSize: "15px", fontWeight: 700, color: B, lineHeight: 1.35, marginBottom: "12px", letterSpacing: "-0.005em", wordBreak: "break-word" }}>{current.title}</div>
 
-        <div style={{ padding: "11px 13px", background: BG, borderLeft: `3px solid ${accent}`, borderRadius: "0 8px 8px 0", marginBottom: current.resource_hint ? "10px" : 0 }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "5px", display: "flex", alignItems: "center", gap: "5px", ...MONO }}>
-            <Flag size={11} color={accent} /> MILESTONE — BUILD THIS
-          </div>
-          <div style={{ fontSize: "12.5px", color: "#1F2937", lineHeight: 1.6, wordBreak: "break-word" }}>{current.milestone}</div>
-        </div>
+                <div style={{ marginBottom: "12px" }}>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px", ...MONO }}>
+                    <Layers size={11} /> WHAT TO LEARN
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                    {current.skills.map(s => (
+                      <span key={s} style={{ padding: "4px 10px", background: `${accent}18`, color: B, border: `1px solid ${accent}55`, borderRadius: "20px", fontSize: "11.5px", fontWeight: 600, lineHeight: 1.3, wordBreak: "break-word" }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
 
-        {current.resource_hint && (
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", padding: "8px 10px", background: W, borderRadius: "7px", border: `1px dashed ${BORD}` }}>
-            <BookOpen size={12} color={MUTE} style={{ flexShrink: 0, marginTop: "2px" }} />
-            <div style={{ fontSize: "11.5px", color: "#374151", lineHeight: 1.55, wordBreak: "break-word" }}><strong style={{ color: B }}>Resource: </strong>{current.resource_hint}</div>
+                <div style={{ padding: "11px 13px", background: BG, borderLeft: `3px solid ${accent}`, borderRadius: "0 8px 8px 0", marginBottom: "10px" }}>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: B, letterSpacing: "0.1em", marginBottom: "5px", display: "flex", alignItems: "center", gap: "5px", ...MONO }}>
+                    <Flag size={11} color={accent} /> MILESTONE — BUILD THIS
+                  </div>
+                  <div style={{ fontSize: "12.5px", color: "#1F2937", lineHeight: 1.6, wordBreak: "break-word" }}>{current.milestone}</div>
+                </div>
+
+                {current.resource_hint && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", padding: "8px 10px", background: W, borderRadius: "7px", border: `1px dashed ${BORD}`, marginBottom: "10px" }}>
+                    <BookOpen size={12} color={MUTE} style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div style={{ fontSize: "11.5px", color: "#374151", lineHeight: 1.55, wordBreak: "break-word" }}><strong style={{ color: B }}>Resource: </strong>{current.resource_hint}</div>
+                  </div>
+                )}
+
+                {/* Step-level recommended links */}
+                {current.recommended_links && current.recommended_links.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px", ...MONO }}>
+                      <ExternalLink size={11} /> OPEN ON UPSTRIDE
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {current.recommended_links.map((ln, i) => <LinkChip key={i} link={ln} accent={accent} size="sm" />)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer nav */}
+              <div style={{ padding: "10px 16px", borderTop: `1px solid ${BORD}`, display: "flex", justifyContent: "space-between", gap: "8px", background: BG, position: "sticky", bottom: 0, flexShrink: 0 }}>
+                <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))}
+                  style={{ padding: "7px 14px", background: step === 0 ? "transparent" : W, color: step === 0 ? "#CBD5E1" : B, border: `1.5px solid ${step === 0 ? "#E5E7EB" : BORD}`, borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: step === 0 ? "not-allowed" : "pointer", ...SANS }}>
+                  ← Prev
+                </button>
+                <div style={{ fontSize: "11px", color: MUTE, alignSelf: "center", fontWeight: 600 }}>{step + 1} / {steps.length}</div>
+                <button disabled={step === steps.length - 1} onClick={() => setStep(s => Math.min(steps.length - 1, s + 1))}
+                  style={{ padding: "7px 14px", background: step === steps.length - 1 ? "#E5E7EB" : B, color: step === steps.length - 1 ? MUTE : Y, border: "none", borderRadius: "7px", fontSize: "12px", fontWeight: 700, cursor: step === steps.length - 1 ? "not-allowed" : "pointer", ...SANS }}>
+                  Next →
+                </button>
+              </div>
+            </>
+          )
+        )}
+
+        {tab === "projects" && (
+          <div style={{ padding: "14px 16px" }}>
+            {projects.length === 0 ? (
+              <div style={{ fontSize: "12px", color: MUTE, lineHeight: 1.55 }}>No flagship projects yet for this role.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {projects.map((p, i) => (
+                  <div key={i} style={{ padding: "12px 14px", background: W, border: `1.5px solid ${BORD}`, borderRadius: "10px", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
+                      <div style={{ width: "22px", height: "22px", borderRadius: "6px", background: `${accent}22`, color: accent, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Wrench size={12} />
+                      </div>
+                      <div style={{ fontSize: "13.5px", fontWeight: 700, color: B, lineHeight: 1.3, flex: 1, minWidth: 0, wordBreak: "break-word" }}>{p.title}</div>
+                    </div>
+                    {(p.difficulty || p.duration) && (
+                      <div style={{ display: "flex", gap: "5px", marginBottom: "6px", flexWrap: "wrap" }}>
+                        {p.difficulty && <span style={{ padding: "2px 8px", background: `${accent}18`, color: B, borderRadius: "10px", fontSize: "10px", fontWeight: 700, ...MONO }}>{p.difficulty.toUpperCase()}</span>}
+                        {p.duration && <span style={{ padding: "2px 8px", background: "#F3F4F6", color: MUTE, borderRadius: "10px", fontSize: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "3px", ...MONO }}><Clock size={9} /> {p.duration}</span>}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "12px", color: "#374151", lineHeight: 1.55, marginBottom: "8px", wordBreak: "break-word" }}>{p.description}</div>
+                    {p.inspiration && (
+                      <div style={{ fontSize: "11px", color: MUTE, fontStyle: "italic", marginBottom: "8px", wordBreak: "break-word" }}>e.g. {p.inspiration}</div>
+                    )}
+                    {p.skills && p.skills.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        {p.skills.map((s, j) => (
+                          <span key={j} style={{ padding: "2px 8px", background: `${accent}10`, color: B, border: `1px solid ${accent}33`, borderRadius: "10px", fontSize: "10.5px", fontWeight: 600 }}>{s}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      {/* Footer nav */}
-      <div style={{ padding: "10px 16px", borderTop: `1px solid ${BORD}`, display: "flex", justifyContent: "space-between", gap: "8px", background: BG, flexShrink: 0 }}>
-        <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))}
-          style={{ padding: "7px 14px", background: step === 0 ? "transparent" : W, color: step === 0 ? "#CBD5E1" : B, border: `1.5px solid ${step === 0 ? "#E5E7EB" : BORD}`, borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: step === 0 ? "not-allowed" : "pointer", ...SANS }}>
-          ← Prev
-        </button>
-        <div style={{ fontSize: "11px", color: MUTE, alignSelf: "center", fontWeight: 600 }}>{step + 1} / {steps.length}</div>
-        <button disabled={step === steps.length - 1} onClick={() => setStep(s => Math.min(steps.length - 1, s + 1))}
-          style={{ padding: "7px 14px", background: step === steps.length - 1 ? "#E5E7EB" : B, color: step === steps.length - 1 ? MUTE : Y, border: "none", borderRadius: "7px", fontSize: "12px", fontWeight: 700, cursor: step === steps.length - 1 ? "not-allowed" : "pointer", ...SANS }}>
-          Next →
-        </button>
+        {tab === "resources" && (
+          <div style={{ padding: "14px 16px" }}>
+            {roleLinks.length === 0 ? (
+              <div style={{ fontSize: "12px", color: MUTE, lineHeight: 1.55 }}>No portal links recommended for this role yet.</div>
+            ) : (
+              <div>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: MUTE, letterSpacing: "0.1em", marginBottom: "8px", ...MONO }}>UPSTRIDE RESOURCES FOR THIS ROLE</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {roleLinks.map((ln, i) => (
+                    <div key={i} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <LinkChip link={ln} accent={accent} size="md" />
+                      {ln.note && <div style={{ fontSize: "11px", color: MUTE, lineHeight: 1.5, paddingLeft: "12px", borderLeft: `2px solid ${accent}33`, marginLeft: "4px" }}>{ln.note}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

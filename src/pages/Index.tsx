@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronUp, Phone, CalendarDays } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -209,6 +209,23 @@ const Index = () => {
   const [applyForm, setApplyForm]   = useState({ name: "", email: "", phone: "" });
   const [applySubmitting, setApplySubmitting] = useState(false);
   const [applyDone, setApplyDone]   = useState(false);
+  const [referredBy, setReferredBy] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // ?ref= carries the encrypted token; ?referral= is the legacy raw-email form.
+    const fromUrl = searchParams.get("ref") || searchParams.get("referral");
+    if (fromUrl) {
+      const val = fromUrl.trim();
+      setReferredBy(val);
+      sessionStorage.setItem("upstride_referral", val);
+      // Arrived via someone's referral link — open the apply modal so the CTA is unmissable.
+      setApplyOpen(true);
+    } else {
+      const stored = sessionStorage.getItem("upstride_referral");
+      if (stored) setReferredBy(stored);
+    }
+  }, [searchParams]);
 
   const openApply = () => setApplyOpen(true);
   const closeApply = () => {
@@ -224,7 +241,7 @@ const Index = () => {
     }
     setApplySubmitting(true);
     try {
-      await api.public.apply({ name: applyForm.name, email: applyForm.email, phone: applyForm.phone });
+      await api.public.apply({ name: applyForm.name, email: applyForm.email, phone: applyForm.phone, referred_by: referredBy });
       setApplyDone(true);
     } catch {
       toast({ title: "Submission failed. Please try again.", variant: "destructive" });
@@ -531,7 +548,7 @@ const Index = () => {
 
             <h1 style={{ ...BEBAS, lineHeight: isMobile ? 1.05 : 0.92, marginBottom: "28px", color: B }}>
               {[
-                { text: "BECOME THE PROFESSIONAL", yellow: false, delay: "0s" },
+                { text: "BECOME THE STUDENT", yellow: false, delay: "0s" },
                 { text: "BUILT FOR THE NEXT DECADE", yellow: true, delay: "0.15s" },
                 { text: "IN AI.", yellow: false, delay: "0.3s" },
               ].map(({ text, yellow, delay }) => (
@@ -1268,9 +1285,14 @@ const Index = () => {
                     <p style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: `${B}60`, marginBottom: "6px" }}>
                       START YOUR JOURNEY
                     </p>
-                    <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 5vw, 56px)", color: B, lineHeight: 0.95, marginBottom: "32px" }}>
+                    <h2 style={{ ...BEBAS, fontSize: "clamp(40px, 5vw, 56px)", color: B, lineHeight: 0.95, marginBottom: referredBy ? "16px" : "32px" }}>
                       APPLY NOW
                     </h2>
+                    {referredBy && (
+                      <div style={{ marginBottom: "24px", padding: "10px 14px", background: Y, border: `2px solid ${B}`, borderRadius: "6px", color: B, fontSize: "12px", fontWeight: 600, lineHeight: 1.5, ...MONO }}>
+                        🎁 Referred by <strong>{referredBy}</strong>
+                      </div>
+                    )}
 
                     <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
                       {[

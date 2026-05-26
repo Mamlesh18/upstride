@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -45,13 +45,31 @@ export interface CompassNextSkill {
   why: string;
   resource_hint?: string;
 }
+export type CompassLinkType = "course" | "interview" | "career_kit" | "placement";
+export interface CompassRecommendedLink {
+  type: CompassLinkType;
+  slug: string;
+  label: string;
+  note?: string;
+}
+export type CompassPhase = "foundations" | "core" | "advanced" | "projects" | "interview";
 export interface CompassRoadmapStep {
   step: number;
+  phase?: CompassPhase;
   title: string;
   duration: string;
   skills: string[];
   milestone: string;
   resource_hint?: string;
+  recommended_links?: CompassRecommendedLink[];
+}
+export interface CompassFlagshipProject {
+  title: string;
+  description: string;
+  skills?: string[];
+  difficulty?: string;
+  duration?: string;
+  inspiration?: string;
 }
 export interface CompassRole {
   id: string;
@@ -61,6 +79,8 @@ export interface CompassRole {
   salary_range?: string;
   next_skills: CompassNextSkill[];
   roadmap?: CompassRoadmapStep[];
+  flagship_projects?: CompassFlagshipProject[];
+  recommended_links?: CompassRecommendedLink[];
   combination_of?: string[];
 }
 export interface CompassCluster {
@@ -225,6 +245,20 @@ export const api = {
         body: JSON.stringify({ skills, interests: interests || null }),
       }),
     deleteCompass: () => request("/api/student/compass", { method: "DELETE" }),
+
+    // ── Referral ──
+    getReferralCode: () => request<{ code: string }>("/api/student/referral-code"),
+
+    // ── Upstrides Sheet progress (persisted in MongoDB) ──
+    getSheetProgress: () => request<{ done: string[]; revision: string[]; unlocked_solutions: string[]; quota_left: number; daily_limit: number }>("/api/student/sheet/progress"),
+    setSheetDone: (done: string[]) =>
+      request("/api/student/sheet/done", { method: "PUT", body: JSON.stringify({ done }) }),
+    setSheetRevision: (revision: string[]) =>
+      request("/api/student/sheet/revision", { method: "PUT", body: JSON.stringify({ revision }) }),
+    unlockSheetSolution: (problemId: string) =>
+      request<{ unlocked: boolean; quota_left: number; reason?: string; already?: boolean }>(
+        "/api/student/sheet/unlock", { method: "POST", body: JSON.stringify({ problem_id: problemId }) }
+      ),
   },
 
   public: {
@@ -235,7 +269,7 @@ export const api = {
       if (params.page) q.set("page", String(params.page));
       return request(`/api/public/jobs?${q}`);
     },
-    apply: (data: { name: string; email: string; phone: string }) =>
+    apply: (data: { name: string; email: string; phone: string; referred_by?: string | null }) =>
       request("/api/public/apply", { method: "POST", body: JSON.stringify(data) }),
   },
 

@@ -98,7 +98,11 @@ const Placements = () => {
     }
     setLockSubmitting(true);
     try {
-      await api.public.apply(lockForm);
+      const params = new URLSearchParams(window.location.search);
+      const stored = sessionStorage.getItem("upstride_referral");
+      const fromUrl = params.get("ref") || params.get("referral");
+      const ref = (fromUrl || stored || "").trim() || null;
+      await api.public.apply({ ...lockForm, referred_by: ref });
       setLockSubmitted(true);
     } catch (err: unknown) {
       toast({ title: "Submission failed", description: (err as Error).message, variant: "destructive" });
