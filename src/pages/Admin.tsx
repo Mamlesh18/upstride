@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen, Layers, Briefcase, UserPlus } from "lucide-react";
+import { Users, FolderKanban, UserCog, PhoneCall, Plus, Trash2, RefreshCw, LogOut, ToggleLeft, ToggleRight, X, PlayCircle, MessageSquare, Lock, Save, CalendarDays, ImagePlus, ToggleRight as Toggle, BookOpen, Layers, Briefcase, UserPlus, Send, Copy, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
+import ClassMessagesTab from "@/components/admin/ClassMessagesTab";
 
 const Y = "#FFE500"; const B = "#0A0A0A"; const W = "#FFFFFF"; const BG = "#FAFAFA";
 const BORD = "#E5E5E5"; const MUTE = "#6B7280"; const RED = "#EF4444"; const GREEN = "#22C55E";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
-type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "batches" | "placements" | "leads" | "courses";
+type Tab = "students" | "managers" | "projects" | "sales" | "sessions" | "feedback" | "events" | "batches" | "placements" | "leads" | "courses" | "class_msgs";
 type ContactStatus = "pending" | "picked" | "rejected" | "missed" | "joining" | "will_discuss";
 
 interface Student { id: string; name: string; email: string; is_active: boolean; must_change_password: boolean; }
@@ -736,6 +737,7 @@ export default function Admin() {
     { key: "placements",  label: "Placements",    icon: <Briefcase size={15} /> },
     { key: "leads",       label: "Leads & Signups", icon: <UserPlus size={15} /> },
     { key: "courses",     label: "Courses",       icon: <BookOpen size={15} /> },
+    { key: "class_msgs",  label: "Class Messages", icon: <Send size={15} /> },
   ];
 
   return (
@@ -1689,6 +1691,9 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {/* ── Class Messages Tab ──────────────────────────────────────── */}
+        {tab === "class_msgs" && <ClassMessagesTab />}
 
       </div>
 

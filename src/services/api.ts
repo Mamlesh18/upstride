@@ -1,6 +1,6 @@
 const BASE_URL = "https://upstride-backend-portal.vercel.app";
 // const BASE_URL = "http://localhost:8001";
-
+// 
 function getToken(): string | null {
   return localStorage.getItem("token");
 }
@@ -201,6 +201,13 @@ export const api = {
     // Public users & leads
     listPublicUsers: () => request("/api/admin/public-users"),
     listLeads: () => request("/api/admin/leads"),
+
+    // Training session messages (10 sessions, copied into WhatsApp)
+    listTrainingSessions: () => request<{ data: { sessions: Array<{ id: string; order: number; topic: string; covered: string; task: string; why: string; updated_at: string | null }> } }>("/api/admin/training-sessions"),
+    updateTrainingSession: (id: string, data: { topic?: string; covered?: string; task?: string; why?: string }) =>
+      request<{ success: boolean; session: { id: string; order: number; topic: string; covered: string; task: string; why: string; updated_at: string | null } }>(
+        `/api/admin/training-sessions/${id}`, { method: "PUT", body: JSON.stringify(data) }
+      ),
   },
 
   projects: {
