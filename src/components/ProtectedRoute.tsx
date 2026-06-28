@@ -15,6 +15,15 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to={`/login${redirect}`} replace />;
   }
 
+  // SSO partner users are locked to a single page — never let them out of it.
+  if (role === "sso") {
+    const scope = localStorage.getItem("ssoScope") || "mock-interview";
+    if (location.pathname !== `/${scope}`) {
+      return <Navigate to={`/${scope}`} replace />;
+    }
+    return <>{children}</>;
+  }
+
   if (allowedRoles && role && !allowedRoles.includes(role)) {
     if (role === "super_admin") return <Navigate to="/admin" replace />;
     if (role === "project_manager") return <Navigate to="/projects" replace />;

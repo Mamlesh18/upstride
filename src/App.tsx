@@ -27,6 +27,7 @@ const Compass = lazy(() => import("./pages/Compass"));
 const Payment = lazy(() => import("./pages/Payment"));
 const UpstridesSheet = lazy(() => import("./pages/UpstridesSheet"));
 const CheatSheet = lazy(() => import("./pages/CheatSheet"));
+const MockInterviewPage = lazy(() => import("./pages/MockInterviewPage"));
 
 const queryClient = new QueryClient();
 
@@ -123,6 +124,10 @@ const App = () => (
                 <CheatSheet />
               </ProtectedRoute>
             } />
+            {/* /mock-interview is intentionally NOT wrapped in ProtectedRoute —
+                the page itself handles both normal auth and the partner SSO
+                handshake (?sso=<token>) so external paid students can reach it. */}
+            <Route path="/mock-interview" element={<MockInterviewPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

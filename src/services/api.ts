@@ -268,6 +268,16 @@ export const api = {
       ),
   },
 
+  sso: {
+    // Frontend never touches the shared secret — it just forwards the SSO token
+    // and the target page; the backend verifies it server-to-server and mints
+    // a short-lived JWT scoped to that page.
+    exchange: (data: { token: string; page: string }) =>
+      request<{ access_token: string; email: string; name: string; scope: string }>(
+        "/api/sso/exchange", { method: "POST", body: JSON.stringify(data) }
+      ),
+  },
+
   public: {
     jobs: (params: { category?: string; search?: string; page?: number }) => {
       const q = new URLSearchParams();
