@@ -26,7 +26,8 @@
       "Read(//c/Users/mamle/visualstudiocode/mamlesh.me/server/**)",
       "Bash(xargs grep -l \"sso\\\\|api/sso\")",
       "Bash(grep -nE \"href: \\\\`?\\\\\\\\\\\\$\\\\{?U\\\\}?\" C:/Users/mamle/visualstudiocode/mamlesh.me/client/src/data/portal.js)",
-      "PowerShell(cd C:\\\\Users\\\\mamle\\\\visualstudiocode\\\\Upstride\\\\Upstride-Backend-Portal; $env:JWT_SECRET=\"t\"; $env:MONGODB_URL=\"m\"; $env:SSO_PARTNER_SECRET=\"s\"; python -c \"from app.routers.sso import router, ExchangeBody; print\\('routes:', [\\(r.path, r.methods\\) for r in router.routes]\\); b = ExchangeBody\\(token='abc'\\); print\\('page defaults to:', repr\\(b.page\\)\\)\")"
+      "PowerShell(cd C:\\\\Users\\\\mamle\\\\visualstudiocode\\\\Upstride\\\\Upstride-Backend-Portal; $env:JWT_SECRET=\"t\"; $env:MONGODB_URL=\"m\"; $env:SSO_PARTNER_SECRET=\"s\"; python -c \"from app.routers.sso import router, ExchangeBody; print\\('routes:', [\\(r.path, r.methods\\) for r in router.routes]\\); b = ExchangeBody\\(token='abc'\\); print\\('page defaults to:', repr\\(b.page\\)\\)\")",
+      "PowerShell(cd C:\\\\Users\\\\mamle\\\\visualstudiocode\\\\Upstride\\\\Upstride-Backend-Portal; $env:JWT_SECRET=\"t\"; $env:MONGODB_URL=\"m\"; $env:SSO_PARTNER_SECRET=\"s\"; python -c \"from app.routers.sso import router, ExchangeBody; import ast, pathlib; src = pathlib.Path\\('app/routers/sso.py'\\).read_text\\(\\); checks = {'is_active': '\\\\\"is_active\\\\\"' in src, 'role student': '\\\\\"role\\\\\": \\\\\"student\\\\\"' in src, 'no role sso set':'\\\\\"role\\\\\": \\\\\"sso\\\\\"' not in src or src.count\\('\\\\\"role\\\\\": \\\\\"sso\\\\\"'\\)==1, 'backfill present': 'Backfill' in src}; print\\(checks\\)\")"
     ],
     "deny": [],
     "ask": []
