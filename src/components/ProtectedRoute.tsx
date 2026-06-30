@@ -15,11 +15,20 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to={`/login${redirect}`} replace />;
   }
 
-  // SSO partner users are locked to a single page — never let them out of it.
+  // SSO partner users.
+  // - If a scope is set on their session, they're locked to that single page.
+  // - Otherwise they get the same portal access as a regular student.
   if (role === "sso") {
-    const scope = localStorage.getItem("ssoScope") || "mock-interview";
-    if (location.pathname !== `/${scope}`) {
-      return <Navigate to={`/${scope}`} replace />;
+    const scope = localStorage.getItem("ssoScope");
+    if (scope) {
+      if (location.pathname !== `/${scope}`) {
+        return <Navigate to={`/${scope}`} replace />;
+      }
+      return <>{children}</>;
+    }
+    // No scope -> student-like access. Allow any route that admits students.
+    if (allowedRoles && !allowedRoles.includes("student") && !allowedRoles.includes("sso")) {
+      return <Navigate to="/portal" replace />;
     }
     return <>{children}</>;
   }
