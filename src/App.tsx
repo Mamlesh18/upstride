@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SsoBootstrap from "./components/SsoBootstrap";
 
@@ -41,6 +41,11 @@ const PageLoader = () => (
     </div>
   </div>
 );
+
+const MockInterviewRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/portal/mock-interview${location.search}`} replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -126,10 +131,11 @@ const App = () => (
                 <CheatSheet />
               </ProtectedRoute>
             } />
-            {/* /mock-interview is intentionally NOT wrapped in ProtectedRoute —
+            {/* /portal/mock-interview is intentionally NOT wrapped in ProtectedRoute —
                 the page itself handles both normal auth and the partner SSO
                 handshake (?sso=<token>) so external paid students can reach it. */}
-            <Route path="/mock-interview" element={<MockInterviewPage />} />
+            <Route path="/portal/mock-interview" element={<MockInterviewPage />} />
+            <Route path="/mock-interview" element={<MockInterviewRedirect />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
