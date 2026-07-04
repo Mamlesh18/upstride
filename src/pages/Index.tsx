@@ -371,6 +371,13 @@ const Index = () => {
 
           {/* Desktop nav — section anchors */}
           <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
+            {/* Programs — real page, not a scroll anchor */}
+            <button
+              onClick={() => navigate("/programs")}
+              style={{ padding: "16px 20px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", borderLeft: `3px solid ${B}`, background: "transparent", color: B, cursor: "pointer", transition: "all 0.15s", ...MONO, whiteSpace: "nowrap" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = B; (e.currentTarget as HTMLButtonElement).style.color = Y; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = B; }}
+            >Programs</button>
             {[
               { label: "Trust",            id: "trust" },
               { label: "Events",           id: "events" },
@@ -462,6 +469,10 @@ const Index = () => {
 
         {mobileMenuOpen && (
           <div style={{ borderTop: `3px solid ${B}` }}>
+            <button
+              onClick={() => { navigate("/programs"); setMobileMenuOpen(false); }}
+              style={{ display: "block", width: "100%", padding: "14px 24px", textAlign: "left", fontWeight: 700, fontSize: "12px", letterSpacing: "0.12em", background: "transparent", color: B, borderBottom: `1px solid ${B}18`, cursor: "pointer", ...MONO }}
+            >Programs</button>
             {[
               { label: "Trust",            id: "trust" },
               { label: "Events",           id: "events" },
