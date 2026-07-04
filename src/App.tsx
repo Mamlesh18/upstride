@@ -29,6 +29,7 @@ const Payment = lazy(() => import("./pages/Payment"));
 const UpstridesSheet = lazy(() => import("./pages/UpstridesSheet"));
 const CheatSheet = lazy(() => import("./pages/CheatSheet"));
 const MockInterviewPage = lazy(() => import("./pages/MockInterviewPage"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 
 const queryClient = new QueryClient();
 
@@ -136,6 +137,7 @@ const App = () => (
                 handshake (?sso=<token>) so external paid students can reach it. */}
             <Route path="/portal/mock-interview" element={<MockInterviewPage />} />
             <Route path="/mock-interview" element={<MockInterviewRedirect />} />
+            <Route path="/welcome" element={<Welcome />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

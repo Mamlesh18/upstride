@@ -126,6 +126,20 @@ export const api = {
         body: JSON.stringify({ email, new_password }),
       }),
     me: () => request("/api/auth/me"),
+
+    // ── Post-payment onboarding ──
+    onboardingInspect: (token: string) =>
+      request<{ email: string; name: string }>(
+        "/api/onboarding/inspect", { method: "POST", body: JSON.stringify({ token }) }
+      ),
+    onboardingFind: (data: { payment_id?: string; email?: string }) =>
+      request<{ token: string }>(
+        "/api/onboarding/find", { method: "POST", body: JSON.stringify(data) }
+      ),
+    onboardingComplete: (data: { token: string; password: string; email?: string }) =>
+      request<{ access_token: string; user: { id: string; email: string; name: string; role: string; must_change_password: boolean } }>(
+        "/api/onboarding/complete", { method: "POST", body: JSON.stringify(data) }
+      ),
   },
 
   admin: {
