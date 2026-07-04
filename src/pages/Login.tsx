@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 
@@ -15,9 +15,13 @@ const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = new URLSearchParams(location.search).get("redirect") || null;
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const redirectTo = params.get("redirect") || null;
+  // ?welcome=1 → the buyer just paid; render the "set your password" mode.
+  const welcomeMode = params.get("welcome") === "1" || params.get("enrolled") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
@@ -63,6 +67,44 @@ const Login = () => {
       else routeByRole(res.user.role as string);
     } catch (err: unknown) {
       toast({ title: "Login failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Post-payment "set a password" flow. Buyer types the email they paid with
+  // and a new password; if the account is pending onboarding, we create it.
+  const handleCompleteSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast({ title: "Missing fields", description: "Enter your email and a password", variant: "destructive" });
+      return;
+    }
+    if (password.length < 8) {
+      toast({ title: "Password too short", description: "Use at least 8 characters.", variant: "destructive" });
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await api.auth.completeSignup(email, password);
+      storeAuth({ access_token: res.access_token, user: res.user as unknown as Record<string, unknown> });
+      toast({ title: "You're in!", description: "Setup complete." });
+      routeByRole(res.user.role);
+    } catch (err: unknown) {
+      const msg = (err as Error).message || "";
+      // Already set up → drop them into normal login mode with the same email.
+      if (msg.toLowerCase().includes("already set up")) {
+        toast({ title: "You already have a password", description: "Please log in with the password you created." });
+        navigate("/login", { replace: true });
+        setPassword("");
+        setConfirmPassword("");
+      } else {
+        toast({ title: "Couldn't complete setup", description: msg, variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,33 +184,73 @@ const Login = () => {
         </div>
 
         <div style={{ width: "100%", maxWidth: "420px", backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "12px", padding: "40px", boxShadow: "0 4px 24px rgba(0,0,0,0.07)", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(20px)", transition: "all 0.5s 0.2s ease" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-            <div style={{ width: "52px", height: "52px", borderRadius: "10px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `3px 3px 0 ${B}` }}>
-              <ShieldCheck size={24} color={B} />
-            </div>
-          </div>
+          {welcomeMode ? (
+            <>
+              <div style={{ background: Y, color: B, border: `2px solid ${B}`, borderRadius: "8px", padding: "14px 16px", marginBottom: "22px", display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <Sparkles size={16} color={B} style={{ marginTop: "2px", flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em" }}>PAYMENT RECEIVED — WELCOME.</div>
+                  <div style={{ fontSize: "12px", color: `${B}cc`, marginTop: "4px", lineHeight: 1.5 }}>
+                    Enter the email you paid with and set a password. That's how you'll log in from now on.
+                  </div>
+                </div>
+              </div>
 
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-            <Field label="EMAIL ADDRESS">
-              <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-              <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} style={inputStyle("email")} required />
-            </Field>
-            <Field label="PASSWORD">
-              <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-              <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required />
-              <PasswordToggle show={showPassword} setShow={setShowPassword} />
-            </Field>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
-              <button type="button" onClick={() => navigate("/forgot-password")}
-                style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0 }}
-                onMouseEnter={e => (e.currentTarget.style.color = B)}
-                onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
-              >
-                Forgot password?
-              </button>
-            </div>
-            <SubmitButton isLoading={isLoading} label="ACCESS PORTAL ->" loadingLabel="AUTHENTICATING..." />
-          </form>
+              <form onSubmit={handleCompleteSignup} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                <Field label="EMAIL YOU PAID WITH">
+                  <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+                  <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} style={inputStyle("email")} required autoFocus />
+                </Field>
+                <Field label="CREATE A PASSWORD">
+                  <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+                  <input type={showPassword ? "text" : "password"} placeholder="At least 8 characters" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required autoComplete="new-password" />
+                  <PasswordToggle show={showPassword} setShow={setShowPassword} />
+                </Field>
+                <Field label="CONFIRM PASSWORD">
+                  <Lock size={16} color={focused === "confirm" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+                  <input type={showPassword ? "text" : "password"} placeholder="Type it again" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} onFocus={() => setFocused("confirm")} onBlur={() => setFocused(null)} style={inputStyle("confirm")} required autoComplete="new-password" />
+                </Field>
+                <SubmitButton isLoading={isLoading} label="SET PASSWORD & LOG IN →" loadingLabel="SETTING UP…" />
+                <button type="button" onClick={() => navigate("/login", { replace: true })}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0, textAlign: "center" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = B)}
+                  onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
+                >
+                  Already have a password? Log in
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "10px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `3px 3px 0 ${B}` }}>
+                  <ShieldCheck size={24} color={B} />
+                </div>
+              </div>
+
+              <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                <Field label="EMAIL ADDRESS">
+                  <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+                  <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} style={inputStyle("email")} required />
+                </Field>
+                <Field label="PASSWORD">
+                  <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+                  <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required />
+                  <PasswordToggle show={showPassword} setShow={setShowPassword} />
+                </Field>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
+                  <button type="button" onClick={() => navigate("/forgot-password")}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0 }}
+                    onMouseEnter={e => (e.currentTarget.style.color = B)}
+                    onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <SubmitButton isLoading={isLoading} label="ACCESS PORTAL ->" loadingLabel="AUTHENTICATING..." />
+              </form>
+            </>
+          )}
         </div>
 
         <p style={{ marginTop: "18px", fontSize: "11px", color: MUTE, textAlign: "center", maxWidth: "320px", lineHeight: 1.7 }}>

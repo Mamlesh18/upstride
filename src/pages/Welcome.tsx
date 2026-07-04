@@ -23,7 +23,6 @@ const SANS:  React.CSSProperties = { fontFamily: "'Geist', system-ui, -apple-sys
  */
 const POLL_INTERVAL_MS = 2500;
 const POLL_MAX_MS      = 60_000;   // give the webhook up to a minute
-const POLL_TICKS_TO_ASK_EMAIL = 6; // ~15s in without payment_id → ask for email
 
 type Phase =
   | "checking"          // inspecting an onboarding token from the URL
@@ -194,11 +193,66 @@ const Welcome = () => {
   }
 
   if (phase === "polling") {
+    // Do we have a way to identify the buyer?
+    // - razorpay_payment_id in URL (comes back from some Razorpay products) → auto-poll
+    // - email in URL or already typed → auto-poll
+    // - neither → show the email input as the PRIMARY CTA so they can type it in
+    const haveIdentifier = !!razorpayPayment || !!emailFromUrl || !!emailFallback;
     const pct = Math.min(100, Math.round((pollTicks / (POLL_MAX_MS / POLL_INTERVAL_MS)) * 100));
-    const shouldAskEmail = !razorpayPayment && !emailFromUrl && !emailFallback && pollTicks >= POLL_TICKS_TO_ASK_EMAIL;
+
+    if (!haveIdentifier) {
+      return (
+        <Centered>
+          <div style={{ maxWidth: "460px", width: "100%" }}>
+            <div style={{ background: Y, color: B, border: `3px solid ${B}`, boxShadow: `6px 6px 0 ${B}`, padding: "22px 24px", marginBottom: "18px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", marginBottom: "12px" }}>
+                <Sparkles size={13} /> PAYMENT RECEIVED
+              </div>
+              <h1 style={{ ...BEBAS, fontSize: "36px", lineHeight: 1, color: B, marginBottom: "8px", letterSpacing: "0.02em" }}>
+                ONE LAST STEP.
+              </h1>
+              <p style={{ fontSize: "13.5px", color: `${B}cc`, lineHeight: 1.6, margin: 0 }}>
+                Enter the email you paid with so we can find your new account.
+              </p>
+            </div>
+
+            <form
+              onSubmit={(e) => { e.preventDefault(); setPollTicks(0); }}
+              style={{ background: W, border: `2px solid ${B}`, padding: "20px 22px" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", color: B }}>
+                <Mail size={15} />
+                <span style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em" }}>YOUR PAYMENT EMAIL</span>
+              </div>
+              <input
+                type="email"
+                value={emailFallback}
+                onChange={(e) => setEmailFallback(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                autoFocus
+                style={{ width: "100%", padding: "11px 12px", border: `1.5px solid ${BORD}`, borderRadius: "6px", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "12px" }}
+                onFocus={e => (e.currentTarget.style.borderColor = B)}
+                onBlur={e => (e.currentTarget.style.borderColor = BORD)}
+              />
+              <button type="submit"
+                disabled={!emailFallback.includes("@")}
+                style={{ width: "100%", padding: "12px", background: B, color: Y, border: `2px solid ${B}`, ...MONO, fontSize: "12.5px", fontWeight: 700, letterSpacing: "0.12em", cursor: emailFallback.includes("@") ? "pointer" : "not-allowed", opacity: emailFallback.includes("@") ? 1 : 0.55, boxShadow: `4px 4px 0 ${Y}` }}>
+                FIND MY ACCOUNT →
+              </button>
+              <p style={{ marginTop: "10px", fontSize: "11.5px", color: MUTE, lineHeight: 1.55, textAlign: "center" }}>
+                Use the same email you typed on the Razorpay payment page.
+              </p>
+            </form>
+          </div>
+        </Centered>
+      );
+    }
+
+    // Have an identifier → showing progress
     return (
       <Centered>
-        <div style={{ maxWidth: "480px", width: "100%" }}>
+        <div style={{ maxWidth: "460px", width: "100%" }}>
           <div style={{ background: Y, color: B, border: `3px solid ${B}`, boxShadow: `6px 6px 0 ${B}`, padding: "24px 26px", textAlign: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", marginBottom: "14px" }}>
               <Sparkles size={13} /> PAYMENT RECEIVED
@@ -216,39 +270,6 @@ const Welcome = () => {
               {pct < 100 ? "SETTING UP YOUR PORTAL…" : "ALMOST THERE…"}
             </div>
           </div>
-
-          {shouldAskEmail && (
-            <form
-              onSubmit={(e) => { e.preventDefault(); setPollTicks(0); }}
-              style={{ marginTop: "18px", background: W, border: `2px solid ${B}`, padding: "18px 20px" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", color: B }}>
-                <Mail size={15} />
-                <span style={{ ...MONO, fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em" }}>TAKING LONGER THAN EXPECTED?</span>
-              </div>
-              <p style={{ fontSize: "12.5px", color: MUTE, lineHeight: 1.6, marginBottom: "10px" }}>
-                Enter the email you used to pay and we'll find your account.
-              </p>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <input
-                  type="email"
-                  value={emailFallback}
-                  onChange={(e) => setEmailFallback(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  style={{ flex: 1, minWidth: "180px", padding: "10px 12px", border: `1.5px solid ${BORD}`, borderRadius: "6px", fontSize: "13.5px", outline: "none", boxSizing: "border-box" }}
-                  onFocus={e => (e.currentTarget.style.borderColor = B)}
-                  onBlur={e => (e.currentTarget.style.borderColor = BORD)}
-                />
-                <button type="submit"
-                  disabled={!emailFallback.includes("@")}
-                  style={{ padding: "10px 16px", background: B, color: Y, border: `2px solid ${B}`, ...MONO, fontSize: "11.5px", fontWeight: 700, letterSpacing: "0.1em", cursor: emailFallback.includes("@") ? "pointer" : "not-allowed", opacity: emailFallback.includes("@") ? 1 : 0.55 }}>
-                  FIND MY ACCOUNT
-                </button>
-              </div>
-            </form>
-          )}
-
           <div style={{ marginTop: "14px", textAlign: "center", fontSize: "12px", color: MUTE }}>
             Don't refresh — we'll take you to the next step automatically.
           </div>

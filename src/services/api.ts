@@ -128,6 +128,10 @@ export const api = {
     me: () => request("/api/auth/me"),
 
     // ── Post-payment onboarding ──
+    completeSignup: (email: string, password: string) =>
+      request<{ access_token: string; user: { id: string; email: string; name: string; role: string; must_change_password: boolean } }>(
+        "/api/auth/complete-signup", { method: "POST", body: JSON.stringify({ email, password }) }
+      ),
     onboardingInspect: (token: string) =>
       request<{ email: string; name: string }>(
         "/api/onboarding/inspect", { method: "POST", body: JSON.stringify({ token }) }
