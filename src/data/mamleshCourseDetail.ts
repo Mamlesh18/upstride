@@ -7,10 +7,12 @@ export const COURSE_DETAIL = {
   paymentUrl: "https://rzp.io/rzp/YO5NnJrF",
   livePrice: 2499,
   originalPrice: 4999,
-  enrollmentNote: "Enrollments are open - next cohort starts 1st August.",
+  // Enrollment note + weekend copy are computed at render time from cohortDate.ts
+  // so we never ship stale month names. Kept blank here as fallbacks.
+  enrollmentNote: "",
   earlyBird: "Early-bird pricing ends soon — save now.",
   weekendMessage:
-    "The weekend batch is fully booked. We are now running weekday classes only.",
+    "The weekend batch is now closed due to overwhelming demand — thank you for the incredible support. Weekday classes are still open.",
 
   sessions: [
     { n: 1, track: "AI", title: "Foundations & LLMs", desc: "How LLMs actually work and the mental models you need to build with them.", topics: ["LLM fundamentals", "Tokens & context windows", "Stochastic outputs", "Setting up your stack"] },
@@ -45,7 +47,7 @@ export const COURSE_DETAIL = {
 
   faqs: [
     { q: "What will I actually be able to do after 30 days?", a: "Build and ship production-style AI systems - RAG, agents, multi-agent workflows - and walk away recruiter-ready with a strong resume, portfolio, LinkedIn, and GitHub." },
-    { q: "When does the next cohort start?", a: "The next cohort kicks off on 1st August. We run a single live Weekday batch and seats are limited - once it is full, it is full." },
+    { q: "When does the next cohort start?", a: "The next cohort kicks off on {{next_cohort}}. We run a single live Weekday batch and seats are limited - once it is full, it is full." },
     { q: "Do I need prior AI experience?", a: "No. You need basic Python and basic system design. We start from foundations and go all the way to production." },
     { q: "Is there a refund policy?", a: "Yes - a 24-hour, no-questions-asked refund window from the time of payment. After 24 hours, or once you download the invoice/certificate, you become ineligible." },
     { q: "Will I get a certificate?", a: "Yes. After the cohort ends you can download a certificate of completion from the portal." },

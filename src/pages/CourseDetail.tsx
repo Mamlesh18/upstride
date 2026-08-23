@@ -6,6 +6,7 @@ import { COURSE_DETAIL as C } from "@/data/mamleshCourseDetail";
 import { PROFILE } from "@/data/mamleshContent";
 import { STUDENT_STORIES, PLACEMENT_COMPANIES } from "@/data/studentTestimonials";
 import { api, type SiteSettings } from "@/services/api";
+import { nextCohortLabel } from "@/lib/cohortDate";
 
 // Screenshots from actual cohort sessions.
 const SESSION_SHOTS = [
@@ -30,7 +31,13 @@ export default function CourseDetail() {
   const livePrice = settings?.live_price_inr ?? C.livePrice;
   const originalPrice = settings?.original_price_inr ?? C.originalPrice;
   const paymentUrl = settings?.live_payment_url || C.paymentUrl;
-  const enrollmentNote = settings?.enrollment_note || C.enrollmentNote;
+  const cohortLabel = nextCohortLabel();
+  // If admin left the enrollment note blank (default), auto-generate it so we
+  // never quote a stale month. Admin can still override from Settings.
+  const enrollmentNote =
+    settings?.enrollment_note ||
+    C.enrollmentNote ||
+    `Enrollments are open — next cohort starts ${cohortLabel}.`;
   const earlyBird = settings?.early_bird_text || C.earlyBird;
   const weekendMessage = settings?.weekend_full_message || C.weekendMessage;
 
@@ -247,7 +254,7 @@ export default function CourseDetail() {
             {C.faqs.map((f, i) => (
               <details className="cd-faq" key={i} open>
                 <summary>{f.q}</summary>
-                <p>{f.a}</p>
+                <p>{f.a.replaceAll("{{next_cohort}}", cohortLabel)}</p>
               </details>
             ))}
           </div>

@@ -1,10 +1,23 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PublicLayout from "@/components/mamlesh/PublicLayout";
 import Seo from "@/components/mamlesh/Seo";
 import { COURSES } from "@/data/mamleshContent";
+import { api, type SiteSettings } from "@/services/api";
+import { nextCohortLabel } from "@/lib/cohortDate";
 
 export default function Courses() {
   const course = COURSES[0];
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  useEffect(() => {
+    api.public.siteConfig().then((r) => setSettings(r.data)).catch(() => {});
+  }, []);
+
+  const cohortLabel = nextCohortLabel();
+  const weekendMessage =
+    settings?.weekend_full_message ||
+    "The weekend batch is closed — thank you for the overwhelming support. Weekday classes are still open.";
 
   return (
     <PublicLayout>
@@ -15,8 +28,8 @@ export default function Courses() {
         />
 
         <div className="courses-notice">
-          The weekend batch is fully booked - thank you for the incredible
-          support. We are now running <strong>weekday classes only</strong>.
+          {weekendMessage}{" "}
+          <strong>Next weekday cohort — {cohortLabel}.</strong>
         </div>
 
         <h1 className="courses-title">Become a better engineer</h1>
@@ -27,7 +40,7 @@ export default function Courses() {
         </p>
 
         <div className="course-hero-card">
-          <span className="badge">Live cohort · Weekday batch</span>
+          <span className="badge">Live cohort · Weekday batch · {cohortLabel}</span>
           <h2>{course.title}</h2>
           <p className="muted">{course.tagline}</p>
 
