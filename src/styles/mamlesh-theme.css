@@ -561,6 +561,98 @@
   .cd-faq[open] summary::before { content: '- '; }
   .cd-faq p { color: var(--text-muted); padding-bottom: 14px; }
 
+  /* ---------- Student wall (course page social proof) ---------- */
+  .student-wall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .student-card {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column;
+    transition: transform var(--ease), border-color var(--ease), box-shadow var(--ease);
+  }
+  .student-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--yellow-border);
+    box-shadow: 0 18px 40px -26px rgba(244, 180, 0, 0.6);
+  }
+  .student-highlight {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #b88600; background: var(--yellow-soft);
+    border: 1px solid var(--yellow-border);
+    padding: 3px 10px; border-radius: 999px;
+    margin-bottom: 12px; align-self: flex-start;
+  }
+  .student-quote {
+    color: var(--text); font-size: 0.95rem;
+    line-height: 1.55; margin: 0 0 16px;
+    font-style: italic;
+  }
+  .student-foot {
+    display: flex; gap: 12px; align-items: center;
+    margin-top: auto; padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .student-photo {
+    width: 44px; height: 44px; border-radius: 50%;
+    object-fit: cover; border: 1px solid var(--yellow-border);
+    background: var(--yellow-soft); flex-shrink: 0;
+  }
+  .student-meta strong {
+    display: block; font-size: 0.92rem;
+    color: var(--text); letter-spacing: 0.02em;
+  }
+  .student-meta span {
+    display: block; font-size: 0.78rem;
+    color: var(--text-muted); line-height: 1.35;
+    margin-top: 2px;
+  }
+
+  /* ---------- Placements strip ---------- */
+  .placement-strip {
+    display: flex; flex-wrap: wrap; gap: 8px 10px;
+    margin-top: 18px;
+  }
+  .placement-chip {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px;
+    font-weight: 600; font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .placement-chip strong { color: var(--text); }
+
+  /* ---------- Session screenshots grid ---------- */
+  .meet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px; margin-top: 18px;
+  }
+  .meet-shot {
+    margin: 0; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--surface);
+    transition: transform var(--ease), border-color var(--ease);
+  }
+  .meet-shot:hover {
+    transform: translateY(-2px); border-color: var(--yellow-border);
+  }
+  .meet-shot img {
+    display: block; width: 100%;
+    aspect-ratio: 16 / 9; object-fit: cover;
+  }
+  .meet-shot figcaption {
+    padding: 10px 14px; font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
   /* ---------- Home featured band ---------- */
   .home-feature {
     border: 1px solid var(--yellow-border); border-radius: 16px;

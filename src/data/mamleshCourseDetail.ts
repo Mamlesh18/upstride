@@ -4,7 +4,7 @@ export const COURSE_DETAIL = {
   promise:
     "Learn to build production-ready AI systems and become a recruiter-ready AI engineer in just 30 days.",
   format: "30 days · 10 live sessions · build real AI products",
-  paymentUrl: "https://rzp.io/rzp/de3kIhbF",
+  paymentUrl: "https://rzp.io/rzp/YO5NnJrF",
   livePrice: 2499,
   originalPrice: 4999,
   enrollmentNote: "Enrollments are open - next cohort starts 1st August.",

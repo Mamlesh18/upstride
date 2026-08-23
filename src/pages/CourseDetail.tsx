@@ -1,12 +1,39 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PublicLayout from "@/components/mamlesh/PublicLayout";
 import Seo from "@/components/mamlesh/Seo";
 import { COURSE_DETAIL as C } from "@/data/mamleshCourseDetail";
 import { PROFILE } from "@/data/mamleshContent";
+import { STUDENT_STORIES, PLACEMENT_COMPANIES } from "@/data/studentTestimonials";
+import { api, type SiteSettings } from "@/services/api";
+
+// Screenshots from actual cohort sessions.
+const SESSION_SHOTS = [
+  { src: "/meet-1.jpeg", caption: "Live cohort session — hands-on build" },
+  { src: "/meet-2.jpeg", caption: "Q&A + code walkthrough" },
+];
 
 export default function CourseDetail() {
-  const livePrice = C.livePrice;
-  const originalPrice = C.originalPrice;
+  // Admin-editable settings; fall back to the hardcoded defaults if the API
+  // is unavailable (offline dev, first-run before admin sets anything).
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  useEffect(() => {
+    api.public
+      .siteConfig()
+      .then((r) => setSettings(r.data))
+      .catch(() => {
+        /* keep hardcoded fallback */
+      });
+  }, []);
+
+  const livePrice = settings?.live_price_inr ?? C.livePrice;
+  const originalPrice = settings?.original_price_inr ?? C.originalPrice;
+  const paymentUrl = settings?.live_payment_url || C.paymentUrl;
+  const enrollmentNote = settings?.enrollment_note || C.enrollmentNote;
+  const earlyBird = settings?.early_bird_text || C.earlyBird;
+  const weekendMessage = settings?.weekend_full_message || C.weekendMessage;
+
   const discounted = originalPrice > livePrice;
   const pctOff = discounted
     ? Math.round(((originalPrice - livePrice) / originalPrice) * 100)
@@ -26,13 +53,13 @@ export default function CourseDetail() {
           <h1>{C.title}</h1>
           <p className="tagline">{C.promise}</p>
           <div className="cd-format">{C.format}</div>
-          <div className="cd-enroll-note">{C.enrollmentNote}</div>
+          <div className="cd-enroll-note">{enrollmentNote}</div>
 
           <div className="cd-hero-cta">
             <Link to="/login" className="btn btn-ghost">
               Already enrolled? Log in
             </Link>
-            <a className="btn btn-primary" href={C.paymentUrl}>
+            <a className="btn btn-primary" href={paymentUrl}>
               Enroll now
             </a>
           </div>
@@ -67,12 +94,12 @@ export default function CourseDetail() {
           </div>
         </section>
 
-        <p className="cd-weekend-note">{C.weekendMessage}</p>
+        <p className="cd-weekend-note">{weekendMessage}</p>
 
         {/* Pricing */}
         <section className="section" style={{ textAlign: "center" }}>
           <h2 className="cd-h2">Pricing</h2>
-          <p className="muted">{C.earlyBird}</p>
+          <p className="muted">{earlyBird}</p>
           <div className="cd-plans single">
             <div className="cd-plan featured">
               {discounted && (
@@ -105,7 +132,7 @@ export default function CourseDetail() {
                 <li>Career Compass + lifetime resource library</li>
                 <li>Lifetime recordings &amp; certificate</li>
               </ul>
-              <a className="btn btn-primary" href={C.paymentUrl}>
+              <a className="btn btn-primary" href={paymentUrl}>
                 Enroll Now
               </a>
             </div>
@@ -139,6 +166,70 @@ export default function CourseDetail() {
                 <li key={it}>{it}</li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        {/* ── Real student outcomes ─────────────────────────────────────── */}
+        <section className="section">
+          <h2 className="cd-h2">Real student outcomes</h2>
+          <p className="muted">
+            These are actual students from prior cohorts — what they built, and
+            where they landed.
+          </p>
+          <div className="student-wall">
+            {STUDENT_STORIES.map((s) => (
+              <figure className="student-card" key={s.name}>
+                <span className="student-highlight">{s.highlight}</span>
+                <blockquote className="student-quote">"{s.quote}"</blockquote>
+                <figcaption className="student-foot">
+                  <img
+                    className="student-photo"
+                    src={s.image}
+                    alt={s.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.visibility =
+                        "hidden";
+                    }}
+                  />
+                  <div className="student-meta">
+                    <strong>{s.name}</strong>
+                    <span>{s.achievement}</span>
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <h3
+            className="cd-h3"
+            style={{ marginTop: 36, fontSize: "1.05rem", fontWeight: 600 }}
+          >
+            Where students have landed
+          </h3>
+          <div className="placement-strip">
+            {PLACEMENT_COMPANIES.map((c) => (
+              <span className="placement-chip" key={c}>
+                <strong>{c}</strong>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Inside a live session (screenshots) ──────────────────────── */}
+        <section className="section">
+          <h2 className="cd-h2">Inside a live session</h2>
+          <p className="muted">
+            Snapshots from recent cohort meetings — hands-on builds, not
+            slideware.
+          </p>
+          <div className="meet-grid">
+            {SESSION_SHOTS.map((shot) => (
+              <figure className="meet-shot" key={shot.src}>
+                <img src={shot.src} alt={shot.caption} loading="lazy" />
+                <figcaption>{shot.caption}</figcaption>
+              </figure>
+            ))}
           </div>
         </section>
 

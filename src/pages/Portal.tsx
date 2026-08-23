@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
+import { AI_PROJECTS, DOMAIN_ACCENTS, LEVEL_LABEL, type Domain } from "@/data/aiProjects";
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const Y    = "#FFE500";   // yellow
@@ -43,7 +44,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "overview" | "courses" | "placements" | "interviews" | "career_kit" | "sessions" | "resume" | "leaderboard" | "mockinterview" | "course";
+type ViewType = "overview" | "courses" | "placements" | "interviews" | "career_kit" | "sessions" | "resume" | "leaderboard" | "mockinterview" | "course" | "projects";
 
 interface CourseSummary {
   id: string;
@@ -5013,6 +5014,7 @@ const Portal = () => {
       items: [
         { view: "overview", label: "Compass", icon: Compass, count: "", href: "/portal/compass" },
         { view: "overview", label: "DSA Sheet", icon: Code2, count: "", href: "/upstrides-sheet" },
+        { view: "projects", label: "AI Projects", icon: Boxes, count: "24" },
         { view: "mockinterview", label: "Mock Interview", icon: MessageCircle, count: "" },
       ],
     },
@@ -10195,6 +10197,11 @@ Best regards,
           );
         })()}
 
+        {/* ── PROJECTS VIEW ─────────────────────────────────────────────── */}
+        {currentView === "projects" && (
+          <ProjectsView isMobile={isMobile} />
+        )}
+
         {/* ── MOCK INTERVIEW VIEW ──────────────────────────────────────────── */}
         {currentView === "mockinterview" && (
           <div style={{ padding: isMobile ? "16px 0" : "32px 24px" }}>
@@ -10392,6 +10399,122 @@ function CourseCard({ course, onClick }: { course: CourseSummary; onClick: () =>
             {ctaLabel} <ArrowUpRight size={14} />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── AI Projects view — 24 real-world project ideas grouped by domain ────
+function ProjectsView({ isMobile }: { isMobile: boolean }) {
+  const DOMAINS: Domain[] = ["GenAI", "Data Science", "Machine Learning", "Deep Learning", "Computer Vision"];
+  const [activeDomain, setActiveDomain] = useState<"ALL" | Domain>("ALL");
+
+  const visible = activeDomain === "ALL"
+    ? AI_PROJECTS
+    : AI_PROJECTS.filter(p => p.domain === activeDomain);
+
+  return (
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "8px 0" : "24px 20px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "inline-block", background: Y, color: B, padding: "4px 10px", fontSize: "10px", fontWeight: 800, letterSpacing: "0.14em", ...MONO, marginBottom: 12 }}>
+          24 PROJECTS · REAL PROBLEMS
+        </div>
+        <h1 style={{ fontSize: isMobile ? "24px" : "30px", fontWeight: 800, letterSpacing: "-0.01em", color: B, marginBottom: 6 }}>
+          Build the AI projects that actually get you hired.
+        </h1>
+        <p style={{ fontSize: "14px", color: MUTE, maxWidth: 720, lineHeight: 1.6 }}>
+          Each project is a real problem a company faces — not a toy demo. Ordered
+          from foundations → RAG → agents → multi-agent → MCP → guardrails → evals,
+          across GenAI, Data Science, ML, Deep Learning, and Computer Vision.
+        </p>
+      </div>
+
+      {/* Domain filter tabs */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18, borderBottom: `2px solid ${BORD}`, paddingBottom: 8 }}>
+        {(["ALL", ...DOMAINS] as const).map(d => {
+          const active = activeDomain === d;
+          const accent = d === "ALL" ? B : DOMAIN_ACCENTS[d as Domain];
+          const count = d === "ALL" ? AI_PROJECTS.length : AI_PROJECTS.filter(p => p.domain === d).length;
+          return (
+            <button key={d} onClick={() => setActiveDomain(d)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "7px 14px", background: active ? B : "transparent",
+                color: active ? Y : B, border: `2px solid ${active ? B : BORD}`,
+                borderRadius: 6, fontSize: 11, fontWeight: 700,
+                letterSpacing: "0.08em", cursor: "pointer", ...MONO,
+              }}>
+              <span style={{ width: 8, height: 8, background: accent, borderRadius: "50%", display: "inline-block" }} />
+              {d.toUpperCase()}
+              <span style={{ marginLeft: 4, opacity: 0.65 }}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Project cards */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(340px, 1fr))", gap: 14 }}>
+        {visible.map(p => {
+          const accent = DOMAIN_ACCENTS[p.domain];
+          return (
+            <div key={p.n} style={{
+              background: W, border: `2px solid ${BORD}`, borderLeft: `4px solid ${accent}`,
+              borderRadius: 8, padding: 20, display: "flex", flexDirection: "column",
+              transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `4px 4px 0 ${accent}44`; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+            >
+              {/* Top row: number, domain, level */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, ...MONO }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: MUTE, letterSpacing: "0.1em" }}>#{String(p.n).padStart(2, "0")}</span>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: accent, background: `${accent}15`, padding: "3px 8px", borderRadius: 999, textTransform: "uppercase" }}>{p.domain}</span>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.1em", color: B, background: Y, padding: "3px 8px", borderRadius: 999, textTransform: "uppercase" }}>L{p.level} · {LEVEL_LABEL[p.level]}</span>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: B, marginBottom: 10, lineHeight: 1.3 }}>{p.title}</h3>
+
+              {/* Problem */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.14em", color: "#d62828", marginBottom: 4, ...MONO }}>THE PROBLEM</div>
+                <p style={{ fontSize: 12.5, color: B, lineHeight: 1.55, margin: 0 }}>{p.problem}</p>
+              </div>
+
+              {/* Build */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.14em", color: "#1d7a44", marginBottom: 4, ...MONO }}>WHAT YOU BUILD</div>
+                <p style={{ fontSize: 12.5, color: B, lineHeight: 1.55, margin: 0 }}>{p.build}</p>
+              </div>
+
+              {/* Stack chips */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 12 }}>
+                {p.stack.map(s => (
+                  <span key={s} style={{ fontSize: 10, fontWeight: 600, color: MUTE, background: BG, border: `1px solid ${BORD}`, padding: "3px 8px", borderRadius: 4, ...MONO }}>{s}</span>
+                ))}
+              </div>
+
+              {/* Outcome (bottom) */}
+              <div style={{ marginTop: "auto", padding: "8px 10px", background: `${accent}0d`, borderLeft: `3px solid ${accent}`, borderRadius: 4 }}>
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.14em", color: accent, marginBottom: 2, ...MONO }}>OUTCOME</div>
+                <p style={{ fontSize: 12, color: B, lineHeight: 1.45, margin: 0, fontWeight: 600 }}>{p.outcome}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer note */}
+      <div style={{ marginTop: 24, padding: 18, background: W, border: `2px dashed ${BORD}`, borderRadius: 8, ...MONO }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: B, marginBottom: 6 }}>HOW TO USE THIS</div>
+        <p style={{ fontSize: 12.5, color: MUTE, lineHeight: 1.6, margin: 0 }}>
+          Pick one project per level. Ship it end-to-end — code on GitHub, a
+          README, a short demo video. Three of these on your portfolio matter
+          more than fifty tutorials.
+        </p>
       </div>
     </div>
   );
