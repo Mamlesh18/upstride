@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Code2, ChevronRight } from "lucide-react";
 import { SHEETS, type Block, type Section, type AnimName } from "@/data/cheatSheet";
 
-// ─── Dark palette (matches Upstrides Sheet) ──────────────────────────────────
+// ─── Dark palette (matches DSA Sheet) ──────────────────────────────────
 const BG    = "#0B0D10";
 const SURF   = "#15171C";
 const SURF2  = "#1B1E24";

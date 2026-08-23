@@ -12,7 +12,7 @@ const BEBAS: React.CSSProperties = { fontFamily: "'Bebas Neue', cursive" };
 const MONO:  React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 const SANS:  React.CSSProperties = { fontFamily: "'Sora', system-ui, -apple-system, sans-serif" };
 
-const REDIRECT_TO = "https://upstrides.in/";
+const REDIRECT_TO = "/";
 const COUNTDOWN_SECS = 6;
 
 const NotFound = () => {
@@ -168,7 +168,7 @@ const NotFound = () => {
               {seconds}
             </div>
             <div style={{ fontSize: "12.5px", color: B, lineHeight: 1.4 }}>
-              Redirecting to <strong>upstrides.in</strong>…
+              Redirecting to <strong>the home page</strong>…
             </div>
           </div>
           <button

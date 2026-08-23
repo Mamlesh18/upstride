@@ -1,5 +1,5 @@
-const BASE_URL = "https://upstride-backend-portal.vercel.app";
-// const BASE_URL = "http://localhost:8001";
+// const BASE_URL = "https://upstride-backend-portal.vercel.app";
+const BASE_URL = "http://localhost:8001";
 // 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -24,18 +24,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     console.error("[API error]", res.status, detail, data);
     throw new Error(detail);
   }
-  return data;
-}
-
-async function formRequest<T>(path: string, formData: FormData, method = "POST"): Promise<T> {
-  const token = getToken();
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    body: formData,
-    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || data.message || "Request failed");
   return data;
 }
 
@@ -127,22 +115,10 @@ export const api = {
       }),
     me: () => request("/api/auth/me"),
 
-    // ── Post-payment onboarding ──
+    // Post-payment onboarding — student sets their password from /login?welcome=1.
     completeSignup: (email: string, password: string) =>
       request<{ access_token: string; user: { id: string; email: string; name: string; role: string; must_change_password: boolean } }>(
         "/api/auth/complete-signup", { method: "POST", body: JSON.stringify({ email, password }) }
-      ),
-    onboardingInspect: (token: string) =>
-      request<{ email: string; name: string }>(
-        "/api/onboarding/inspect", { method: "POST", body: JSON.stringify({ token }) }
-      ),
-    onboardingFind: (data: { payment_id?: string; email?: string }) =>
-      request<{ token: string }>(
-        "/api/onboarding/find", { method: "POST", body: JSON.stringify(data) }
-      ),
-    onboardingComplete: (data: { token: string; password: string; email?: string }) =>
-      request<{ access_token: string; user: { id: string; email: string; name: string; role: string; must_change_password: boolean } }>(
-        "/api/onboarding/complete", { method: "POST", body: JSON.stringify(data) }
       ),
   },
 
@@ -151,10 +127,17 @@ export const api = {
 
     addStudent: (data: { email: string; name: string; password: string }) =>
       request("/api/admin/students", { method: "POST", body: JSON.stringify(data) }),
-    bulkAddStudents: (emails: string[], password: string, batchId?: string, resumeEmail?: string, resumePassword?: string) =>
-      request("/api/admin/students/bulk", { method: "POST", body: JSON.stringify({ emails, password, ...(batchId ? { batch_id: batchId } : {}), ...(resumeEmail ? { resume_enhancer_email: resumeEmail, resume_enhancer_password: resumePassword } : {}) }) }),
-    listStudents: (page = 1, search = "") =>
-      request(`/api/admin/students?page=${page}&search=${search}`),
+    bulkAddStudents: (emails: string[], password: string) =>
+      request<{ success: boolean; data: { added: string[]; skipped: string[] } }>(
+        "/api/admin/students/bulk",
+        { method: "POST", body: JSON.stringify({ emails, password }) },
+      ),
+    listStudents: (page = 1, search = "", paid?: "true" | "false") => {
+      const q = new URLSearchParams({ page: String(page) });
+      if (search) q.set("search", search);
+      if (paid) q.set("paid", paid);
+      return request<{ success: boolean; data: { students: Array<Record<string, unknown>>; pagination: { page: number; limit: number; total: number } } }>(`/api/admin/students?${q}`);
+    },
     updateStudent: (id: string, data: Record<string, unknown>) =>
       request(`/api/admin/students/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     resetPassword: (id: string, newPassword: string) =>
@@ -164,84 +147,13 @@ export const api = {
       }),
     deleteStudent: (id: string) =>
       request(`/api/admin/students/${id}`, { method: "DELETE" }),
-    setResumeEnhancer: (id: string, email: string, password: string) =>
-      request(`/api/admin/students/${id}/resume-enhancer`, { method: "PATCH", body: JSON.stringify({ email, password }) }),
-    bulkSetResumeEnhancer: (email: string, password: string) =>
-      request("/api/admin/students/resume-enhancer/bulk-set", { method: "POST", body: JSON.stringify({ email, password }) }),
 
-    addManager: (data: { email: string; name: string; password: string }) =>
-      request("/api/admin/managers", { method: "POST", body: JSON.stringify(data) }),
-    listManagers: () => request("/api/admin/managers"),
-    deleteManager: (id: string) =>
-      request(`/api/admin/managers/${id}`, { method: "DELETE" }),
+    listLeads: () => request<{ success: boolean; data: { leads: Array<Record<string, unknown>> } }>("/api/admin/leads"),
 
-    addProject: (data: { title: string; description: string; project_link: string; meeting_link: string; github_link: string; day: string; time: string; manager_id: string }) =>
-      request("/api/admin/projects", { method: "POST", body: JSON.stringify(data) }),
-    listProjects: () => request("/api/admin/projects"),
-    updateProject: (id: string, data: Record<string, unknown>) =>
-      request(`/api/admin/projects/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    deleteProject: (id: string) =>
-      request(`/api/admin/projects/${id}`, { method: "DELETE" }),
-
-    // Sales persons
-    addSalesperson: (data: { email: string; name: string; password: string }) =>
-      request("/api/admin/salespersons", { method: "POST", body: JSON.stringify(data) }),
-    listSalespersons: () => request("/api/admin/salespersons"),
-    deleteSalesperson: (id: string) =>
-      request(`/api/admin/salespersons/${id}`, { method: "DELETE" }),
-
-    // Contacts
-    bulkAddContacts: (raw: string) =>
-      request("/api/admin/contacts/bulk", { method: "POST", body: JSON.stringify({ raw }) }),
-    allotContacts: (salesperson_id: string, count: number) =>
-      request("/api/admin/contacts/allot", { method: "POST", body: JSON.stringify({ salesperson_id, count }) }),
-    listContacts: (params: { status?: string; assigned_to?: string; search?: string; page?: number; date?: string }) => {
-      const q = new URLSearchParams();
-      if (params.status) q.set("status", params.status);
-      if (params.assigned_to) q.set("assigned_to", params.assigned_to);
-      if (params.search) q.set("search", params.search);
-      if (params.page) q.set("page", String(params.page));
-      if (params.date) q.set("date", params.date);
-      return request(`/api/admin/contacts?${q}`);
-    },
-    contactStats: () => request("/api/admin/contacts/stats"),
-    deleteContact: (id: string) => request(`/api/admin/contacts/${id}`, { method: "DELETE" }),
-    clearUnassigned: () => request("/api/admin/contacts/clear-unassigned", { method: "DELETE" }),
-
-    // Jobs
-    listJobs: () => request("/api/admin/jobs"),
-    createJob: (data: { role: string; company: string; description: string; apply_link: string; category: string }) =>
-      request("/api/admin/jobs", { method: "POST", body: JSON.stringify(data) }),
-    updateJob: (id: string, data: Record<string, unknown>) =>
-      request(`/api/admin/jobs/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    deleteJob: (id: string) => request(`/api/admin/jobs/${id}`, { method: "DELETE" }),
-
-    // Public users & leads
-    listPublicUsers: () => request("/api/admin/public-users"),
-    listLeads: () => request("/api/admin/leads"),
-
-    // Training session messages (10 sessions, copied into WhatsApp)
-    listTrainingSessions: () => request<{ data: { sessions: Array<{ id: string; order: number; topic: string; covered: string; task: string; why: string; updated_at: string | null }> } }>("/api/admin/training-sessions"),
-    updateTrainingSession: (id: string, data: { topic?: string; covered?: string; task?: string; why?: string }) =>
-      request<{ success: boolean; session: { id: string; order: number; topic: string; covered: string; task: string; why: string; updated_at: string | null } }>(
-        `/api/admin/training-sessions/${id}`, { method: "PUT", body: JSON.stringify(data) }
-      ),
-  },
-
-  projects: {
-    myProjects: () => request("/api/projects/my"),
-  },
-
-  sales: {
-    myContacts: (status?: string) =>
-      request(`/api/sales/contacts${status ? `?status=${status}` : ""}`),
-    updateStatus: (contactId: string, status: string, notes?: string) =>
-      request(`/api/sales/contacts/${contactId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status, notes }),
-      }),
-    addContact: (data: { name: string; phone: string; email?: string }) =>
-      request("/api/sales/contacts", { method: "POST", body: JSON.stringify(data) }),
+    // Site settings (course price, payment URL, notes)
+    getSettings: () => request<{ success: boolean; data: SiteSettings }>("/api/admin/settings"),
+    updateSettings: (data: Partial<SiteSettings>) =>
+      request<{ success: boolean; data: SiteSettings }>("/api/admin/settings", { method: "PUT", body: JSON.stringify(data) }),
   },
 
   student: {
@@ -259,7 +171,6 @@ export const api = {
     track: (type: string, resource_name?: string) =>
       request("/api/student/track", { method: "POST", body: JSON.stringify({ type, resource_name }) }),
     getLeaderboard: () => request("/api/student/leaderboard"),
-    getSchedule: () => request("/api/student/schedule"),
     getUpcomingEvents: () => request("/api/student/events"),
 
     // ── Compass — personalized career graph ──
@@ -271,10 +182,7 @@ export const api = {
       }),
     deleteCompass: () => request("/api/student/compass", { method: "DELETE" }),
 
-    // ── Referral ──
-    getReferralCode: () => request<{ code: string }>("/api/student/referral-code"),
-
-    // ── Upstrides Sheet progress (persisted in MongoDB) ──
+    // ── DSA Sheet progress (persisted in MongoDB) ──
     getSheetProgress: () => request<{ done: string[]; revision: string[]; unlocked_solutions: string[]; quota_left: number; daily_limit: number }>("/api/student/sheet/progress"),
     setSheetDone: (done: string[]) =>
       request("/api/student/sheet/done", { method: "PUT", body: JSON.stringify({ done }) }),
@@ -297,15 +205,9 @@ export const api = {
   },
 
   public: {
-    jobs: (params: { category?: string; search?: string; page?: number }) => {
-      const q = new URLSearchParams();
-      if (params.category) q.set("category", params.category);
-      if (params.search) q.set("search", params.search);
-      if (params.page) q.set("page", String(params.page));
-      return request(`/api/public/jobs?${q}`);
-    },
     apply: (data: { name: string; email: string; phone: string; referred_by?: string | null }) =>
       request("/api/public/apply", { method: "POST", body: JSON.stringify(data) }),
+    siteConfig: () => request<{ success: boolean; data: SiteSettings }>("/api/public/site-config"),
   },
 
   mockInterview: {
@@ -330,14 +232,6 @@ export const api = {
       request("/api/mock-interview/analyze", { method: "POST", body: JSON.stringify(data) }),
   },
 
-  events: {
-    getUpcoming: () => request("/api/events"),
-    adminList: () => request("/api/admin/events"),
-    create: (fd: FormData) => formRequest("/api/admin/events", fd),
-    update: (id: string, fd: FormData) => formRequest(`/api/admin/events/${id}`, fd, "PATCH"),
-    delete: (id: string) => request(`/api/admin/events/${id}`, { method: "DELETE" }),
-  },
-
   resources: {
     getAll: () => request("/api/resources"),
     adminList: () => request("/api/admin/resources"),
@@ -349,23 +243,6 @@ export const api = {
     delete: (id: string) => request(`/api/admin/resources/${id}`, { method: "DELETE" }),
   },
 
-  adminCourses: {
-    list: () => request("/api/admin/courses"),
-    create: (data: Record<string, unknown>) =>
-      request("/api/admin/courses", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: string, data: Record<string, unknown>) =>
-      request(`/api/admin/courses/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: string) => request(`/api/admin/courses/${id}`, { method: "DELETE" }),
-    addTopic: (courseId: string, data: Record<string, unknown>) =>
-      request(`/api/admin/courses/${courseId}/topics`, { method: "POST", body: JSON.stringify(data) }),
-    bulkAddTopics: (courseId: string, topics: Record<string, unknown>[]) =>
-      request(`/api/admin/courses/${courseId}/topics/bulk`, { method: "POST", body: JSON.stringify({ topics }) }),
-    updateTopic: (courseId: string, topicId: string, data: Record<string, unknown>) =>
-      request(`/api/admin/courses/${courseId}/topics/${topicId}`, { method: "PATCH", body: JSON.stringify(data) }),
-    deleteTopic: (courseId: string, topicId: string) =>
-      request(`/api/admin/courses/${courseId}/topics/${topicId}`, { method: "DELETE" }),
-  },
-
   courses: {
     list: () => request<{ success: boolean; data: unknown[] }>("/api/courses"),
     get: (courseId: string) => request<{ success: boolean; data: unknown }>(`/api/courses/${courseId}`),
@@ -375,36 +252,100 @@ export const api = {
       request(`/api/courses/${courseId}/progress/${topicId}`, { method: "DELETE" }),
   },
 
-  standup: {
-    pmBatches: () => request<{ success: boolean; data: { batches: { id: string; name: string }[] } }>("/api/standup/pm/batches"),
-    pmGet: (batchId: string) => request<{ success: boolean; data: { batch_id: string; dates: string[]; students: { email: string; name: string; role: string; updates: Record<string, string> }[] } }>(`/api/standup/pm/${batchId}`),
-    pmUpdateCell: (batchId: string, date: string, student_email: string, update: string) =>
-      request(`/api/standup/pm/${batchId}/cell`, { method: "PATCH", body: JSON.stringify({ date, student_email, update }) }),
-    pmUpdateRole: (batchId: string, student_email: string, role: string) =>
-      request(`/api/standup/pm/${batchId}/role`, { method: "PATCH", body: JSON.stringify({ student_email, role }) }),
-    pmAddDate: (batchId: string, date: string) =>
-      request(`/api/standup/pm/${batchId}/date`, { method: "POST", body: JSON.stringify({ date }) }),
-    pmRemoveDate: (batchId: string, date: string) =>
-      request(`/api/standup/pm/${batchId}/date/remove`, { method: "POST", body: JSON.stringify({ date }) }),
-    studentGet: () => request<{ success: boolean; data: { batch_id: string | null; dates: string[]; students: { email: string; name: string; role: string; updates: Record<string, string> }[] } }>("/api/standup/student"),
+  // ── mamlesh.me content ─────────────────────────────────────────────
+  blogs: {
+    list: () => request<BlogSummary[]>("/api/blogs"),
+    get: (slug: string) => request<BlogDetail>(`/api/blogs/${slug}`),
+    adminList: () => request<BlogDetail[]>("/api/admin/blogs"),
+    create: (data: BlogInput) =>
+      request<BlogDetail>("/api/admin/blogs", { method: "POST", body: JSON.stringify(data) }),
+    update: (slug: string, data: BlogInput) =>
+      request<BlogDetail>(`/api/admin/blogs/${slug}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (slug: string) =>
+      request<{ status: string; slug: string }>(`/api/admin/blogs/${slug}`, { method: "DELETE" }),
   },
 
-  batches: {
-    list: () => request("/api/admin/batches"),
-    create: (data: { name: string; resume_enhancer_email?: string; resume_enhancer_password?: string; common_calendar_url?: string; calendar_url_1?: string; calendar_url_2?: string }) =>
-      request("/api/admin/batches", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: string, data: Record<string, unknown>) =>
-      request(`/api/admin/batches/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: string) => request(`/api/admin/batches/${id}`, { method: "DELETE" }),
+  papers: {
+    list: () => request<Paper[]>("/api/papers"),
+    adminList: () => request<Paper[]>("/api/admin/papers"),
+    create: (data: PaperInput) =>
+      request<Paper>("/api/admin/papers", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: string, data: PaperInput) =>
+      request<Paper>(`/api/admin/papers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (id: string) =>
+      request<{ status: string; id: string }>(`/api/admin/papers/${id}`, { method: "DELETE" }),
   },
 
-  adminExtra: {
-    getSessions: () => request("/api/admin/sessions"),
-    updateSession: (sessionNumber: number, data: { drive_link?: string; description?: string }) =>
-      request(`/api/admin/sessions/${sessionNumber}`, { method: "PATCH", body: JSON.stringify(data) }),
-    getFeedback: (status?: string) =>
-      request(`/api/admin/feedback${status ? `?status=${status}` : ""}`),
-    resolveFeedback: (id: string) =>
-      request(`/api/admin/feedback/${id}/resolve`, { method: "PATCH" }),
+  analytics: {
+    track: (path: string, visitorId: string) =>
+      request("/api/track", { method: "POST", body: JSON.stringify({ path, visitor_id: visitorId }) }),
+    dashboard: (days = 30) => request<AnalyticsDashboard>(`/api/admin/analytics?days=${days}`),
   },
 };
+
+// ── mamlesh content types ────────────────────────────────────────────
+export interface BlogBlock {
+  type: "heading" | "paragraph" | "list" | "image" | "quote" | "code";
+  text?: string;
+  items?: string[];
+  url?: string;
+  caption?: string;
+}
+export interface BlogSummary {
+  slug: string;
+  title: string;
+  excerpt: string;
+  cover_image?: string | null;
+  published: boolean;
+  created_at: string;
+}
+export interface BlogDetail extends BlogSummary {
+  blocks: BlogBlock[];
+}
+export interface BlogInput {
+  title: string;
+  excerpt?: string;
+  cover_image?: string | null;
+  blocks: BlogBlock[];
+  published: boolean;
+}
+export interface Paper {
+  id: string;
+  title: string;
+  url: string;
+  kind: "paper" | "book";
+  date: string;
+  created_at: string;
+}
+export interface PaperInput {
+  title: string;
+  url: string;
+  date?: string;
+  kind?: "paper" | "book";
+}
+export interface SiteSettings {
+  live_price_inr: number;
+  original_price_inr: number;
+  live_payment_url: string;
+  enrollment_note: string;
+  weekend_full_message: string;
+  early_bird_text: string;
+  calendar_link: string;
+  community_link: string;
+}
+export interface AnalyticsDashboard {
+  generated_at: string;
+  window_days: number;
+  total_visitors: number;
+  visitors_today: number;
+  visitors_last_7d: number;
+  total_pageviews: number;
+  revenue_inr: number;
+  paid_students: number;
+  students: number;
+  blogs: number;
+  papers: number;
+  top_paths: { path: string; count: number }[];
+  daily: { date: string; count: number }[];
+  recent_signups: { email: string; name: string; paid: boolean; created_at: string }[];
+}

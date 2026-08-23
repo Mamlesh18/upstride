@@ -1,16 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Eye, EyeOff, Sparkles } from "lucide-react";
+import "@/styles/mamlesh-theme.css";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
-
-const Y = "#FFE500";
-const B = "#0A0A0A";
-const W = "#FFFFFF";
-const BG = "#FAFAFA";
-const BORD = "#E5E5E5";
-const MUTE = "#6B7280";
-const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,27 +12,23 @@ const Login = () => {
   const redirectTo = params.get("redirect") || null;
   // ?welcome=1 → the buyer just paid; render the "set your password" mode.
   const welcomeMode = params.get("welcome") === "1" || params.get("enrolled") === "1";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("userRole");
     if (token) routeByRole(role);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const routeByRole = (role: string | null) => {
     if (redirectTo) { navigate(redirectTo); return; }
     if (role === "super_admin") navigate("/admin");
-    else if (role === "project_manager") navigate("/projects");
-    else if (role === "sales_person") navigate("/sales");
     else navigate("/portal");
   };
 
@@ -57,23 +46,18 @@ const Login = () => {
       toast({ title: "Missing fields", description: "Enter email and password", variant: "destructive" });
       return;
     }
-
-    setIsLoading(true);
+    setLoading(true);
     try {
       const res = await api.auth.login(email, password);
       storeAuth(res);
       toast({ title: "Welcome back!", description: `${res.user.name}` });
       if (res.user.must_change_password) navigate("/change-password");
       else routeByRole(res.user.role as string);
-    } catch (err: unknown) {
+    } catch (err) {
       toast({ title: "Login failed", description: (err as Error).message, variant: "destructive" });
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  // Post-payment "set a password" flow. Buyer types the email they paid with
-  // and a new password; if the account is pending onboarding, we create it.
   const handleCompleteSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -88,15 +72,14 @@ const Login = () => {
       toast({ title: "Passwords don't match", variant: "destructive" });
       return;
     }
-    setIsLoading(true);
+    setLoading(true);
     try {
       const res = await api.auth.completeSignup(email, password);
       storeAuth({ access_token: res.access_token, user: res.user as unknown as Record<string, unknown> });
       toast({ title: "You're in!", description: "Setup complete." });
       routeByRole(res.user.role);
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = (err as Error).message || "";
-      // Already set up → drop them into normal login mode with the same email.
       if (msg.toLowerCase().includes("already set up")) {
         toast({ title: "You already have a password", description: "Please log in with the password you created." });
         navigate("/login", { replace: true });
@@ -105,189 +88,166 @@ const Login = () => {
       } else {
         toast({ title: "Couldn't complete setup", description: msg, variant: "destructive" });
       }
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const inputStyle = (field: string): React.CSSProperties => ({
-    width: "100%",
-    padding: "12px 16px 12px 44px",
-    backgroundColor: W,
-    border: `2px solid ${focused === field ? B : BORD}`,
-    borderRadius: "6px",
-    color: B,
-    fontSize: "14px",
-    ...MONO,
-    outline: "none",
-    transition: "border-color 0.15s",
-    boxSizing: "border-box" as const,
-  });
-
-  const stats = [
-    { value: "250+", label: "Students Trained" },
-    { value: "30+", label: "Internships Secured" },
-    { value: "6+", label: "Colleges Visited" },
-  ];
-
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: BG, display: "flex", ...MONO }}>
-      <div className="hidden lg:flex" style={{ width: "44%", backgroundColor: B, flexDirection: "column", justifyContent: "space-between", padding: "48px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "120px", height: "120px", backgroundColor: Y }} />
-
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "56px", position: "relative", zIndex: 1 }}>
-            <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "36px", filter: "brightness(0) invert(1)" }} />
-            <span style={{ fontSize: "20px", fontWeight: 700, color: W, letterSpacing: "0.08em" }}>Upstrides</span>
-          </div>
-
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s 0.1s ease" }}>
-            <div style={{ display: "inline-block", backgroundColor: Y, color: B, padding: "5px 12px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", marginBottom: "24px" }}>
-              STUDENT PORTAL
-            </div>
-            <h1 style={{ fontSize: "clamp(30px, 3vw, 44px)", fontWeight: 700, color: W, lineHeight: 1.15, marginBottom: "20px", letterSpacing: "-0.02em" }}>
-              Your career<br />resources,<br /><span style={{ color: Y }}>all in one place.</span>
-            </h1>
-            <p style={{ fontSize: "14px", color: `${W}99`, lineHeight: 1.8, maxWidth: "340px" }}>
-              Access curated training materials, placement prep, company-specific resources, and mentorship guides.
-            </p>
+    <div className="mamlesh-site" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <nav className="nav">
+        <div className="container nav-inner">
+          <Link to="/" className="nav-brand">
+            Mamlesh<span>.</span>
+          </Link>
+          <div className="nav-links">
+            <Link to="/">← Back to site</Link>
           </div>
         </div>
+      </nav>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", backgroundColor: `${W}22`, opacity: mounted ? 1 : 0, transition: "all 0.6s 0.3s ease" }}>
-          {stats.map(({ value, label }) => (
-            <div key={label} style={{ backgroundColor: `${W}08`, padding: "20px 16px", textAlign: "center", border: `1px solid ${W}15` }}>
-              <div style={{ fontSize: "26px", fontWeight: 700, color: Y, marginBottom: "4px" }}>{value}</div>
-              <div style={{ fontSize: "10px", color: `${W}77`, letterSpacing: "0.1em", lineHeight: 1.4 }}>{label.toUpperCase()}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ borderLeft: `3px solid ${Y}`, paddingLeft: "20px", opacity: mounted ? 1 : 0, transition: "all 0.6s 0.5s ease" }}>
-          <p style={{ fontSize: "13px", color: `${W}88`, lineHeight: 1.8, fontStyle: "italic" }}>
-            "The gap between where you are and where you want to be is just information."
-          </p>
-          <span style={{ fontSize: "11px", color: Y, fontWeight: 600, letterSpacing: "0.1em" }}>- Upstrides Team</span>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 24px", position: "relative", backgroundColor: BG }}>
-        <div style={{ position: "absolute", top: "24px", left: "24px" }}>
-          <button
-            onClick={() => navigate("/")}
-            style={{ display: "flex", alignItems: "center", gap: "8px", color: MUTE, background: "none", border: "none", cursor: "pointer", fontSize: "13px", ...MONO }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = B; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = MUTE; }}
-          >
-            <ArrowLeft size={16} /> Back to home
-          </button>
-        </div>
-
-        <div style={{ width: "100%", maxWidth: "420px", backgroundColor: W, border: `2px solid ${BORD}`, borderRadius: "12px", padding: "40px", boxShadow: "0 4px 24px rgba(0,0,0,0.07)", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(20px)", transition: "all 0.5s 0.2s ease" }}>
-          {welcomeMode ? (
-            <>
-              <div style={{ background: Y, color: B, border: `2px solid ${B}`, borderRadius: "8px", padding: "14px 16px", marginBottom: "22px", display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <Sparkles size={16} color={B} style={{ marginTop: "2px", flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em" }}>PAYMENT RECEIVED — WELCOME.</div>
-                  <div style={{ fontSize: "12px", color: `${B}cc`, marginTop: "4px", lineHeight: 1.5 }}>
-                    Enter the email you paid with and set a password. That's how you'll log in from now on.
+      <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+        <div style={{ width: "100%", maxWidth: 440 }}>
+          <div style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "16px",
+            padding: "40px 36px",
+            boxShadow: "0 20px 50px -28px rgba(30, 30, 30, 0.25)",
+          }}>
+            {welcomeMode ? (
+              <>
+                <div style={{
+                  background: "var(--yellow-soft)",
+                  border: "1px solid var(--yellow-border)",
+                  borderRadius: "12px",
+                  padding: "16px 18px",
+                  marginBottom: 24,
+                  display: "flex", gap: 12, alignItems: "flex-start",
+                }}>
+                  <Sparkles size={18} color="#b88600" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <div style={{ fontWeight: 700, color: "#8a6d00", fontSize: "0.9rem", marginBottom: 4 }}>
+                      Payment received — welcome.
+                    </div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "0.88rem", lineHeight: 1.5 }}>
+                      Enter the email you paid with and set a password. That's how you'll log in from now on.
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <form onSubmit={handleCompleteSignup} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                <Field label="EMAIL YOU PAID WITH">
-                  <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-                  <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} style={inputStyle("email")} required autoFocus />
-                </Field>
-                <Field label="CREATE A PASSWORD">
-                  <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-                  <input type={showPassword ? "text" : "password"} placeholder="At least 8 characters" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required autoComplete="new-password" />
-                  <PasswordToggle show={showPassword} setShow={setShowPassword} />
-                </Field>
-                <Field label="CONFIRM PASSWORD">
-                  <Lock size={16} color={focused === "confirm" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-                  <input type={showPassword ? "text" : "password"} placeholder="Type it again" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} onFocus={() => setFocused("confirm")} onBlur={() => setFocused(null)} style={inputStyle("confirm")} required autoComplete="new-password" />
-                </Field>
-                <SubmitButton isLoading={isLoading} label="SET PASSWORD & LOG IN →" loadingLabel="SETTING UP…" />
+                <h1 style={{ fontFamily: "var(--heading)", fontSize: "1.7rem", marginBottom: 4 }}>
+                  Finish setting up
+                </h1>
+                <p className="muted" style={{ marginBottom: 24, fontSize: "0.95rem" }}>
+                  Choose a password so you can access your course.
+                </p>
+
+                <form onSubmit={handleCompleteSignup}>
+                  <div className="field">
+                    <label>Email you paid with</label>
+                    <input
+                      type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com" required autoFocus
+                    />
+                  </div>
+                  <div className="field" style={{ position: "relative" }}>
+                    <label>Create a password</label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password} onChange={(e) => setPassword(e.target.value)}
+                      placeholder="At least 8 characters" required autoComplete="new-password"
+                      style={{ paddingRight: 42 }}
+                    />
+                    <PasswordToggle show={showPassword} setShow={setShowPassword} />
+                  </div>
+                  <div className="field">
+                    <label>Confirm password</label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Type it again" required autoComplete="new-password"
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={loading}
+                    style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+                    {loading ? "Setting up…" : "Set password & log in →"}
+                  </button>
+                </form>
+
                 <button type="button" onClick={() => navigate("/login", { replace: true })}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0, textAlign: "center" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = B)}
-                  onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
+                  style={{
+                    display: "block", margin: "18px auto 0", background: "none", border: "none",
+                    color: "var(--text-muted)", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer",
+                  }}
                 >
                   Already have a password? Log in
                 </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                <div style={{ width: "52px", height: "52px", borderRadius: "10px", backgroundColor: Y, border: `2px solid ${B}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `3px 3px 0 ${B}` }}>
-                  <ShieldCheck size={24} color={B} />
-                </div>
-              </div>
+              </>
+            ) : (
+              <>
+                <h1 style={{ fontFamily: "var(--heading)", fontSize: "1.8rem", marginBottom: 4 }}>
+                  Welcome back
+                </h1>
+                <p className="muted" style={{ marginBottom: 28, fontSize: "0.95rem" }}>
+                  Log in to your course portal.
+                </p>
 
-              <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                <Field label="EMAIL ADDRESS">
-                  <Mail size={16} color={focused === "email" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-                  <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} style={inputStyle("email")} required />
-                </Field>
-                <Field label="PASSWORD">
-                  <Lock size={16} color={focused === "password" ? B : MUTE} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }} />
-                  <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} style={{ ...inputStyle("password"), paddingRight: "44px" }} required />
-                  <PasswordToggle show={showPassword} setShow={setShowPassword} />
-                </Field>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
-                  <button type="button" onClick={() => navigate("/forgot-password")}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, fontSize: "12px", fontWeight: 600, ...MONO, padding: 0 }}
-                    onMouseEnter={e => (e.currentTarget.style.color = B)}
-                    onMouseLeave={e => (e.currentTarget.style.color = MUTE)}
-                  >
-                    Forgot password?
+                <form onSubmit={handleLogin}>
+                  <div className="field">
+                    <label>Email address</label>
+                    <input
+                      type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com" required
+                    />
+                  </div>
+                  <div className="field" style={{ position: "relative" }}>
+                    <label>Password</label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password} onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password" required
+                      style={{ paddingRight: 42 }}
+                    />
+                    <PasswordToggle show={showPassword} setShow={setShowPassword} />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -8, marginBottom: 16 }}>
+                    <button type="button" onClick={() => navigate("/forgot-password")}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", padding: 0 }}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={loading}
+                    style={{ width: "100%", justifyContent: "center" }}>
+                    {loading ? "Signing in…" : "Log in →"}
                   </button>
-                </div>
-                <SubmitButton isLoading={isLoading} label="ACCESS PORTAL ->" loadingLabel="AUTHENTICATING..." />
-              </form>
-            </>
-          )}
-        </div>
+                </form>
+              </>
+            )}
+          </div>
 
-        <p style={{ marginTop: "18px", fontSize: "11px", color: MUTE, textAlign: "center", maxWidth: "320px", lineHeight: 1.7 }}>
-          By accessing the portal, you agree to our{" "}
-          <button onClick={() => navigate("/terms")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700, ...MONO, textDecoration: "underline" }}>Terms</button>{" "}
-          and{" "}
-          <button onClick={() => navigate("/privacy-policy")} style={{ color: B, background: "none", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700, ...MONO, textDecoration: "underline" }}>Privacy Policy</button>
-        </p>
-      </div>
+          <p style={{ marginTop: 20, fontSize: "0.8rem", color: "var(--text-faint)", textAlign: "center", lineHeight: 1.7 }}>
+            By logging in, you agree to our{" "}
+            <Link to="/terms" className="link-blue">Terms</Link>{" "}and{" "}
+            <Link to="/privacy-policy" className="link-blue">Privacy Policy</Link>.
+          </p>
+        </div>
+      </main>
     </div>
   );
 };
 
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div>
-    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: "8px" }}>{label}</label>
-    <div style={{ position: "relative" }}>{children}</div>
-  </div>
-);
-
-const PasswordToggle = ({ show, setShow }: { show: boolean; setShow: (next: boolean) => void }) => (
+const PasswordToggle = ({ show, setShow }: { show: boolean; setShow: (v: boolean) => void }) => (
   <button
     type="button"
     onClick={() => setShow(!show)}
-    style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: MUTE, display: "flex", alignItems: "center" }}
+    style={{
+      position: "absolute", right: 12, top: 36,
+      background: "none", border: "none", cursor: "pointer",
+      color: "var(--text-muted)", display: "flex", alignItems: "center", padding: 4,
+    }}
+    aria-label={show ? "Hide password" : "Show password"}
   >
     {show ? <EyeOff size={16} /> : <Eye size={16} />}
-  </button>
-);
-
-const SubmitButton = ({ isLoading, label, loadingLabel }: { isLoading: boolean; label: string; loadingLabel: string }) => (
-  <button
-    type="submit"
-    disabled={isLoading}
-    style={{ width: "100%", padding: "14px", backgroundColor: isLoading ? `${B}cc` : B, color: Y, border: `2px solid ${B}`, borderRadius: "6px", fontSize: "13px", fontWeight: 700, letterSpacing: "0.12em", ...MONO, cursor: isLoading ? "not-allowed" : "pointer", boxShadow: `3px 3px 0 ${Y}`, marginTop: "4px" }}
-  >
-    {isLoading ? loadingLabel : label}
   </button>
 );
 

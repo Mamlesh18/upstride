@@ -1,291 +1,122 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import PublicLayout from "@/components/mamlesh/PublicLayout";
+import PolicyLayout, {
+  Note,
+  type PolicySection,
+} from "@/components/mamlesh/PolicyLayout";
+import { PROFILE } from "@/data/mamleshContent";
 
-const TermsOfAgreement = () => {
-  const navigate = useNavigate();
+export default function TermsOfAgreement() {
+  const sections: PolicySection[] = [
+    {
+      id: "access",
+      heading: "Courses & access",
+      body: (
+        <>
+          <p>
+            Courses are digital learning products. Once your payment succeeds, you get access to the course and portal using the email address you paid with.
+          </p>
+          <p>Access is for one person and is not transferable.</p>
+        </>
+      ),
+    },
+    {
+      id: "ip",
+      heading: "Using the content",
+      body: (
+        <>
+          <p>
+            All content - recordings, materials, code, and templates - belongs to {PROFILE.name} and is protected under the <strong>Copyright Act, 1957</strong>. Please use it for your own learning.
+          </p>
+          <ul>
+            <li>Do not resell, redistribute, or publicly share the content.</li>
+            <li>Do not share your login or access with anyone else.</li>
+          </ul>
+          <Note tone="warn">
+            We track devices and sessions. Suspected sharing or misuse can lead to access being revoked without a refund.
+          </Note>
+        </>
+      ),
+    },
+    {
+      id: "payments",
+      heading: "Payments & taxes",
+      body: (
+        <p>
+          All payments are processed securely through <strong>Razorpay</strong>. Prices are in Indian Rupees (INR) and include <strong>GST</strong> where applicable. A valid tax invoice is available in your course portal.
+        </p>
+      ),
+    },
+    {
+      id: "refunds",
+      heading: "Refunds",
+      body: (
+        <p>
+          Refunds follow our separate <Link to="/refund">Refund Policy</Link>, which gives you a 24-hour window. Please read it before enrolling.
+        </p>
+      ),
+    },
+    {
+      id: "outcomes",
+      heading: "Certificates & outcomes",
+      body: (
+        <p>
+          You receive a certificate of completion after the cohort ends. We do not guarantee any specific job, placement, or salary - the career tools and guidance are there to help, and your results depend on your own effort.
+        </p>
+      ),
+    },
+    {
+      id: "liability",
+      heading: "Limitation of liability",
+      body: (
+        <p>
+          To the maximum extent permitted by law, our total liability relating to the course will not exceed the amount you paid for it. We are not liable for any indirect or consequential losses.
+        </p>
+      ),
+    },
+    {
+      id: "law",
+      heading: "Governing law",
+      body: (
+        <p>
+          These terms are governed by the laws of India. Subject to applicable law, the courts at the service provider's registered location in India have exclusive jurisdiction over any disputes.
+        </p>
+      ),
+    },
+    {
+      id: "contact",
+      heading: "Contact",
+      body: (
+        <>
+          <p>
+            Questions about these terms? Email <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>.
+          </p>
+          <Note>
+            This page is for transparency and is not legal advice. Please consult a qualified professional for your specific situation.
+          </Note>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-sm z-50 border-b border-border/20">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              Home
-            </Button>
-          </div>
-        </nav>
-      </header>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-8"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-4">Terms of Agreement</h1>
-          <p className="text-muted-foreground text-lg mb-8">
-            Last Updated: November 2026
+    <PublicLayout>
+      <PolicyLayout
+        seo={{
+          title: "Terms & Conditions - Mamlesh",
+          description:
+            "The terms for using this website and enrolling in courses - access, content use, payments, refunds, and governing law.",
+        }}
+        eyebrow="Terms & Conditions"
+        title="Terms & Conditions"
+        updated="Last updated: July 2026 · Governed by the laws of India"
+        intro={
+          <p>
+            These terms cover how you use this website and enrol in courses. They are an electronic record under the <strong>Information Technology Act, 2000</strong> and a binding agreement under the <strong>Indian Contract Act, 1872</strong>. By using the site or enrolling, you accept them.
           </p>
-
-          <div className="space-y-8">
-            {/* Introduction */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">1. Introduction</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  These Terms of Agreement ("Terms") govern your use of Upstrides' website and educational services. By accessing and using our platform, you agree to be bound by these terms. If you do not agree, please do not use our services.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Use License */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">2. Use License</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  Permission is granted to temporarily download one copy of the materials (information or software) on Upstrides for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
-                </p>
-                <ul className="list-disc list-inside space-y-2">
-                  <li>Modifying or copying the materials</li>
-                  <li>Using the materials for any commercial purpose or for any public display</li>
-                  <li>Attempting to decompile or reverse engineer any software contained on the platform</li>
-                  <li>Removing any copyright or other proprietary notations from the materials</li>
-                  <li>Transferring the materials to another person or "mirroring" the materials on any other server</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Course Terms */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">3. Course Terms and Conditions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Enrollment and Access</h4>
-                  <p>
-                    Upon enrollment and payment, you receive access to course materials for the duration specified. Access may be revoked for violation of these terms.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Course Content</h4>
-                  <p>
-                    All course materials, videos, documents, and resources are proprietary to Upstrides and may not be reproduced, distributed, or shared without permission.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Completion and Certificates</h4>
-                  <p>
-                    Certificates are issued upon successful completion of course requirements. Upstrides reserves the right to audit or revoke certificates if plagiarism or cheating is detected.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Payment Terms */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">4. Payment Terms</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  Payment for courses is non-refundable except where required by law. Enrollments are valid from the date of payment and access continues for the specified duration. In case of technical issues preventing course access, contact our support team.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Refund Policy */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">5. Refund Policy</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  Refund requests must be submitted within 7 days of enrollment. No refunds are provided for courses already accessed. Special circumstances will be reviewed on a case-by-case basis.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* User Responsibilities */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">6. User Responsibilities</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>You agree to:</p>
-                <ul className="list-disc list-inside space-y-2">
-                  <li>Provide accurate information during enrollment</li>
-                  <li>Use your account solely for your own learning</li>
-                  <li>Not share your login credentials with others</li>
-                  <li>Comply with all applicable laws and regulations</li>
-                  <li>Not engage in harassment, plagiarism, or cheating</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Intellectual Property */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">7. Intellectual Property Rights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  All course materials, curriculum, videos, and content are owned by Upstrides or licensed to us. You may not reproduce, distribute, or use these materials outside of the course without explicit permission.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Limitation of Liability */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">8. Limitation of Liability</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  Upstrides is provided "as is" without warranties. We are not liable for any indirect, incidental, special, or consequential damages arising from your use of our services.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Modifications */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">9. Changes to Terms</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  Upstrides reserves the right to modify these terms at any time. Changes will be posted on this page with an updated "Last Updated" date.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Contact */}
-            <Card className="bg-primary/5 border-primary/30">
-              <CardHeader>
-                <CardTitle className="text-2xl">10. Contact Us</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  For questions about these terms, please contact:
-                </p>
-                <a
-                  href="mailto:hello@upstrides.in"
-                  className="text-primary hover:text-primary/80 font-bold transition-colors"
-                >
-                  hello@upstrides.in
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-foreground/5 border-t border-border mt-20">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-8 w-8 object-contain" />
-                <h3 className="text-xl font-bold text-foreground">Upstrides</h3>
-              </div>
-              <p className="text-muted-foreground text-sm mb-4">
-                Transforming careers through world-class online education.
-              </p>
-              <a
-                href="mailto:hello@upstrides.in"
-                className="text-primary hover:text-primary/80 font-semibold text-sm transition-colors"
-              >
-                hello@upstrides.in
-              </a>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Home
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/privacy-policy")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Privacy Policy
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/terms")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Terms of Agreement
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/contact")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Contact Us
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="mailto:hello@upstrides.in"
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Email Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-muted-foreground text-sm">
-                © 2026 Upstrides Learning. All rights reserved.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Recognized by MSME, Government of India
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+        }
+        sections={sections}
+      />
+    </PublicLayout>
   );
-};
-
-export default TermsOfAgreement;
+}

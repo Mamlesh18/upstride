@@ -7,32 +7,36 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import ProtectedRoute from "./components/ProtectedRoute";
 import SsoBootstrap from "./components/SsoBootstrap";
 
-// Lazy load all page components for code splitting
+// ── Public site (mamlesh.me theme) ─────────────────────────────────────
 const Index = lazy(() => import("./pages/Index"));
-const Programs = lazy(() => import("./pages/Programs"));
+const Blogs = lazy(() => import("./pages/Blogs"));
+const BlogDetail = lazy(() => import("./pages/BlogDetail"));
+const Papershelf = lazy(() => import("./pages/Papershelf"));
+const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
-const Portal = lazy(() => import("./pages/Portal"));
+const About = lazy(() => import("./pages/About"));
+const Talks = lazy(() => import("./pages/Talks"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
+const Refund = lazy(() => import("./pages/Refund"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// ── Auth ───────────────────────────────────────────────────────────────
 const Login = lazy(() => import("./pages/Login"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+
+// ── Dashboard (post-login, unchanged) ──────────────────────────────────
+const Portal = lazy(() => import("./pages/Portal"));
 const Admin = lazy(() => import("./pages/Admin"));
-const ProjectManager = lazy(() => import("./pages/ProjectManager"));
-const SalesPerson = lazy(() => import("./pages/SalesPerson"));
 const Workspace = lazy(() => import("./pages/Workspace"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
-const ContactUs = lazy(() => import("./pages/ContactUs"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Results = lazy(() => import("./pages/Results"));
 const Compass = lazy(() => import("./pages/Compass"));
-const Payment = lazy(() => import("./pages/Payment"));
 const UpstridesSheet = lazy(() => import("./pages/UpstridesSheet"));
 const CheatSheet = lazy(() => import("./pages/CheatSheet"));
 const MockInterviewPage = lazy(() => import("./pages/MockInterviewPage"));
 
 const queryClient = new QueryClient();
 
-// Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="text-center">
@@ -56,9 +60,24 @@ const App = () => (
         <SsoBootstrap>
         <Suspense fallback={<PageLoader />}>
           <Routes>
+            {/* Public site */}
             <Route path="/" element={<Index />} />
-            <Route path="/programs" element={<Programs />} />
-            <Route path="/course/:courseId" element={<CourseDetail />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/blogs/:slug" element={<BlogDetail />} />
+            <Route path="/papershelf" element={<Papershelf />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:courseId" element={<CourseDetail />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/talks" element={<Talks />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfAgreement />} />
+            <Route path="/refund" element={<Refund />} />
+
+            {/* Legacy redirects (old public URLs → new home) */}
+            <Route path="/programs" element={<Navigate to="/courses" replace />} />
+            <Route path="/contact" element={<Navigate to="/about" replace />} />
+
+            {/* Auth */}
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/change-password" element={
@@ -66,6 +85,8 @@ const App = () => (
                 <ChangePassword />
               </ProtectedRoute>
             } />
+
+            {/* Dashboard — unchanged */}
             <Route path="/portal" element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <Portal />
@@ -86,6 +107,11 @@ const App = () => (
                 <Portal />
               </ProtectedRoute>
             } />
+            <Route path="/portal/compass" element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Compass />
+              </ProtectedRoute>
+            } />
             <Route path="/portal/:slug" element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <Portal />
@@ -96,31 +122,11 @@ const App = () => (
                 <Admin />
               </ProtectedRoute>
             } />
-            <Route path="/projects" element={
-              <ProtectedRoute allowedRoles={["project_manager"]}>
-                <ProjectManager />
-              </ProtectedRoute>
-            } />
-            <Route path="/sales" element={
-              <ProtectedRoute allowedRoles={["sales_person"]}>
-                <SalesPerson />
-              </ProtectedRoute>
-            } />
             <Route path="/workspace" element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <Workspace />
               </ProtectedRoute>
             } />
-            <Route path="/portal/compass" element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <Compass />
-              </ProtectedRoute>
-            } />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfAgreement />} />
-            <Route path="/contact" element={<ContactUs />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/payment" element={<Payment />} />
             <Route path="/upstrides-sheet" element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <UpstridesSheet />
@@ -131,12 +137,11 @@ const App = () => (
                 <CheatSheet />
               </ProtectedRoute>
             } />
-            {/* /portal/mock-interview is intentionally NOT wrapped in ProtectedRoute —
-                the page itself handles both normal auth and the partner SSO
-                handshake (?sso=<token>) so external paid students can reach it. */}
+            {/* /portal/mock-interview handles its own auth (accepts SSO) */}
             <Route path="/portal/mock-interview" element={<MockInterviewPage />} />
             <Route path="/mock-interview" element={<MockInterviewRedirect />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

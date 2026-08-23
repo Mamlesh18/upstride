@@ -43,7 +43,7 @@ const SURF = "#FFFFFF";   // card surface
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ViewType = "overview" | "courses" | "placements" | "interviews" | "career_kit" | "sessions" | "resume" | "leaderboard" | "schedule" | "mockinterview" | "course" | "standup";
+type ViewType = "overview" | "courses" | "placements" | "interviews" | "career_kit" | "sessions" | "resume" | "leaderboard" | "mockinterview" | "course";
 
 interface CourseSummary {
   id: string;
@@ -4754,18 +4754,10 @@ const Portal = () => {
   interface LeaderboardData { week_label: string; leaderboard: LeaderboardEntry[]; my_rank: number | null; my_stats: { email: string; score: number; login_days: number; resource_opens: number } | null; }
   const [leaderboard, setLeaderboard]         = useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  interface CalendarEntry { label: string; url: string; }
-  interface ScheduleData { batch: string | null; calendars: CalendarEntry[]; }
-  const [schedule, setSchedule]               = useState<ScheduleData | null>(null);
-  const [activeCalendar, setActiveCalendar]   = useState(0);
   interface UpcomingEvent { title: string; description: string; start: string; all_day: boolean; countdown: string; urgency: "now" | "today" | "soon" | "week" | "later"; }
   const [upcomingEvents, setUpcomingEvents]   = useState<UpcomingEvent[]>([]);
   const [courses, setCourses]                 = useState<CourseSummary[]>([]);
   const [activeCourseId, setActiveCourseId]   = useState<string | null>(null);
-  interface StandupStudent { email: string; name: string; role: string; updates: Record<string, string>; }
-  interface StandupData { batch_id: string | null; dates: string[]; students: StandupStudent[]; }
-  const [standupData, setStandupData]         = useState<StandupData | null>(null);
-  const [standupLoading, setStandupLoading]   = useState(false);
   const [clockTime, setClockTime]             = useState(() => new Date());
   const [careerKitResource, setCareerKitResource] = useState<null | "resume_review" | "cover_letter" | "linkedin_review" | "linkedin_messages" | "cold_emails" | "mock_interview" | "ai_projects" | "open_source" | "projects_graduation" | "github_portfolio">(null);
   const [coverLetterTab, setCoverLetterTab]   = useState<"short" | "long" | "founder" | "technical" | "hr">("short");
@@ -4791,7 +4783,7 @@ const Portal = () => {
     api.courses.list().then((r: unknown) => {
       const res = r as { data: CourseSummary[] };
       setCourses(res.data);
-      const RESERVED: Record<string, ViewType> = { standup: "standup", overview: "overview", courses: "courses", placements: "placements", interviews: "interviews", "career-kit": "career_kit" };
+      const RESERVED: Record<string, ViewType> = { overview: "overview", courses: "courses", placements: "placements", interviews: "interviews", "career-kit": "career_kit" };
       if (slug && RESERVED[slug]) {
         setCurrentView(RESERVED[slug]);
       } else if (slug) {
@@ -4809,12 +4801,12 @@ const Portal = () => {
       if (key) {
         setCurrentView("career_kit");
         setCareerKitResource(key);
-        document.title = `${CK_KEY_TITLE[key]} — Career Kit | Upstride`;
+        document.title = `${CK_KEY_TITLE[key]} — Career Kit | Mamlesh`;
       }
     } else if (slug === "career-kit" || window.location.pathname === "/portal/career-kit") {
       setCurrentView("career_kit");
       setCareerKitResource(null);
-      document.title = "Career Kit | Upstride";
+      document.title = "Career Kit | Mamlesh";
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ckSlug]);
@@ -4827,12 +4819,12 @@ const Portal = () => {
         setCurrentView("interviews");
         setInterviewTopic(key);
         setIvSection("beginner");
-        document.title = `${IV_KEY_TITLE[key]} | Upstride`;
+        document.title = `${IV_KEY_TITLE[key]} | Mamlesh`;
       }
     } else if (slug === "interviews" || window.location.pathname === "/portal/interviews") {
       setCurrentView("interviews");
       setInterviewTopic(null);
-      document.title = "Interviews | Upstride";
+      document.title = "Interviews | Mamlesh";
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ivSlug]);
@@ -4846,23 +4838,15 @@ const Portal = () => {
         setPlacementsCompany(key);
         setPlacementsTab(PLACEMENT_COMPANIES[key].type);
         setPlacementsSection(PLACEMENT_COMPANIES[key].sections[0].key);
-        document.title = `${PLACEMENT_COMPANIES[key].name} | Placements | Upstride`;
+        document.title = `${PLACEMENT_COMPANIES[key].name} | Placements | Mamlesh`;
       }
     } else if (slug === "placements" || window.location.pathname === "/portal/placements") {
       setCurrentView("placements");
       setPlacementsCompany(null);
-      document.title = "Placements | Upstride";
+      document.title = "Placements | Mamlesh";
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companySlug]);
-
-  const loadStandup = () => {
-    if (standupData) return;
-    setStandupLoading(true);
-    api.standup.studentGet().then(r => {
-      setStandupData(r.data);
-    }).catch(() => {}).finally(() => setStandupLoading(false));
-  };
 
   const loadSessions = useCallback(async () => {
     try {
@@ -4922,14 +4906,6 @@ const Portal = () => {
         setLeaderboard(res.data);
       }).catch(() => {}).finally(() => setLeaderboardLoading(false));
     }
-    if (view === "schedule" && !schedule) {
-      api.student.getSchedule().then((r: unknown) => {
-        const res = r as { data: ScheduleData };
-        setSchedule(res.data);
-        setActiveCalendar(0);
-      }).catch(() => {});
-    }
-    if (view === "standup") loadStandup();
   };
 
   const copyToClipboard = (text: string, type: "email" | "password") => {
@@ -5026,8 +5002,6 @@ const Portal = () => {
     { view: "interviews",   label: "Interviews",     icon: Users,           count: `${interviewsCourses.length || ""}` },
     { view: "career_kit",   label: "Career Kit",     icon: Briefcase,       count: "" },
     { view: "sessions",     label: "Sessions",       icon: PlayCircle,      count: sessionsInfo ? `${sessionsInfo.unlocked_count}` : "" },
-    { view: "schedule",     label: "Schedule",       icon: CalendarDays,    count: "" },
-    { view: "standup",      label: "Standup",        icon: ClipboardList,   count: "" },
     { view: "leaderboard",  label: "Leaderboard",    icon: Trophy,          count: "" },
     { view: "mockinterview", label: "Mock Interview", icon: MessageCircle,  count: "" },
   ];
@@ -5038,7 +5012,7 @@ const Portal = () => {
       accent: "#FFB000",
       items: [
         { view: "overview", label: "Compass", icon: Compass, count: "", href: "/portal/compass" },
-        { view: "overview", label: "Upstrides Sheet", icon: Code2, count: "", href: "/upstrides-sheet" },
+        { view: "overview", label: "DSA Sheet", icon: Code2, count: "", href: "/upstrides-sheet" },
         { view: "mockinterview", label: "Mock Interview", icon: MessageCircle, count: "" },
       ],
     },
@@ -5054,12 +5028,10 @@ const Portal = () => {
       ],
     },
     {
-      label: "UPSTRIDE",
+      label: "MAMLESH",
       accent: "#6366F1",
       items: [
         { view: "sessions",  label: "Sessions", icon: PlayCircle,   count: "" },
-        { view: "schedule",  label: "Schedule", icon: CalendarDays, count: "" },
-        { view: "standup",   label: "Standup",  icon: ClipboardList, count: "" },
       ],
     },
     {
@@ -5092,8 +5064,16 @@ const Portal = () => {
               {sidebarOpen ? <X size={16} color={B} /> : <Menu size={16} color={B} />}
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }} onClick={() => navigate("/")}>
-              <img src="/upstride-logo.png" alt="Upstrides" style={{ height: "28px", objectFit: "contain" }} />
-              {!isMobile && <span style={{ fontSize: "15px", fontWeight: 700, color: B, letterSpacing: "0.05em", ...MONO }}>Upstrides</span>}
+              {!isMobile && (
+                <span style={{ fontSize: "16px", fontWeight: 800, color: B, letterSpacing: "-0.01em" }}>
+                  Mamlesh<span style={{ color: Y, textShadow: `1px 1px 0 ${B}` }}>.</span>
+                </span>
+              )}
+              {isMobile && (
+                <span style={{ fontSize: "18px", fontWeight: 800, color: B, letterSpacing: "-0.01em" }}>
+                  M<span style={{ color: Y, textShadow: `1px 1px 0 ${B}` }}>.</span>
+                </span>
+              )}
               <span style={{ fontSize: "10px", backgroundColor: Y, color: B, padding: "2px 8px", fontWeight: 700, letterSpacing: "0.12em", border: `1px solid ${B}`, ...MONO }}>
                 PORTAL
               </span>
@@ -5185,7 +5165,7 @@ const Portal = () => {
                         }
                         switchView(view);
                         if (isMobile) setSidebarOpen(false);
-                        navigate(view === "standup" ? "/portal/standup" : "/portal", { replace: true });
+                        navigate("/portal", { replace: true });
                       }}
                       style={{
                         display: "flex", alignItems: "center", gap: "10px",
@@ -5380,7 +5360,7 @@ const Portal = () => {
                         <span style={{ fontSize: "32px" }}>🔥</span>
                         <div>
                           <div style={{ fontSize: "14px", fontWeight: 700, color: "#15803D" }}>That's what separates you from the 80% who didn't.</div>
-                          <div style={{ fontSize: "12px", color: "#4ADE80", marginTop: "4px" }}>Upstride is right here with you. Keep the streak alive.</div>
+                          <div style={{ fontSize: "12px", color: "#4ADE80", marginTop: "4px" }}>Mamlesh is right here with you. Keep the streak alive.</div>
                         </div>
                       </div>
                     )}
@@ -5395,7 +5375,7 @@ const Portal = () => {
                         />
                         <button onClick={() => { if (dsaReason.trim()) setDsaReasonDone(true); }}
                           style={{ marginTop: "12px", padding: "10px 22px", background: B, color: W, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>
-                          Tell Upstride →
+                          Tell Mamlesh →
                         </button>
                       </div>
                     )}
@@ -5404,7 +5384,7 @@ const Portal = () => {
                         <span style={{ fontSize: "28px" }}>💛</span>
                         <div>
                           <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400E" }}>We hear you. Tomorrow is a clean slate.</div>
-                          <div style={{ fontSize: "12px", color: "#D97706", marginTop: "4px" }}>Upstride is here — show up again and we'll be right here too.</div>
+                          <div style={{ fontSize: "12px", color: "#D97706", marginTop: "4px" }}>Mamlesh is here — show up again and we'll be right here too.</div>
                         </div>
                       </div>
                     )}
@@ -5443,9 +5423,6 @@ const Portal = () => {
 
               {/* ══ RIGHT SIDEBAR ════════════════════════════════════════ */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "80px", alignSelf: "flex-start" }}>
-
-                {/* REFER & EARN */}
-                <ReferEarnCard userEmail={userEmail} />
 
                 {/* QUICK FIRE MCQ */}
                 <div style={{ background: W, border: "1.5px solid #E5E5E5", borderRadius: "12px", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
@@ -10218,147 +10195,6 @@ Best regards,
           );
         })()}
 
-        {/* ── SCHEDULE VIEW ────────────────────────────────────────────── */}
-        {currentView === "schedule" && (
-          <div style={{ maxWidth: "780px", margin: "0 auto", padding: isMobile ? "16px 0" : "32px 24px" }}>
-            {/* Header */}
-            <div style={{ marginBottom: "32px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "36px" : "52px", color: B, lineHeight: 0.9, letterSpacing: "0.02em" }}>
-                UPCOMING<br /><span style={{ borderBottom: `4px solid ${Y}` }}>EVENTS</span>
-              </div>
-              {schedule?.batch && (
-                <div style={{ marginTop: "12px", display: "inline-flex", alignItems: "center", gap: "6px", background: B, color: W, borderRadius: "999px", padding: "5px 14px", fontSize: "11px", fontWeight: 600 }}>
-                  <CalendarDays size={12} /> {schedule.batch}
-                </div>
-              )}
-            </div>
-
-            {upcomingEvents.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "64px 24px", border: `2px dashed ${BORD}` }}>
-                <CalendarDays size={40} style={{ marginBottom: "14px", opacity: 0.25 }} />
-                <div style={{ fontWeight: 700, color: B, marginBottom: "6px", ...MONO }}>No upcoming events</div>
-                <div style={{ fontSize: "12px", color: MUTE }}>Check back soon — your admin will add events here.</div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-                {upcomingEvents.map((evt, idx) => {
-                  const meetLink = evt.description ? extractMeetLink(evt.description) : null;
-                  const cleanDesc = evt.description ? cleanDescription(evt.description) : "";
-                  const accentColor = urgencyBg(evt.urgency);
-                  const isFirst = idx === 0;
-                  return (
-                    <div key={idx} style={{ display: "flex", gap: "0", position: "relative" }}>
-                      {/* Timeline spine */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "40px", flexShrink: 0 }}>
-                        <div style={{
-                          width: "14px", height: "14px", borderRadius: "50%",
-                          background: accentColor,
-                          border: `3px solid ${isFirst ? B : BORD}`,
-                          marginTop: "28px",
-                          flexShrink: 0,
-                          zIndex: 1,
-                          boxShadow: isFirst ? `0 0 0 4px ${accentColor}33` : "none",
-                          animation: ["now","today"].includes(evt.urgency) ? "up-blink 1.1s ease-in-out infinite" : "none",
-                        }} />
-                        {idx < upcomingEvents.length - 1 && (
-                          <div style={{ flex: 1, width: "2px", background: BORD, marginTop: "4px", marginBottom: "-8px" }} />
-                        )}
-                      </div>
-
-                      {/* Event card */}
-                      <div style={{
-                        flex: 1,
-                        marginLeft: "16px",
-                        marginBottom: "20px",
-                        border: `2px solid ${isFirst ? B : BORD}`,
-                        borderLeft: `4px solid ${accentColor}`,
-                        background: isFirst ? B : W,
-                        overflow: "hidden",
-                        transition: "box-shadow 0.15s",
-                      }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = `4px 4px 0 ${accentColor}`; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
-                      >
-                        <div style={{ padding: isMobile ? "16px" : "20px 24px" }}>
-                          {/* Urgency + date row */}
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
-                            <span style={{
-                              fontSize: "9px", fontWeight: 700, letterSpacing: "0.18em",
-                              color: isFirst ? accentColor : accentColor,
-                              background: isFirst ? `${accentColor}22` : `${accentColor}15`,
-                              padding: "3px 8px",
-                              ...MONO,
-                            }}>
-                              {urgencyLabel(evt.urgency)}
-                            </span>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <CalendarDays size={11} color={isFirst ? "#ffffff80" : MUTE} />
-                              <span style={{ fontSize: "11px", color: isFirst ? "#ffffff80" : MUTE, letterSpacing: "0.04em", ...MONO }}>
-                                {formatEventDate(evt.start, evt.all_day)}
-                              </span>
-                            </div>
-                            <span style={{ fontSize: "10px", color: isFirst ? "#ffffff55" : `${MUTE}88`, ...MONO, marginLeft: "auto" }}>
-                              {evt.countdown}
-                            </span>
-                          </div>
-
-                          {/* Title */}
-                          <div style={{
-                            fontFamily: "'Bebas Neue', cursive",
-                            fontSize: isMobile ? "22px" : "28px",
-                            color: isFirst ? W : B,
-                            lineHeight: 1,
-                            letterSpacing: "0.02em",
-                            marginBottom: cleanDesc ? "10px" : "0",
-                          }}>
-                            {evt.title}
-                          </div>
-
-                          {/* Description */}
-                          {cleanDesc && (
-                            <p style={{ fontSize: "12px", color: isFirst ? "#ffffffa0" : MUTE, lineHeight: 1.7, marginBottom: meetLink ? "14px" : "0", maxWidth: "560px" }}>
-                              {cleanDesc.slice(0, 200)}
-                            </p>
-                          )}
-
-                          {/* Join button */}
-                          {meetLink && (
-                            <a
-                              href={meetLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                backgroundColor: Y,
-                                color: B,
-                                border: `2px solid ${B}`,
-                                padding: "9px 20px",
-                                fontSize: "11px",
-                                fontWeight: 800,
-                                letterSpacing: "0.1em",
-                                textDecoration: "none",
-                                boxShadow: `3px 3px 0 ${B}`,
-                                transition: "all 0.12s",
-                                ...MONO,
-                              }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translate(-2px,-2px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `5px 5px 0 ${B}`; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translate(0,0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `3px 3px 0 ${B}`; }}
-                            >
-                              JOIN SESSION →
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ── MOCK INTERVIEW VIEW ──────────────────────────────────────────── */}
         {currentView === "mockinterview" && (
           <div style={{ padding: isMobile ? "16px 0" : "32px 24px" }}>
@@ -10383,66 +10219,6 @@ Best regards,
                 }).catch(() => {});
               }}
             />
-          </div>
-        )}
-
-        {/* ══ STANDUP ════════════════════════════════════════════════════ */}
-        {currentView === "standup" && (
-          <div>
-            <div style={{ marginBottom: "24px" }}>
-              <h2 style={{ fontSize: "20px", fontWeight: 700, color: B, marginBottom: "4px" }}>Standup Sheet</h2>
-              <p style={{ fontSize: "12px", color: MUTE }}>Daily standup updates for your batch</p>
-            </div>
-            {standupLoading ? (
-              <div style={{ textAlign: "center", padding: "60px", color: MUTE, fontSize: "13px" }}>Loading...</div>
-            ) : !standupData || standupData.batch_id === null ? (
-              <div style={{ backgroundColor: W, border: `2px dashed ${BORD}`, borderRadius: "12px", padding: "60px", textAlign: "center" }}>
-                <ClipboardList size={40} color={BORD} style={{ margin: "0 auto 16px" }} />
-                <p style={{ fontSize: "14px", color: MUTE }}>You're not assigned to a batch yet.</p>
-                <p style={{ fontSize: "12px", color: MUTE, marginTop: "4px" }}>Contact your project manager.</p>
-              </div>
-            ) : standupData.students.length === 0 ? (
-              <div style={{ backgroundColor: W, border: `2px dashed ${BORD}`, borderRadius: "12px", padding: "60px", textAlign: "center" }}>
-                <p style={{ fontSize: "14px", color: MUTE }}>No standup data yet.</p>
-              </div>
-            ) : (
-              <div style={{ overflowX: "auto", borderRadius: "10px", border: `2px solid ${BORD}`, backgroundColor: W }}>
-                <table style={{ borderCollapse: "collapse", minWidth: "100%", fontFamily: "'IBM Plex Mono', monospace" }}>
-                  <thead>
-                    <tr style={{ backgroundColor: B }}>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: Y, letterSpacing: "0.12em", whiteSpace: "nowrap", minWidth: "150px", borderRight: `1px solid ${W}20` }}>STUDENT</th>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: Y, letterSpacing: "0.12em", whiteSpace: "nowrap", minWidth: "120px", borderRight: `1px solid ${W}20` }}>ROLE</th>
-                      {standupData.dates.map(date => (
-                        <th key={date} style={{ padding: "10px 16px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: Y, letterSpacing: "0.1em", whiteSpace: "nowrap", minWidth: "180px", borderRight: `1px solid ${W}15` }}>
-                          {date}
-                        </th>
-                      ))}
-                      {standupData.dates.length === 0 && (
-                        <th style={{ padding: "10px 16px", fontSize: "10px", color: `${W}50`, fontStyle: "italic" }}>No date columns yet</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {standupData.students.map((student, idx) => (
-                      <tr key={student.email} style={{ backgroundColor: idx % 2 === 0 ? W : `${B}04`, borderTop: `1px solid ${BORD}` }}>
-                        <td style={{ padding: "10px 16px", fontSize: "12px", fontWeight: 700, color: B, borderRight: `1px solid ${BORD}`, verticalAlign: "top" }}>
-                          <div>{student.name}</div>
-                          <div style={{ fontSize: "10px", color: MUTE, marginTop: "2px" }}>{student.email}</div>
-                        </td>
-                        <td style={{ padding: "10px 16px", fontSize: "12px", color: student.role ? B : MUTE, borderRight: `1px solid ${BORD}`, verticalAlign: "top" }}>
-                          {student.role || "—"}
-                        </td>
-                        {standupData.dates.map(date => (
-                          <td key={date} style={{ padding: "10px 14px", fontSize: "11px", color: B, borderRight: `1px solid ${BORD}`, verticalAlign: "top", whiteSpace: "pre-wrap", lineHeight: 1.6, maxWidth: "240px" }}>
-                            {student.updates[date] || <span style={{ color: BORD }}>—</span>}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         )}
 
@@ -10615,106 +10391,6 @@ function CourseCard({ course, onClick }: { course: CourseSummary; onClick: () =>
           }}>
             {ctaLabel} <ArrowUpRight size={14} />
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Refer & Earn — sidebar card ──────────────────────────────────────────────
-function ReferEarnCard({ userEmail }: { userEmail: string }) {
-  const [copied, setCopied] = useState(false);
-  const [code, setCode] = useState<string | null>(null);
-
-  // Fetch the encrypted referral token from the backend — the email is never
-  // exposed in the link; the backend decrypts it when a lead applies.
-  useEffect(() => {
-    let alive = true;
-    api.student.getReferralCode()
-      .then(r => { if (alive) setCode(r.code); })
-      .catch(() => { /* keep fallback link */ });
-    return () => { alive = false; };
-  }, []);
-
-  const referralLink = code
-    ? `https://upstrides.in/?ref=${encodeURIComponent(code)}`
-    : `https://upstrides.in/`;
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopied(true);
-      toast({ title: "Link copied", description: "Share it with your friends." });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({ title: "Couldn't copy", description: "Long-press the link to copy it manually.", variant: "destructive" });
-    }
-  };
-
-  const handleShare = async () => {
-    const shareData = {
-      title: "Upstrides — Apply now",
-      text: "I'm on Upstrides and it's been a game-changer for placements. Apply using my link 👇",
-      url: referralLink,
-    };
-    try {
-      if (navigator.share) await navigator.share(shareData);
-      else await handleCopy();
-    } catch { /* user cancelled */ }
-  };
-
-  return (
-    <div style={{
-      position: "relative",
-      background: "linear-gradient(135deg, #0A0A0A 0%, #1F1F1F 60%, #2A2A2A 100%)",
-      borderRadius: "12px",
-      overflow: "hidden",
-      boxShadow: "0 6px 20px rgba(0,0,0,0.18)",
-      border: "1.5px solid #1F1F1F",
-    }}>
-      {/* Decorative orbs */}
-      <div style={{ position: "absolute", top: "-30px", right: "-30px", width: "120px", height: "120px", background: "radial-gradient(circle, #FFE50055, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: "-40px", left: "-20px", width: "100px", height: "100px", background: "radial-gradient(circle, #FFE50022, transparent 70%)", pointerEvents: "none" }} />
-
-      {/* Header */}
-      <div style={{ position: "relative", padding: "12px 14px 8px", display: "flex", alignItems: "center", gap: "8px" }}>
-        <div style={{ width: "24px", height: "24px", background: "#FFE500", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Gift size={12} color="#0A0A0A" />
-        </div>
-        <span style={{ fontSize: "11px", fontWeight: 700, color: "#FFE500", letterSpacing: "0.06em" }}>REFER & EARN</span>
-      </div>
-
-      {/* Body */}
-      <div style={{ position: "relative", padding: "0 14px 14px" }}>
-        <div style={{ fontSize: "10.5px", fontWeight: 600, color: "#FFE500AA", marginBottom: "2px" }}>Earn up to</div>
-        <div style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "10px" }}>
-          <IndianRupee size={20} color="#FFE500" strokeWidth={2.5} />
-          <span style={{ fontSize: "26px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}>10,000</span>
-        </div>
-
-        {/* Link box */}
-        <div style={{ background: "#FFFFFF08", border: "1.5px dashed #FFE50055", borderRadius: "8px", padding: "7px 10px", marginBottom: "10px" }}>
-          <div style={{ fontSize: "11px", color: "#FFFFFF", fontFamily: "'IBM Plex Mono', monospace", wordBreak: "break-all", lineHeight: 1.4 }}>
-            {referralLink}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: "flex", gap: "6px" }}>
-          <button onClick={handleCopy}
-            style={{
-              flex: 1, padding: "8px 12px", background: copied ? "#22C55E" : "#FFE500", color: "#0A0A0A",
-              border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
-              cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px",
-              transition: "all 0.15s",
-            }}>
-            {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy link</>}
-          </button>
-          <button onClick={handleShare}
-            title="Share"
-            style={{ width: "36px", padding: "8px", background: "transparent", color: "#FFE500", border: "1.5px solid #FFE50055", borderRadius: "8px", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <Share2 size={13} />
-          </button>
         </div>
       </div>
     </div>

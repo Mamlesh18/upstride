@@ -1,280 +1,117 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import PublicLayout from "@/components/mamlesh/PublicLayout";
+import PolicyLayout, {
+  Note,
+  type PolicySection,
+} from "@/components/mamlesh/PolicyLayout";
+import { PROFILE } from "@/data/mamleshContent";
 
-const PrivacyPolicy = () => {
-  const navigate = useNavigate();
+export default function PrivacyPolicy() {
+  const sections: PolicySection[] = [
+    {
+      id: "collect",
+      heading: "What we collect",
+      body: (
+        <>
+          <ul>
+            <li>Your name, email, and phone number when you enrol or contact us.</li>
+            <li>
+              Payment confirmation from Razorpay (payment ID, amount, and the email used).
+            </li>
+            <li>
+              Limited device and session info, used only to protect against account sharing.
+            </li>
+          </ul>
+          <Note tone="success">
+            We never collect or store your card, UPI, or banking details - those are handled entirely by Razorpay.
+          </Note>
+        </>
+      ),
+    },
+    {
+      id: "use",
+      heading: "How we use it",
+      body: (
+        <>
+          <ul>
+            <li>To give you access to your courses and portal.</li>
+            <li>To issue invoices and certificates.</li>
+            <li>To send course updates and answer your questions.</li>
+            <li>To meet legal, tax, and accounting obligations.</li>
+          </ul>
+          <p>
+            We process your data based on your consent and to deliver the course you signed up for. You can withdraw consent any time, subject to legal retention rules.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "rights",
+      heading: "Your rights",
+      body: (
+        <>
+          <p>Under the DPDP Act, 2023 you can:</p>
+          <ul>
+            <li>Access a summary of the data we hold about you.</li>
+            <li>Ask us to correct, complete, update, or erase your data.</li>
+            <li>Withdraw consent, or nominate someone to exercise your rights.</li>
+            <li>Raise a grievance (see below).</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      id: "sharing",
+      heading: "How we share it",
+      body: (
+        <p>
+          We do not sell your data. We share it only with the services needed to run the platform - for example, <strong>Razorpay</strong> for payments - who handle it under their own policies, and where a competent authority requires it under Indian law.
+        </p>
+      ),
+    },
+    {
+      id: "retention",
+      heading: "Keeping your data safe",
+      body: (
+        <p>
+          We keep your data only as long as needed for the purposes above or as required by law, then delete or anonymise it. We use reasonable security practices to protect it against unauthorised access, disclosure, or loss.
+        </p>
+      ),
+    },
+    {
+      id: "grievance",
+      heading: "Grievance officer",
+      body: (
+        <>
+          <p>
+            For any privacy concern, contact our Grievance Officer at{" "}
+            <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>. We acknowledge requests within 48 hours and respond within the timelines required by law.
+          </p>
+          <Note>
+            This page is for transparency and is not legal advice. Please consult a qualified professional for your specific situation.
+          </Note>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-sm z-50 border-b border-border/20">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/")}>
-            <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-10 w-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">Upstrides</h1>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              Home
-            </Button>
-          </div>
-        </nav>
-      </header>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-8"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground text-lg mb-8">
-            Last Updated: November 2024
+    <PublicLayout>
+      <PolicyLayout
+        seo={{
+          title: "Privacy Policy - Mamlesh",
+          description:
+            "How we collect, use, and protect your data - aligned with the DPDP Act 2023 and the IT Act 2000.",
+        }}
+        eyebrow="Privacy"
+        title="Privacy Policy"
+        updated="Last updated: July 2026 · Governed by the laws of India"
+        intro={
+          <p>
+            Your privacy matters. Here is exactly what we collect, why, and how we protect it - in line with the <strong>Digital Personal Data Protection Act, 2023</strong> and the <strong>Information Technology Act, 2000</strong>.
           </p>
-
-          <div className="space-y-8">
-            {/* Introduction */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Introduction</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  At Upstrides, we are committed to protecting your privacy and ensuring a transparent experience. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and educational services.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Information We Collect */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">1. Information We Collect</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Personal Information</h4>
-                  <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Name, email address, and phone number</li>
-                    <li>Academic background and educational goals</li>
-                    <li>Billing and payment information</li>
-                    <li>User account credentials</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Course Usage Information</h4>
-                  <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Course progress and completion status</li>
-                    <li>Quiz and assignment scores</li>
-                    <li>Video viewing history and duration</li>
-                    <li>Login times and frequency</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground mb-2">Automatic Information</h4>
-                  <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>IP address and device information</li>
-                    <li>Browser type and operating system</li>
-                    <li>Pages visited and time spent</li>
-                    <li>Cookies and similar tracking technologies</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* How We Use Your Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">2. How We Use Your Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-muted-foreground">
-                <p>• Providing and improving our educational services</p>
-                <p>• Processing payments and course enrollment</p>
-                <p>• Personalizing your learning experience</p>
-                <p>• Sending course updates and announcements</p>
-                <p>• Responding to your inquiries and support requests</p>
-                <p>• Analyzing course effectiveness and student engagement</p>
-                <p>• Complying with legal obligations</p>
-                <p>• Preventing fraud and unauthorized access</p>
-              </CardContent>
-            </Card>
-
-            {/* Data Security */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">3. Data Security</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  We implement industry-standard security measures to protect your personal information, including encryption, secure servers, and regular security audits. However, no method of transmission over the internet is 100% secure.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Data Retention */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">4. Data Retention</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  We retain your personal information as long as necessary to provide our services and comply with legal obligations. You may request deletion of your data at any time, subject to legal requirements.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Sharing Your Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">5. Sharing Your Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                  We do not sell your personal information. We may share information with:
-                </p>
-                <ul className="list-disc list-inside space-y-2">
-                  <li>Service providers assisting with course delivery</li>
-                  <li>Payment processors for transactions</li>
-                  <li>Legal authorities when required by law</li>
-                  <li>Educational partners (with your consent)</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Your Rights */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">6. Your Rights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-muted-foreground">
-                <p>You have the right to:</p>
-                <ul className="list-disc list-inside space-y-2">
-                  <li>Access your personal information</li>
-                  <li>Correct inaccurate data</li>
-                  <li>Request deletion of your data</li>
-                  <li>Opt-out of marketing communications</li>
-                  <li>Data portability</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Contact Us */}
-            <Card className="bg-primary/5 border-primary/30">
-              <CardHeader>
-                <CardTitle className="text-2xl">7. Contact Us</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  For privacy-related inquiries, please contact us at:
-                </p>
-                <a
-                  href="mailto:hello@upstrides.in"
-                  className="text-primary hover:text-primary/80 font-bold transition-colors"
-                >
-                  hello@upstrides.in
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-foreground/5 border-t border-border mt-20">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/upstride-logo.png" alt="Upstrides Logo" className="h-8 w-8 object-contain" />
-                <h3 className="text-xl font-bold text-foreground">Upstrides</h3>
-              </div>
-              <p className="text-muted-foreground text-sm mb-4">
-                Transforming careers through world-class online education.
-              </p>
-              <a
-                href="mailto:hello@upstrides.in"
-                className="text-primary hover:text-primary/80 font-semibold text-sm transition-colors"
-              >
-                hello@upstrides.in
-              </a>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Home
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/privacy-policy")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Privacy Policy
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/terms")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Terms of Agreement
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/contact")}
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Contact Us
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-foreground mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="mailto:hello@upstrides.in"
-                    className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                  >
-                    Email Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-muted-foreground text-sm">
-                © 2026 Upstrides Learning. All rights reserved.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Recognized by MSME, Government of India
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+        }
+        sections={sections}
+      />
+    </PublicLayout>
   );
-};
-
-export default PrivacyPolicy;
+}

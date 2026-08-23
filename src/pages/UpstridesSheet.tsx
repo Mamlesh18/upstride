@@ -4690,7 +4690,7 @@ const UpstridesSheet = () => {
         </button>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
           <Code2 size={16} color={Y} />
-          <span style={{ fontWeight: 700, letterSpacing: "-0.01em" }}>Upstrides Sheet</span>
+          <span style={{ fontWeight: 700, letterSpacing: "-0.01em" }}>DSA Sheet</span>
           <span style={{ fontSize: "9px", fontWeight: 700, color: BG, background: Y, padding: "2px 7px", borderRadius: "10px", letterSpacing: "0.08em", ...MONO }}>A2Z</span>
         </div>
         {/* daily quota pill */}

@@ -12,13 +12,13 @@ const MUTE = "#6B7280";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 
 // Where to bounce unauthenticated visitors. Override at deploy time if needed.
-const SSO_LOGIN_FALLBACK = "https://upstrides.in/";
+const SSO_LOGIN_FALLBACK = "/";
 
 /**
  * Standalone Mock Interview page.
  *
  * Two entry modes:
- *   1. A logged-in Upstrides student lands here via the normal portal nav.
+ *   1. A logged-in Mamlesh student lands here via the normal portal nav.
  *      The existing token in localStorage is used. They get the full feature.
  *   2. A paid student from a partner platform is redirected to
  *      /mock-interview?sso=<external-token>. We POST that token to our backend's

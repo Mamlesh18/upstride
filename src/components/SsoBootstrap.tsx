@@ -11,7 +11,7 @@ const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
 /**
  * Catches a `?sso=<token>` query param on any landing URL, exchanges it
  * with our backend (which verifies it server-to-server against mamlesh.me),
- * stores the resulting Upstride JWT, and strips the `sso` param from the URL.
+ * stores the resulting portal JWT, and strips the `sso` param from the URL.
  *
  * Mount this once, INSIDE BrowserRouter, ABOVE the <Routes>. It runs only on
  * initial mount — by the time the rest of the app renders the URL is clean
