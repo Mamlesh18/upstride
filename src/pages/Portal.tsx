@@ -14,7 +14,7 @@ function useIsMobile() {
 }
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  MessageSquare, Building2, LogOut, GraduationCap,
+  Building2, LogOut, GraduationCap,
   MessageCircle, BookOpen, ArrowUpRight,
   Zap, Trophy,
   PlayCircle, Lock, X, Send, CalendarDays, Menu, ClipboardList,
@@ -26,7 +26,7 @@ import {
   CreditCard, Banknote, Building, Landmark, Hexagon, BarChart3,
   Router, Apple as AppleIcon, Package, Mail, Bike,
   ChevronsRight, Sun, Compass, HardHat, Calculator, PieChart, Lightbulb, Monitor, Leaf,
-  CircuitBoard, Gift, Copy, Check, IndianRupee, Share2,
+  CircuitBoard,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
@@ -4749,8 +4749,6 @@ const Portal = () => {
   const [showFeedback, setShowFeedback]       = useState(false);
   const [feedbackForm, setFeedbackForm]       = useState({ type: "resource_request", message: "", resource_name: "" });
   const [feedbackLoading, setFeedbackLoading] = useState(false);
-  const [resumeCreds, setResumeCreds]         = useState<{ has_access: boolean; email: string; password: string } | null>(null);
-  const [copied, setCopied]                   = useState<"email" | "password" | null>(null);
   interface LeaderboardEntry { rank: number; email: string; score: number; login_days: number; resource_opens: number; is_me: boolean; }
   interface LeaderboardData { week_label: string; leaderboard: LeaderboardEntry[]; my_rank: number | null; my_stats: { email: string; score: number; login_days: number; resource_opens: number } | null; }
   const [leaderboard, setLeaderboard]         = useState<LeaderboardData | null>(null);
@@ -4860,13 +4858,6 @@ const Portal = () => {
   useEffect(() => { loadSessions(); }, [loadSessions]);
 
   useEffect(() => {
-    api.student.getResumeEnhancer().then((r: unknown) => {
-      const res = r as { data: { has_access: boolean; email: string; password: string } };
-      setResumeCreds(res.data);
-    }).catch(() => {});
-  }, []);
-
-  useEffect(() => {
     api.student.getUpcomingEvents().then((r: unknown) => {
       const res = r as { data: { events: UpcomingEvent[] } };
       setUpcomingEvents(res.data.events);
@@ -4907,13 +4898,6 @@ const Portal = () => {
         setLeaderboard(res.data);
       }).catch(() => {}).finally(() => setLeaderboardLoading(false));
     }
-  };
-
-  const copyToClipboard = (text: string, type: "email" | "password") => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(type);
-      setTimeout(() => setCopied(null), 2000);
-    });
   };
 
   const answerMCQ = (key: string, chosen: number, correct: number) => {
@@ -4960,20 +4944,12 @@ const Portal = () => {
   };
 
   const urgencyBg = (u: string) => (({ now: "#EF4444", today: "#F97316", soon: Y, week: "#3B82F6", later: "#9CA3AF" } as Record<string, string>)[u] ?? "#9CA3AF");
-  const urgencyFg = (u: string) => u === "soon" ? B : W;
   const urgencyLabel = (u: string) => (({ now: "HAPPENING NOW", today: "TODAY", soon: "TOMORROW", week: "THIS WEEK", later: "UPCOMING" } as Record<string, string>)[u] ?? "UPCOMING");
 
   const extractMeetLink = (desc: string): string | null => {
     const m = desc.match(/https?:\/\/meet\.google\.com\/[\w-]+/);
     return m ? m[0] : null;
   };
-  const cleanDescription = (desc: string): string =>
-    desc
-      .replace(/Join with Google Meet:?\s*https?:\/\/meet\.google\.com\/[\w-]+/gi, "")
-      .replace(/Learn more about Meet at:?\s*https?:\/\/\S+/gi, "")
-      .replace(/https?:\/\/meet\.google\.com\/[\w-]+/g, "")
-      .replace(/\s{2,}/g, " ")
-      .trim();
 
   const openCourse = (courseId: string) => {
     setPreviousView(currentView);          // remember where user came from
@@ -10205,7 +10181,7 @@ Best regards,
         {/* ── MOCK INTERVIEW VIEW ──────────────────────────────────────────── */}
         {currentView === "mockinterview" && (
           <div style={{ padding: isMobile ? "16px 0" : "32px 24px" }}>
-            <MockInterview onExit={() => setCurrentView("recommended")} />
+            <MockInterview onExit={() => setCurrentView("overview")} />
           </div>
         )}
 

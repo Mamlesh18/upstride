@@ -50,7 +50,7 @@ export default function CourseDetail() {
     <PublicLayout>
       <div className="container page course-detail">
         <Seo
-          title="Become an AI Engineer in 30 Days | Mamlesh"
+          title="Mamlesh — AI Engineer, Applied AI & Systems"
           description="A 30-day live cohort to build production-ready AI systems and become a recruiter-ready AI engineer - AI engineering, real projects, Career Compass, and a lifetime resource library."
         />
 
@@ -254,7 +254,7 @@ export default function CourseDetail() {
             {C.faqs.map((f, i) => (
               <details className="cd-faq" key={i} open>
                 <summary>{f.q}</summary>
-                <p>{f.a.replaceAll("{{next_cohort}}", cohortLabel)}</p>
+                <p>{f.a.replace(/\{\{next_cohort\}\}/g, cohortLabel)}</p>
               </details>
             ))}
           </div>

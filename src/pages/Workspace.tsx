@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, CheckCircle2, Circle, Clock, ArrowLeft, Tag } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, Circle, Clock, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/services/api";
 

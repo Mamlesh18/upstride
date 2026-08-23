@@ -6,7 +6,6 @@ import { api } from "@/services/api";
 
 const Y    = "#FFE500";
 const B    = "#0A0A0A";
-const W    = "#FFFFFF";
 const BG   = "#FAFAFA";
 const MUTE = "#6B7280";
 const MONO: React.CSSProperties = { fontFamily: "'IBM Plex Mono', monospace" };
