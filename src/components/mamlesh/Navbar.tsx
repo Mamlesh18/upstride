@@ -32,9 +32,11 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          {/* Login CTA hidden while the cohort is quiet. Uncomment to bring it back.
           <NavLink to="/login" className="nav-cta" onClick={() => setOpen(false)}>
             Login
           </NavLink>
+          */}
         </div>
       </div>
     </nav>

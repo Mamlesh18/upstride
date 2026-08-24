@@ -63,9 +63,11 @@ export default function CourseDetail() {
           <div className="cd-enroll-note">{enrollmentNote}</div>
 
           <div className="cd-hero-cta">
+            {/* Login CTA hidden while the cohort is quiet. Uncomment to bring it back.
             <Link to="/login" className="btn btn-ghost">
               Already enrolled? Log in
             </Link>
+            */}
             <a className="btn btn-primary" href={paymentUrl}>
               Enroll now
             </a>
