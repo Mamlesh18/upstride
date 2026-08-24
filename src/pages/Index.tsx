@@ -55,10 +55,13 @@ export default function Index() {
               ))}
             </div>
             <div className="hero-cta">
+              {/* Masterclass CTA hidden while we quiet-launch the next cohort.
+                  Uncomment to bring it back.
               <Link to="/courses/ai-masterclass" className="btn btn-primary">
                 Join the Masterclass
               </Link>
-              <Link to="/about" className="btn btn-ghost">
+              */}
+              <Link to="/about" className="btn btn-primary">
                 About me
               </Link>
             </div>

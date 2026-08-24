@@ -13,12 +13,15 @@ export default function Footer() {
             <Link to="/talks">Talks</Link>
           </div>
 
+          {/* Courses column hidden while we quiet-launch the next cohort.
+              Uncomment to bring it back.
           <div className="footer-col">
             <h4>Courses</h4>
             <Link to="/courses/ai-masterclass">AI Engineer in 30 Days</Link>
             <Link to="/courses">All Courses</Link>
             <Link to="/login">Student Log in</Link>
           </div>
+          */}
 
           <div className="footer-col">
             <h4>Legal &amp; Contact</h4>

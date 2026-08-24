@@ -5,7 +5,6 @@ const links = [
   { to: "/blogs", label: "Blogs" },
   { to: "/papershelf", label: "Papershelf" },
   { to: "/talks", label: "Talks" },
-  { to: "/courses", label: "Courses" },
   { to: "/about", label: "About" },
 ];
 
