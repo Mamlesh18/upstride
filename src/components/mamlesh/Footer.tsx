@@ -33,6 +33,7 @@ export default function Footer() {
 
           <div className="footer-col">
             <h4>Everything Else</h4>
+            <Link to="/login">Student Log in</Link>
             <a href={`mailto:${PROFILE.email}`}>Email</a>
             <a href={PROFILE.linkedin} target="_blank" rel="noreferrer">
               LinkedIn
