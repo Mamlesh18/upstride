@@ -129,6 +129,109 @@ const Empty = ({ text }: { text: string }) => (
 // ═══════════════════════════════════════════════════════════════════════════
 const emptyBlog: BlogInput = { title: "", excerpt: "", cover_image: null, blocks: [], published: true };
 
+// ── Image uploader ────────────────────────────────────────────────────────
+// Reads the file client-side, downscales it (max 1600px wide, JPEG q=0.82)
+// so blog documents stay lean, then hands back a data URL string. No backend
+// upload endpoint needed — the base64 gets stored inline in the blog doc.
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB raw file
+const MAX_WIDTH = 1600;
+
+async function compressImage(file: File): Promise<string> {
+  const raw = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+  // Load into an Image to resize via canvas
+  const img = new Image();
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("Not a valid image file"));
+    img.src = raw;
+  });
+  const scale = img.width > MAX_WIDTH ? MAX_WIDTH / img.width : 1;
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable");
+  ctx.drawImage(img, 0, 0, w, h);
+  // JPEG for photos; keeps PNG-with-alpha work-ok too by flattening on white.
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
+
+function ImageUploader({
+  value, onChange, label, height = 140,
+}: {
+  value: string | null | undefined;
+  onChange: (dataUrl: string | null) => void;
+  label: string;
+  height?: number;
+}) {
+  const [busy, setBusy] = useState(false);
+  const inputId = `img-${label.replace(/\W+/g, "-")}`;
+
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";  // reset so the same file can be re-picked
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "That's not an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast({ title: "File too large", description: "Keep it under 8 MB.", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    try {
+      const dataUrl = await compressImage(file);
+      onChange(dataUrl);
+    } catch (err) {
+      toast({ title: "Couldn't read that image", description: (err as Error).message, variant: "destructive" });
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: B, letterSpacing: "0.12em", marginBottom: 6 }}>
+        {label}
+      </label>
+      {value ? (
+        <div style={{ border: `2px solid ${BORD}`, borderRadius: 6, padding: 8, background: W }}>
+          <img src={value} alt="preview" style={{ display: "block", width: "100%", maxHeight: height, objectFit: "cover", borderRadius: 4 }} />
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <label htmlFor={inputId}
+              style={{ ...MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", padding: "6px 12px", background: B, color: Y, border: `2px solid ${B}`, borderRadius: 6, cursor: busy ? "not-allowed" : "pointer", boxShadow: `2px 2px 0 ${Y}` }}>
+              {busy ? "PROCESSING…" : "REPLACE"}
+            </label>
+            <button type="button" onClick={() => onChange(null)}
+              style={{ ...MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", padding: "6px 12px", background: W, color: RED, border: `2px solid ${RED}`, borderRadius: 6, cursor: "pointer" }}>
+              REMOVE
+            </button>
+          </div>
+        </div>
+      ) : (
+        <label htmlFor={inputId}
+          style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: 4, border: `2px dashed ${BORD}`, borderRadius: 6, padding: "20px 12px",
+            background: W, cursor: busy ? "not-allowed" : "pointer", ...MONO,
+          }}>
+          <span style={{ fontSize: 20 }}>📷</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: B, letterSpacing: "0.05em" }}>
+            {busy ? "PROCESSING…" : "Choose image"}
+          </span>
+          <span style={{ fontSize: 10, color: MUTE }}>PNG or JPG · downscaled to 1600px · under 8 MB</span>
+        </label>
+      )}
+      <input id={inputId} type="file" accept="image/*" onChange={pick} disabled={busy} style={{ display: "none" }} />
+    </div>
+  );
+}
+
 function BlogsTab() {
   const [rows, setRows] = useState<BlogDetail[] | null>(null);
   const [editing, setEditing] = useState<{ slug: string | null; input: BlogInput } | null>(null);
@@ -223,7 +326,7 @@ function BlogEditor({
     <Modal wide title={state.slug ? `Edit "${state.slug}"` : "New blog"} onClose={onClose}>
       <Input label="TITLE" value={input.title} onChange={(e) => upd({ title: e.target.value })} />
       <Textarea label="EXCERPT (short summary)" value={input.excerpt || ""} onChange={(e) => upd({ excerpt: e.target.value })} style={{ minHeight: 60 }} />
-      <Input label="COVER IMAGE URL (optional)" value={input.cover_image || ""} onChange={(e) => upd({ cover_image: e.target.value || null })} />
+      <ImageUploader label="COVER IMAGE (optional)" value={input.cover_image} onChange={(v) => upd({ cover_image: v })} height={180} />
       <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, ...MONO, fontSize: 12 }}>
         <input type="checkbox" checked={input.published} onChange={(e) => upd({ published: e.target.checked })} />
         Published (visible on the public site)
@@ -288,7 +391,7 @@ function BlogEditor({
 
               {block.type === "image" && (
                 <>
-                  <Input label="URL" value={block.url || ""} onChange={(e) => setBlock({ url: e.target.value })} />
+                  <ImageUploader label="IMAGE" value={block.url} onChange={(v) => setBlock({ url: v || "" })} />
                   <Input label="CAPTION" value={block.caption || ""} onChange={(e) => setBlock({ caption: e.target.value })} />
                 </>
               )}
