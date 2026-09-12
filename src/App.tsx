@@ -23,6 +23,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 // ── Auth ───────────────────────────────────────────────────────────────
 const Login = lazy(() => import("./pages/Login"));
+const CourseAccess = lazy(() => import("./pages/CourseAccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 
@@ -85,6 +86,9 @@ const App = () => (
                 <ChangePassword />
               </ProtectedRoute>
             } />
+
+            {/* Post-payment onboarding + password reset */}
+            <Route path="/courses/ai-masterclass/access" element={<CourseAccess />} />
 
             {/* Dashboard — unchanged */}
             <Route path="/portal" element={

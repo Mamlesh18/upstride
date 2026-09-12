@@ -20,11 +20,18 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Legacy: /login?welcome=1 was the old post-payment landing page.
+    // Redirect to the new course-access URL so bookmarks + old Razorpay
+    // redirect configs keep working.
+    if (welcomeMode) {
+      navigate("/courses/ai-masterclass/access", { replace: true });
+      return;
+    }
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("userRole");
     if (token) routeByRole(role);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [welcomeMode]);
 
   const routeByRole = (role: string | null) => {
     if (redirectTo) { navigate(redirectTo); return; }
@@ -90,6 +97,10 @@ const Login = () => {
       }
     } finally { setLoading(false); }
   };
+
+  // Legacy /login?welcome=1 URL — redirect fires from useEffect, but render
+  // nothing in the meantime so the welcome UI doesn't flash.
+  if (welcomeMode) return null;
 
   return (
     <div className="mamlesh-site" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
