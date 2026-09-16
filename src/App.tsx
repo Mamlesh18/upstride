@@ -19,6 +19,8 @@ const Talks = lazy(() => import("./pages/Talks"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfAgreement = lazy(() => import("./pages/TermsOfAgreement"));
 const Refund = lazy(() => import("./pages/Refund"));
+const MemDream = lazy(() => import("./pages/MemDream"));
+const MemDreamDocs = lazy(() => import("./pages/MemDreamDocs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // ── Auth ───────────────────────────────────────────────────────────────
@@ -73,6 +75,8 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfAgreement />} />
             <Route path="/refund" element={<Refund />} />
+            <Route path="/memdream" element={<MemDream />} />
+            <Route path="/memdream/docs" element={<MemDreamDocs />} />
 
             {/* Legacy redirects (old public URLs → new home) */}
             <Route path="/programs" element={<Navigate to="/courses" replace />} />

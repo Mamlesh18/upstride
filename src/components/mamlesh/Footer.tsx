@@ -10,6 +10,7 @@ export default function Footer() {
             <h4>Writings &amp; Learnings</h4>
             <Link to="/blogs">Blogs</Link>
             <Link to="/papershelf">Papershelf</Link>
+            <Link to="/memdream">MemDream</Link>
             <Link to="/talks">Talks</Link>
           </div>
 
