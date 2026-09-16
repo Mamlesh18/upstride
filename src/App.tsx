@@ -77,6 +77,7 @@ const App = () => (
             <Route path="/refund" element={<Refund />} />
             <Route path="/memdream" element={<MemDream />} />
             <Route path="/memdream/docs" element={<MemDreamDocs />} />
+            <Route path="/memdream/docs/:section" element={<MemDreamDocs />} />
 
             {/* Legacy redirects (old public URLs → new home) */}
             <Route path="/programs" element={<Navigate to="/courses" replace />} />
