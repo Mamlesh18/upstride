@@ -968,4 +968,152 @@
       border-left: none; text-decoration: underline; text-underline-offset: 3px;
     }
   }
+
+  /* ---------- Markdown renderer (project docs) ---------- */
+  .md-body { color: var(--text-muted); font-size: 1rem; line-height: 1.75; }
+  .md-body h1 { font-size: 1.9rem; margin: 0 0 14px; color: var(--text); scroll-margin-top: 96px; }
+  .md-body h2 {
+    font-size: 1.4rem; margin: 40px 0 14px; padding-top: 26px;
+    border-top: 1px solid var(--border); color: var(--text); scroll-margin-top: 96px;
+  }
+  .md-body > h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .md-body h3 { font-size: 1.15rem; margin: 26px 0 10px; color: var(--text); scroll-margin-top: 96px; }
+  .md-body h4 { font-size: 1rem; margin: 20px 0 8px; color: var(--text); scroll-margin-top: 96px; }
+  .md-body p { margin: 0 0 14px; }
+  .md-body ul, .md-body ol { padding-left: 22px; margin: 0 0 14px; }
+  .md-body li { margin-bottom: 6px; }
+  .md-body li > p { margin-bottom: 6px; }
+  .md-body blockquote {
+    border-left: 3px solid var(--yellow); background: var(--yellow-soft);
+    margin: 16px 0; padding: 10px 16px; border-radius: 0 8px 8px 0; color: var(--text);
+  }
+  .md-body blockquote p:last-child { margin-bottom: 0; }
+  .md-body hr { border: 0; border-top: 1px solid var(--border); margin: 32px 0; }
+  .md-body strong { color: var(--text); font-weight: 700; }
+  .md-body a { color: inherit; }
+  .md-inline-code {
+    font-family: var(--mono); font-size: 0.86em; background: var(--yellow-soft);
+    border: 1px solid var(--yellow-border); color: #8a6d00; padding: 1px 6px; border-radius: 5px;
+  }
+
+  .md-pre-wrap { position: relative; margin: 16px 0 22px; }
+  .md-pre {
+    background: #1e1e1e; color: #f4f4f4; padding: 18px 18px 16px;
+    border-radius: var(--radius-sm); overflow-x: auto;
+    font-family: var(--mono); font-size: 0.85rem; line-height: 1.6; margin: 0;
+  }
+  .md-pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+  .md-copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(255, 255, 255, 0.08); color: #f4f4f4;
+    border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 6px;
+    padding: 5px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;
+    transition: background var(--ease), border-color var(--ease); font-family: var(--sans);
+  }
+  .md-copy-btn:hover { background: rgba(244, 180, 0, 0.25); border-color: var(--yellow); }
+
+  /* hljs token colors, tuned to the site's existing dark code treatment */
+  .hljs-keyword, .hljs-built_in { color: var(--yellow); }
+  .hljs-string { color: #a8d98a; }
+  .hljs-comment { color: #9a948a; font-style: italic; }
+  .hljs-number, .hljs-literal { color: #e08a4c; }
+  .hljs-title, .hljs-title.function_, .hljs-title.class_ { color: #7cb7ff; }
+  .hljs-attr, .hljs-params, .hljs-property, .hljs-attribute { color: #f4f4f4; }
+  .hljs-meta { color: #9a948a; }
+  .hljs-punctuation, .hljs-operator { color: #d8d3c8; }
+
+  .md-table-wrap { overflow-x: auto; margin: 16px 0 22px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .md-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .md-table-wrap th, .md-table-wrap td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .md-table-wrap th {
+    background: var(--yellow-soft); color: var(--text); font-weight: 700;
+    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
+  }
+  .md-table-wrap tr:last-child td { border-bottom: 0; }
+  .md-table-wrap code { font-family: var(--mono); font-size: 0.86em; }
+
+  /* ---------- Docs shell (/memdream/docs) ---------- */
+  .container-wide { max-width: 1440px; }
+  .docs-page { padding-top: 8px; }
+  .docs-header { max-width: 760px; margin: 0 0 8px; }
+  .docs-header h1 { font-size: 2.3rem; margin: 10px 0 8px; }
+  .docs-mobile-toggle {
+    display: none; margin: 18px 0 0; background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    padding: 9px 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  }
+  .docs-shell {
+    display: grid; grid-template-columns: 240px minmax(0, 1fr) 240px;
+    gap: 56px; align-items: start; padding: 28px 0 100px;
+  }
+  .docs-sidebar { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; padding-bottom: 20px; }
+  .docs-group { margin-bottom: 24px; }
+  .docs-group-title {
+    display: block; text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 0.72rem; font-weight: 800; color: var(--text-faint); margin-bottom: 10px;
+  }
+  .docs-group nav { display: flex; flex-direction: column; gap: 1px; border-left: 1px solid var(--border); }
+  .docs-link {
+    padding: 7px 0 7px 16px; margin-left: -1px; border-left: 2px solid transparent;
+    color: var(--text-muted); font-size: 0.92rem; line-height: 1.4;
+    transition: color var(--ease), border-color var(--ease), background var(--ease);
+  }
+  .docs-link:hover { color: var(--text); }
+  .docs-link.active { color: var(--text); border-left-color: var(--yellow); font-weight: 700; }
+  .docs-content { min-width: 0; max-width: 760px; }
+  .docs-content .md-body h1:first-child { margin-top: 0; }
+  @media (max-width: 1120px) {
+    .docs-shell { grid-template-columns: 220px minmax(0, 1fr); }
+    .docs-toc { display: none; }
+  }
+  @media (max-width: 860px) {
+    .docs-shell { grid-template-columns: 1fr; gap: 18px; padding-top: 8px; }
+    .docs-mobile-toggle { display: inline-flex; }
+    .docs-sidebar {
+      position: static; max-height: none; display: none;
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 18px; background: var(--surface); margin-top: 14px;
+    }
+    .docs-sidebar.open { display: block; }
+  }
+
+  /* ---------- MemDream project page (/memdream) ---------- */
+  .memdream-hero { padding: 32px 0 8px; }
+  .memdream-hero h1 { font-size: 2.6rem; margin: 14px 0 10px; }
+  .memdream-hero .tagline { font-size: 1.15rem; max-width: 640px; }
+  .memdream-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+  .mm-lifecycle { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+  .mm-lifecycle-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); padding: 18px; transition: transform var(--ease), border-color var(--ease);
+  }
+  .mm-lifecycle-card:hover { transform: translateY(-3px); border-color: var(--yellow-border); }
+  .mm-lifecycle-card .tag {
+    display: inline-block; font-family: var(--mono); font-weight: 800; font-size: 0.8rem;
+    color: #1e1e1e; background: var(--yellow); border-radius: 6px; padding: 3px 10px; margin-bottom: 10px;
+  }
+  .mm-lifecycle-card p { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
+  @media (max-width: 760px) { .mm-lifecycle { grid-template-columns: 1fr 1fr; } }
+
+  .flow { display: grid; gap: 8px; margin-top: 18px; max-width: 620px; }
+  .flow-step {
+    border: 1px solid var(--border); border-left: 3px solid var(--yellow);
+    border-radius: var(--radius); background: var(--surface); padding: 14px 20px;
+  }
+  .flow-step .fs-label {
+    display: block; font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; color: #b88600; margin-bottom: 4px;
+  }
+  .flow-step p { color: var(--text-muted); font-size: 0.92rem; margin: 0; }
+  .flow-arrow { text-align: center; color: var(--text-faint); font-family: var(--mono); font-size: 1.1rem; line-height: 1; }
+  .flow-title { font-weight: 700; color: var(--text); margin: 28px 0 4px; }
+
+  .mm-compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 18px; }
+  @media (max-width: 640px) { .mm-compare { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Code/tables sit inside CSS grid cells all over these pages; without an
+     explicit min-width the browser sizes tracks to fit the longest line
+     instead of letting .md-pre / .md-table-wrap scroll, overflowing the page. */
+  .md-pre-wrap, .md-table-wrap { min-width: 0; }
 }
